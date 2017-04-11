@@ -1,4 +1,4 @@
-module Geo.Point exposing (..)
+module SlippyMap.Geo.Point exposing (..)
 
 
 type alias Point =

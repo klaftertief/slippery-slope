@@ -1,4 +1,4 @@
-module Geo.Coordinate exposing (..)
+module SlippyMap.Geo.Coordinate exposing (..)
 
 {-| -}
 

@@ -1,4 +1,4 @@
-module Geo.PixelPoint exposing (..)
+module SlippyMap.Geo.PixelPoint exposing (..)
 
 
 type alias PixelPoint =

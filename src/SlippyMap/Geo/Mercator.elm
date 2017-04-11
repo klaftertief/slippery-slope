@@ -1,7 +1,7 @@
-module Geo.Mercator exposing (..)
+module SlippyMap.Geo.Mercator exposing (..)
 
-import Geo.Location as Location exposing (Location)
-import Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Point as Point exposing (Point)
 
 
 {-| Converts given location in WGS84 Datum to a XY Point in radians from Spherical Mercator EPSG:900913.

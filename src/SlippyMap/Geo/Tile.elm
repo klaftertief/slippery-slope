@@ -1,6 +1,6 @@
-module Map.Tile exposing (..)
+module SlippyMap.Geo.Tile exposing (..)
 
-import Geo.Coordinate as Coordinate exposing (Coordinate)
+import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
 import Set exposing (Set)
 
 
