@@ -1,4 +1,4 @@
-module SlippyMap.StaticImage exposing (..)
+module SlippyMap.StaticImage exposing (tileLayer)
 
 import SlippyMap.LowLevel as LowLevel
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
@@ -8,14 +8,16 @@ import Svg.Attributes
 
 
 tileLayer : Transform -> Svg msg
-tileLayer =
-    LowLevel.tileLayer tileRenderer
+tileLayer transform =
+    LowLevel.tileLayer (tileRenderer transform) transform
 
 
-tileRenderer : Tile -> Svg msg
-tileRenderer { z, x, y } =
+tileRenderer : Transform -> Tile -> Svg msg
+tileRenderer transform { z, x, y } =
     Svg.image
-        [ Svg.Attributes.xlinkHref
+        [ Svg.Attributes.width (toString transform.tileSize)
+        , Svg.Attributes.height (toString transform.tileSize)
+        , Svg.Attributes.xlinkHref
             ("//a.tile.openstreetmap.org/"
                 ++ toString z
                 ++ "/"

@@ -114,20 +114,7 @@ tile renderer transform ({ z, x, y } as tile) =
                     ++ ")"
                 )
             ]
-            [ renderer tile
-            , Svg.rect
-                [ Svg.Attributes.width (toString transform.tileSize)
-                , Svg.Attributes.height (toString transform.tileSize)
-                , Svg.Attributes.fill "none"
-                , Svg.Attributes.stroke "red"
-                ]
-                []
-            , Svg.text_
-                [ Svg.Attributes.x "10"
-                , Svg.Attributes.y "20"
-                ]
-                [ Svg.text key ]
-            ]
+            [ renderer tile ]
         )
 
 
@@ -179,11 +166,6 @@ gridLayer transform =
             [ Svg.g
                 [ Svg.Attributes.transform ("translate(" ++ toString (toFloat -centerPoint.x + transform.width / 2 |> floor) ++ " " ++ toString (toFloat -centerPoint.y + transform.height / 2 |> floor) ++ ")") ]
                 (List.map line lons ++ List.map line lats)
-            , Svg.text_
-                [ Svg.Attributes.x "20"
-                , Svg.Attributes.y "20"
-                ]
-                [ Svg.text (toString { nw = nw, se = se }) ]
             ]
 
 
