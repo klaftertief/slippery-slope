@@ -1,4 +1,4 @@
-module SlippyMap.StaticImage exposing (..)
+module SlippyMap.StaticGeoJSon exposing (..)
 
 import GeoJson exposing (GeoJson)
 import SlippyMap.LowLevel as LowLevel
@@ -11,11 +11,11 @@ import Svg.Attributes
 
 tileLayer : (Tile -> GeoJson) -> Transform -> Svg msg
 tileLayer tileToGeoJson transform =
-    LowLevel.tileLayer (tileRenderer tileToGeoJson transform) transform
+    LowLevel.tileLayer (tile tileToGeoJson transform) transform
 
 
-tileRenderer : (Tile -> GeoJson) -> Transform -> Tile -> Svg msg
-tileRenderer tileToGeoJson transform ({ z, x, y } as tile) =
+tile : (Tile -> GeoJson) -> Transform -> Tile -> Svg msg
+tile tileToGeoJson transform ({ z, x, y } as tile) =
     let
         tileCoordinate =
             { column = toFloat x

@@ -9,11 +9,11 @@ import Svg.Attributes
 
 tileLayer : Transform -> Svg msg
 tileLayer transform =
-    LowLevel.tileLayer (tileRenderer transform) transform
+    LowLevel.tileLayer (tile transform) transform
 
 
-tileRenderer : Transform -> Tile -> Svg msg
-tileRenderer transform { z, x, y } =
+tile : Transform -> Tile -> Svg msg
+tile transform { z, x, y } =
     Svg.image
         [ Svg.Attributes.width (toString transform.tileSize)
         , Svg.Attributes.height (toString transform.tileSize)
