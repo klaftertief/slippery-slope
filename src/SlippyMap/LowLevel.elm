@@ -1,6 +1,6 @@
 module SlippyMap.LowLevel exposing (..)
 
-import SlippyMap.Geo.PixelPoint as PixelPoint exposing (PixelPoint)
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
@@ -25,24 +25,19 @@ tileLayer fromTile render transform =
                 (toFloat (floor transform.zoom) - transform.zoom)
 
         centerPoint =
-            Transform.locationToPixelPoint transform transform.center
-                |> (\{ x, y } -> { x = toFloat x, y = toFloat y })
+            Transform.locationToPoint transform transform.center
 
         topLeftCoordinate =
-            Transform.pixelPointToCoordinate transform
-                ({ x = centerPoint.x - transform.width / 2
-                 , y = centerPoint.y - transform.height / 2
-                 }
-                    |> (\{ x, y } -> { x = floor x, y = floor y })
-                )
+            Transform.pointToCoordinate transform
+                { x = centerPoint.x - transform.width / 2
+                , y = centerPoint.y - transform.height / 2
+                }
 
         bottomRightCoordinate =
-            Transform.pixelPointToCoordinate transform
-                ({ x = centerPoint.x + transform.width / 2
-                 , y = centerPoint.y + transform.height / 2
-                 }
-                    |> (\{ x, y } -> { x = floor x, y = floor y })
-                )
+            Transform.pointToCoordinate transform
+                { x = centerPoint.x + transform.width / 2
+                , y = centerPoint.y + transform.height / 2
+                }
 
         bounds =
             { topLeft = topLeftCoordinate
@@ -102,7 +97,7 @@ tile render transform ({ z, x, y } as tile) =
             }
 
         point =
-            Transform.coordinateToPixelPoint transform tileCoordinate
+            Transform.coordinateToPoint transform tileCoordinate
     in
         ( key
         , Svg.g
@@ -122,30 +117,28 @@ gridLayer : Transform -> Svg msg
 gridLayer transform =
     let
         centerPoint =
-            Transform.locationToPixelPoint transform transform.center
+            Transform.locationToPoint transform transform.center
 
         nw =
-            { x = toFloat centerPoint.x - transform.width / 2
-            , y = toFloat centerPoint.y - transform.height / 2
+            { x = centerPoint.x - transform.width / 2
+            , y = centerPoint.y - transform.height / 2
             }
-                |> (\{ x, y } -> { x = floor x, y = floor y })
-                |> Transform.pixelPointToLocation transform
+                |> Transform.pointToLocation transform
 
         se =
-            { x = toFloat centerPoint.x + transform.width / 2
-            , y = toFloat centerPoint.y + transform.height / 2
+            { x = centerPoint.x + transform.width / 2
+            , y = centerPoint.y + transform.height / 2
             }
-                |> (\{ x, y } -> { x = floor x, y = floor y })
-                |> Transform.pixelPointToLocation transform
+                |> Transform.pointToLocation transform
 
         lons =
             List.range (floor nw.lon) (ceiling se.lon)
                 |> List.map toFloat
                 |> List.map
                     (\lon ->
-                        ( Transform.locationToPixelPoint transform
+                        ( Transform.locationToPoint transform
                             { lon = lon, lat = se.lat }
-                        , Transform.locationToPixelPoint transform
+                        , Transform.locationToPoint transform
                             { lon = lon, lat = nw.lat }
                         )
                     )
@@ -155,21 +148,21 @@ gridLayer transform =
                 |> List.map toFloat
                 |> List.map
                     (\lat ->
-                        ( Transform.locationToPixelPoint transform
+                        ( Transform.locationToPoint transform
                             { lon = nw.lon, lat = lat }
-                        , Transform.locationToPixelPoint transform
+                        , Transform.locationToPoint transform
                             { lon = se.lon, lat = lat }
                         )
                     )
     in
         Svg.g []
             [ Svg.g
-                [ Svg.Attributes.transform ("translate(" ++ toString (toFloat -centerPoint.x + transform.width / 2 |> floor) ++ " " ++ toString (toFloat -centerPoint.y + transform.height / 2 |> floor) ++ ")") ]
+                [ Svg.Attributes.transform ("translate(" ++ toString (-centerPoint.x + transform.width / 2 |> floor) ++ " " ++ toString (-centerPoint.y + transform.height / 2 |> floor) ++ ")") ]
                 (List.map line lons ++ List.map line lats)
             ]
 
 
-line : ( PixelPoint, PixelPoint ) -> Svg msg
+line : ( Point, Point ) -> Svg msg
 line ( p1, p2 ) =
     Svg.line
         [ Svg.Attributes.x1 (toString p1.x)

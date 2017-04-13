@@ -1,8 +1,8 @@
-module SlippyMap.StaticGeoJSon exposing (..)
+module SlippyMap.SimpleGeoJson exposing (..)
 
 import GeoJson exposing (GeoJson)
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.LowLevel as LowLevel
-import SlippyMap.Geo.PixelPoint as PixelPoint exposing (PixelPoint)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
@@ -24,22 +24,22 @@ tile transform ( { z, x, y }, geojson ) =
             }
 
         coordinatePoint =
-            Transform.coordinateToPixelPoint transform tileCoordinate
+            Transform.coordinateToPoint transform tileCoordinate
 
         project ( lon, lat, _ ) =
-            Transform.locationToPixelPoint transform { lon = lon, lat = lat }
+            Transform.locationToPoint transform { lon = lon, lat = lat }
                 |> (\{ x, y } -> { x = x - coordinatePoint.x, y = y - coordinatePoint.y })
     in
         renderGeoJson project geojson
 
 
-renderGeoJson : (GeoJson.Position -> PixelPoint) -> GeoJson -> Svg msg
+renderGeoJson : (GeoJson.Position -> Point) -> GeoJson -> Svg msg
 renderGeoJson project ( geoJsonObject, _ ) =
     Svg.g []
         [ renderGeoJsonObject project geoJsonObject ]
 
 
-renderGeoJsonObject : (GeoJson.Position -> PixelPoint) -> GeoJson.GeoJsonObject -> Svg msg
+renderGeoJsonObject : (GeoJson.Position -> Point) -> GeoJson.GeoJsonObject -> Svg msg
 renderGeoJsonObject project geoJsonObject =
     case geoJsonObject of
         GeoJson.Geometry geometry ->
@@ -53,13 +53,13 @@ renderGeoJsonObject project geoJsonObject =
                 (List.map (renderGeoJsonFeatureObject project) featureCollection)
 
 
-renderGeoJsonFeatureObject : (GeoJson.Position -> PixelPoint) -> GeoJson.FeatureObject -> Svg msg
+renderGeoJsonFeatureObject : (GeoJson.Position -> Point) -> GeoJson.FeatureObject -> Svg msg
 renderGeoJsonFeatureObject project featureObject =
     Maybe.map (renderGeoJsonGeometry project) featureObject.geometry
         |> Maybe.withDefault (Svg.text "")
 
 
-renderGeoJsonGeometry : (GeoJson.Position -> PixelPoint) -> GeoJson.Geometry -> Svg msg
+renderGeoJsonGeometry : (GeoJson.Position -> Point) -> GeoJson.Geometry -> Svg msg
 renderGeoJsonGeometry project geometry =
     case geometry of
         GeoJson.Point position ->
@@ -88,7 +88,7 @@ renderGeoJsonGeometry project geometry =
                 (List.map (renderGeoJsonGeometry project) geometryList)
 
 
-renderGeoJsonPoint : (GeoJson.Position -> PixelPoint) -> GeoJson.Position -> Svg msg
+renderGeoJsonPoint : (GeoJson.Position -> Point) -> GeoJson.Position -> Svg msg
 renderGeoJsonPoint project position =
     let
         { x, y } =
@@ -102,7 +102,7 @@ renderGeoJsonPoint project position =
             []
 
 
-renderGeoJsonLineString : (GeoJson.Position -> PixelPoint) -> List GeoJson.Position -> Svg msg
+renderGeoJsonLineString : (GeoJson.Position -> Point) -> List GeoJson.Position -> Svg msg
 renderGeoJsonLineString project positionList =
     Svg.polyline
         [ positionList
@@ -117,7 +117,7 @@ renderGeoJsonLineString project positionList =
         []
 
 
-renderGeoJsonPolygon : (GeoJson.Position -> PixelPoint) -> List (List GeoJson.Position) -> Svg msg
+renderGeoJsonPolygon : (GeoJson.Position -> Point) -> List (List GeoJson.Position) -> Svg msg
 renderGeoJsonPolygon project positionListList =
     Svg.g []
         (List.map
@@ -129,7 +129,8 @@ renderGeoJsonPolygon project positionListList =
                         |> String.join " "
                         |> Svg.Attributes.points
                     , Svg.Attributes.fill "#999"
-                    , Svg.Attributes.strokeWidth "0"
+                    , Svg.Attributes.stroke "#999"
+                    , Svg.Attributes.strokeWidth "1"
                     ]
                     []
             )

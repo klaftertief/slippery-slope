@@ -10,7 +10,7 @@ import Shared
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.LowLevel as LowLevel
-import SlippyMap.StaticGeoJSon as StaticGeoJSon
+import SlippyMap.SimpleGeoJson as SimpleGeoJson
 import Svg exposing (Svg)
 
 
@@ -35,24 +35,19 @@ init =
                 (toFloat (floor transform.zoom) - transform.zoom)
 
         centerPoint =
-            Transform.locationToPixelPoint transform transform.center
-                |> (\{ x, y } -> { x = toFloat x, y = toFloat y })
+            Transform.locationToPoint transform transform.center
 
         topLeftCoordinate =
-            Transform.pixelPointToCoordinate transform
-                ({ x = centerPoint.x - transform.width / 2
-                 , y = centerPoint.y - transform.height / 2
-                 }
-                    |> (\{ x, y } -> { x = floor x, y = floor y })
-                )
+            Transform.pointToCoordinate transform
+                { x = centerPoint.x - transform.width / 2
+                , y = centerPoint.y - transform.height / 2
+                }
 
         bottomRightCoordinate =
-            Transform.pixelPointToCoordinate transform
-                ({ x = centerPoint.x + transform.width / 2
-                 , y = centerPoint.y + transform.height / 2
-                 }
-                    |> (\{ x, y } -> { x = floor x, y = floor y })
-                )
+            Transform.pointToCoordinate transform
+                { x = centerPoint.x + transform.width / 2
+                , y = centerPoint.y + transform.height / 2
+                }
 
         bounds =
             { topLeft = topLeftCoordinate
@@ -63,6 +58,7 @@ init =
                 { topLeftCoordinate | row = bottomRightCoordinate.row }
             }
 
+        -- TODO: pull out tiles calculation in a SlippyMap helper
         tilesToLoad =
             Tile.cover bounds
     in
@@ -75,7 +71,7 @@ init =
 view : Model -> Svg Msg
 view model =
     LowLevel.container model.transform
-        [ StaticGeoJSon.tileLayer (tileToGeoJson model) model.transform
+        [ SimpleGeoJson.tileLayer (tileToGeoJson model) model.transform
         ]
 
 

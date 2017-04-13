@@ -2,7 +2,6 @@ module SlippyMap.Geo.Transform exposing (..)
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.PixelPoint as PixelPoint exposing (PixelPoint)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Mercator as Mercator
 
@@ -19,15 +18,15 @@ type alias Transform =
     }
 
 
-locationToPixelPoint : Transform -> Location -> PixelPoint
-locationToPixelPoint transform location =
+locationToPoint : Transform -> Location -> Point
+locationToPoint transform location =
     locationToCoordinate transform location
-        |> coordinateToPixelPoint transform
+        |> coordinateToPoint transform
 
 
-pixelPointToLocation : Transform -> PixelPoint -> Location
-pixelPointToLocation transform point =
-    pixelPointToCoordinate transform point
+pointToLocation : Transform -> Point -> Location
+pointToLocation transform point =
+    pointToCoordinate transform point
         |> coordinateToLocation transform
 
 
@@ -51,20 +50,20 @@ coordinateToLocation transform coordinate =
         |> Mercator.unproject
 
 
-pixelPointToCoordinate : Transform -> PixelPoint -> Coordinate
-pixelPointToCoordinate transform { x, y } =
+pointToCoordinate : Transform -> Point -> Coordinate
+pointToCoordinate transform { x, y } =
     let
         scale =
             toFloat transform.tileSize
     in
-        { column = toFloat x / scale
-        , row = toFloat y / scale
+        { column = x / scale
+        , row = y / scale
         , zoom = transform.zoom
         }
 
 
-coordinateToPixelPoint : Transform -> Coordinate -> PixelPoint
-coordinateToPixelPoint transform coordinate =
+coordinateToPoint : Transform -> Coordinate -> Point
+coordinateToPoint transform coordinate =
     let
         { column, row, zoom } =
             Coordinate.zoomTo transform.zoom coordinate
@@ -72,8 +71,8 @@ coordinateToPixelPoint transform coordinate =
         scale =
             toFloat transform.tileSize
     in
-        { x = column * scale |> floor
-        , y = row * scale |> floor
+        { x = column * scale
+        , y = row * scale
         }
 
 
