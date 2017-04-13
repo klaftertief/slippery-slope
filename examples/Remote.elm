@@ -108,7 +108,7 @@ getGeoJsonTile ({ z, x, y } as tile) =
             Tile.toComparable tile
 
         url =
-            ("https://tile.mapzen.com/mapzen/vector/v1/landuse/"
+            ("https://tile.mapzen.com/mapzen/vector/v1/earth/"
                 ++ toString z
                 ++ "/"
                 ++ toString (x % (2 ^ z))
@@ -121,6 +121,11 @@ getGeoJsonTile ({ z, x, y } as tile) =
         Http.get url GeoJson.decoder
             |> RemoteData.sendRequest
             |> Cmd.map (GeoJsonTileResponse comparable)
+
+
+vectorTileDecoder : Decoder (List ( String, GeoJson ))
+vectorTileDecoder =
+    Decode.keyValuePairs GeoJson.decoder
 
 
 tileToGeoJson : Model -> Tile -> GeoJson
