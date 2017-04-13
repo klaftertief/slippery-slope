@@ -18,7 +18,7 @@ container ({ width, height } as transform) elements =
 
 
 tileLayer : (Tile -> a) -> (a -> Svg msg) -> Transform -> Svg msg
-tileLayer toRender renderer transform =
+tileLayer fromTile render transform =
     let
         scale =
             Transform.zoomScale
@@ -82,11 +82,11 @@ tileLayer toRender renderer transform =
                     ++ ")"
                 )
             ]
-            (List.map (tile (toRender >> renderer) transform) tiles)
+            (List.map (tile (fromTile >> render) transform) tiles)
 
 
 tile : (Tile -> Svg msg) -> Transform -> Tile -> ( String, Svg msg )
-tile renderer transform ({ z, x, y } as tile) =
+tile render transform ({ z, x, y } as tile) =
     let
         key =
             toString z
@@ -114,7 +114,7 @@ tile renderer transform ({ z, x, y } as tile) =
                     ++ ")"
                 )
             ]
-            [ renderer tile ]
+            [ render tile ]
         )
 
 
