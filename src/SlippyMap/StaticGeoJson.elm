@@ -132,8 +132,7 @@ renderGeoJsonPolygon project positionListList =
                         |> String.join " "
                         |> Svg.Attributes.points
                     , Svg.Attributes.fill "#999"
-                    , Svg.Attributes.stroke "black"
-                    , Svg.Attributes.strokeWidth "1"
+                    , Svg.Attributes.strokeWidth "0"
                     ]
                     []
             )
