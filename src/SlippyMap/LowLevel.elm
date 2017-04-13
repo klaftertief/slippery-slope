@@ -55,9 +55,9 @@ tileLayer fromTile render transform =
             [ Svg.Attributes.transform
                 (""
                     ++ " translate("
-                    ++ toString centerPoint.x
+                    ++ toString (round centerPoint.x)
                     ++ " "
-                    ++ toString centerPoint.y
+                    ++ toString (round centerPoint.y)
                     ++ ")"
                     ++ " "
                     ++ "scale("
@@ -65,15 +65,15 @@ tileLayer fromTile render transform =
                     ++ ")"
                     ++ " "
                     ++ "translate("
-                    ++ toString -centerPoint.x
+                    ++ toString (round -centerPoint.x)
                     ++ " "
-                    ++ toString -centerPoint.y
+                    ++ toString (round -centerPoint.y)
                     ++ ")"
                     ++ " "
                     ++ "translate("
-                    ++ toString ((transform.width / 2 - centerPoint.x) / scale)
+                    ++ toString (round ((transform.width / 2 - centerPoint.x) / scale))
                     ++ " "
-                    ++ toString ((transform.height / 2 - centerPoint.y) / scale)
+                    ++ toString (round ((transform.height / 2 - centerPoint.y) / scale))
                     ++ ")"
                 )
             ]
