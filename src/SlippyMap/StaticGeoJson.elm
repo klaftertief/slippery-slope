@@ -9,13 +9,13 @@ import Svg exposing (Svg)
 import Svg.Attributes
 
 
-tileLayer : (Tile -> GeoJson) -> Transform -> Svg msg
-tileLayer tileToGeoJson transform =
-    LowLevel.tileLayer (tile tileToGeoJson transform) transform
+tileLayer : (Tile -> ( Tile, GeoJson )) -> Transform -> Svg msg
+tileLayer tileToGeoJsonTile transform =
+    LowLevel.tileLayer tileToGeoJsonTile (tile transform) transform
 
 
-tile : (Tile -> GeoJson) -> Transform -> Tile -> Svg msg
-tile tileToGeoJson transform ({ z, x, y } as tile) =
+tile : Transform -> ( Tile, GeoJson ) -> Svg msg
+tile transform ( { z, x, y }, geojson ) =
     let
         tileCoordinate =
             { column = toFloat x
@@ -29,9 +29,6 @@ tile tileToGeoJson transform ({ z, x, y } as tile) =
         project ( lon, lat, _ ) =
             Transform.locationToPixelPoint transform { lon = lon, lat = lat }
                 |> (\{ x, y } -> { x = x - coordinatePoint.x, y = y - coordinatePoint.y })
-
-        geojson =
-            tileToGeoJson tile
     in
         renderGeoJson project geojson
 

@@ -128,7 +128,7 @@ vectorTileDecoder =
     Decode.keyValuePairs GeoJson.decoder
 
 
-tileToGeoJson : Model -> Tile -> GeoJson
+tileToGeoJson : Model -> Tile -> ( Tile, GeoJson )
 tileToGeoJson model tile =
     let
         comparable =
@@ -141,4 +141,4 @@ tileToGeoJson model tile =
                 |> Maybe.withDefault
                     ( GeoJson.FeatureCollection [], Nothing )
     in
-        tileGeoJson
+        ( tile, tileGeoJson )

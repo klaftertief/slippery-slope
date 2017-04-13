@@ -9,7 +9,7 @@ import Svg.Attributes
 
 tileLayer : Transform -> Svg msg
 tileLayer transform =
-    LowLevel.tileLayer (tile transform) transform
+    LowLevel.tileLayer identity (tile transform) transform
 
 
 tile : Transform -> Tile -> Svg msg

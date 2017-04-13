@@ -11,7 +11,7 @@ import Svg.Attributes
 view : Transform -> Svg msg
 view transform =
     LowLevel.container transform
-        [ LowLevel.tileLayer (tile transform) transform
+        [ LowLevel.tileLayer identity (tile transform) transform
         , LowLevel.gridLayer transform
         ]
 
