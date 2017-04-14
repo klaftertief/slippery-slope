@@ -1,6 +1,7 @@
 module Interactive exposing (..)
 
 import Html
+import Json.Decode as Decode exposing (Decoder)
 import Shared
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
@@ -30,13 +31,24 @@ view : Model -> Svg Msg
 view model =
     LowLevel.container model
         [ StaticImage.tileLayer model
-        , zoomControls
-        , Svg.text_
-            [ Svg.Events.onClick (ZoomInAround { x = 10, y = 200 })
-            , Svg.Attributes.transform "translate(10, 200)"
+        , Svg.rect
+            [ Svg.Attributes.visibility "hidden"
+            , Svg.Attributes.pointerEvents "all"
+            , Svg.Attributes.width (toString model.width)
+            , Svg.Attributes.height (toString model.height)
+            , Svg.Events.on "click"
+                (Decode.map ZoomInAround clientPosition)
             ]
-            [ Svg.text "000" ]
+            []
+        , zoomControls
         ]
+
+
+clientPosition : Decoder Point
+clientPosition =
+    Decode.map2 Point
+        (Decode.field "offsetX" Decode.float)
+        (Decode.field "offsetY" Decode.float)
 
 
 zoomControls : Svg Msg
@@ -78,7 +90,7 @@ update msg model =
             { model | zoom = model.zoom - 1 }
 
         ZoomInAround point ->
-            zoomToAround model (model.zoom + 0.1) point
+            zoomToAround model (model.zoom + 1) point
 
 
 zoomToAround : Transform -> Float -> Point -> Transform
