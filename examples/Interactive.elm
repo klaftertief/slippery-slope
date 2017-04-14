@@ -2,6 +2,7 @@ module Interactive exposing (..)
 
 import Html
 import Shared
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.LowLevel as LowLevel
 import SlippyMap.StaticImage as StaticImage
@@ -17,6 +18,7 @@ type alias Model =
 type Msg
     = ZoomIn
     | ZoomOut
+    | ZoomInAround Point
 
 
 model : Model
@@ -29,6 +31,11 @@ view model =
     LowLevel.container model
         [ StaticImage.tileLayer model
         , zoomControls
+        , Svg.text_
+            [ Svg.Events.onClick (ZoomInAround { x = 10, y = 200 })
+            , Svg.Attributes.transform "translate(10, 200)"
+            ]
+            [ Svg.text "000" ]
         ]
 
 
@@ -46,14 +53,16 @@ zoomControls =
             []
         , Svg.text_
             [ Svg.Events.onClick ZoomIn
-            , Svg.Attributes.x "8"
+            , Svg.Attributes.x "12"
             , Svg.Attributes.y "16"
+            , Svg.Attributes.textAnchor "middle"
             ]
             [ Svg.text "+" ]
         , Svg.text_
             [ Svg.Events.onClick ZoomOut
-            , Svg.Attributes.x "8"
+            , Svg.Attributes.x "12"
             , Svg.Attributes.y "36"
+            , Svg.Attributes.textAnchor "middle"
             ]
             [ Svg.text "-" ]
         ]
@@ -67,6 +76,46 @@ update msg model =
 
         ZoomOut ->
             { model | zoom = model.zoom - 1 }
+
+        ZoomInAround point ->
+            zoomToAround model (model.zoom + 0.1) point
+
+
+zoomToAround : Transform -> Float -> Point -> Transform
+zoomToAround transform newZoom around =
+    let
+        transformZoomed =
+            { transform | zoom = newZoom }
+
+        centerPoint =
+            Transform.locationToPoint transform transform.center
+
+        aroundPoint =
+            { x = around.x + centerPoint.x - transform.width / 2
+            , y = around.y + centerPoint.y - transform.height / 2
+            }
+
+        aroundLocation =
+            Transform.pointToLocation transform aroundPoint
+
+        aroundPointZoomed =
+            Transform.locationToPoint transformZoomed aroundLocation
+
+        aroundPointDiff =
+            { x = aroundPointZoomed.x - aroundPoint.x
+            , y = aroundPointZoomed.y - aroundPoint.y
+            }
+
+        newCenter =
+            Transform.pointToLocation transformZoomed
+                { x = centerPoint.x + aroundPointDiff.x
+                , y = centerPoint.y + aroundPointDiff.y
+                }
+    in
+        { transform
+            | zoom = newZoom
+            , center = newCenter
+        }
 
 
 main : Program Never Model Msg

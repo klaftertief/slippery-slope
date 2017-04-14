@@ -1,5 +1,6 @@
 module SlippyMap.LowLevel exposing (..)
 
+import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
@@ -54,7 +55,7 @@ tileLayer fromTile render transform =
         Svg.Keyed.node "g"
             [ Svg.Attributes.transform
                 (""
-                    ++ " translate("
+                    ++ "translate("
                     ++ toString (round centerPoint.x)
                     ++ " "
                     ++ toString (round centerPoint.y)
@@ -113,6 +114,43 @@ tile render transform ({ z, x, y } as tile) =
         )
 
 
+markerLayer : Svg msg -> Transform -> List Location -> Svg msg
+markerLayer markerSvg transform markerLocations =
+    let
+        centerPoint =
+            Transform.locationToPoint transform transform.center
+    in
+        Svg.g
+            [ Svg.Attributes.transform
+                (""
+                    ++ "translate("
+                    ++ toString (round (transform.width / 2 - centerPoint.x))
+                    ++ " "
+                    ++ toString (round (transform.height / 2 - centerPoint.y))
+                    ++ ")"
+                )
+            ]
+            (List.map (marker markerSvg transform) markerLocations)
+
+
+marker : Svg msg -> Transform -> Location -> Svg msg
+marker markerSvg transform markerLocation =
+    let
+        markerPoint =
+            Transform.locationToPoint transform markerLocation
+    in
+        Svg.g
+            [ Svg.Attributes.transform
+                ("translate("
+                    ++ toString markerPoint.x
+                    ++ " "
+                    ++ toString markerPoint.y
+                    ++ ")"
+                )
+            ]
+            [ markerSvg ]
+
+
 gridLayer : Transform -> Svg msg
 gridLayer transform =
     let
@@ -157,7 +195,14 @@ gridLayer transform =
     in
         Svg.g []
             [ Svg.g
-                [ Svg.Attributes.transform ("translate(" ++ toString (-centerPoint.x + transform.width / 2 |> floor) ++ " " ++ toString (-centerPoint.y + transform.height / 2 |> floor) ++ ")") ]
+                [ Svg.Attributes.transform
+                    ("translate("
+                        ++ toString (-centerPoint.x + transform.width / 2 |> floor)
+                        ++ " "
+                        ++ toString (-centerPoint.y + transform.height / 2 |> floor)
+                        ++ ")"
+                    )
+                ]
                 (List.map line lons ++ List.map line lats)
             ]
 
