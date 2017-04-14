@@ -5,7 +5,7 @@ import SlippyMap.Geo.Transform as Transform exposing (Transform)
 
 transform : Transform
 transform =
-    { tileSize = 128
+    { tileSize = 256
     , minZoom = 0
     , maxZoom = 20
     , width = 600
