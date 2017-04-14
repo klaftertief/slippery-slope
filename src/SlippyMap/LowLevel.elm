@@ -21,24 +21,29 @@ container ({ width, height } as transform) elements =
 tileLayer : (Tile -> a) -> (a -> Svg msg) -> Transform -> Svg msg
 tileLayer fromTile render transform =
     let
+        -- Change transform zoom to an integer as tile data is not available for float values in general.
+        tileTransform =
+            { transform | zoom = toFloat (round transform.zoom) }
+
+        -- As the zoom in the transform is changed the tiles need to be scaled to match the actual zoom value.
         scale =
             Transform.zoomScale
-                (toFloat (floor transform.zoom) - transform.zoom)
+                (transform.zoom - tileTransform.zoom)
 
         centerPoint =
-            Transform.locationToPoint transform transform.center
+            Transform.locationToPoint tileTransform tileTransform.center
 
-        topLeftCoordinate =
-            Transform.pointToCoordinate transform
-                { x = centerPoint.x - transform.width / 2
-                , y = centerPoint.y - transform.height / 2
+        -- Scale the bounds points to take the zoom differences into account
+        ( topLeftCoordinate, bottomRightCoordinate ) =
+            ( Transform.pointToCoordinate tileTransform
+                { x = centerPoint.x - tileTransform.width / 2 / scale
+                , y = centerPoint.y - tileTransform.height / 2 / scale
                 }
-
-        bottomRightCoordinate =
-            Transform.pointToCoordinate transform
-                { x = centerPoint.x + transform.width / 2
-                , y = centerPoint.y + transform.height / 2
+            , Transform.pointToCoordinate tileTransform
+                { x = centerPoint.x + tileTransform.width / 2 / scale
+                , y = centerPoint.y + tileTransform.height / 2 / scale
                 }
+            )
 
         bounds =
             { topLeft = topLeftCoordinate
@@ -72,13 +77,13 @@ tileLayer fromTile render transform =
                     ++ ")"
                     ++ " "
                     ++ "translate("
-                    ++ toString (round ((transform.width / 2 - centerPoint.x) / scale))
+                    ++ toString (round ((tileTransform.width / 2 - centerPoint.x) / scale))
                     ++ " "
-                    ++ toString (round ((transform.height / 2 - centerPoint.y) / scale))
+                    ++ toString (round ((tileTransform.height / 2 - centerPoint.y) / scale))
                     ++ ")"
                 )
             ]
-            (List.map (tile (fromTile >> render) transform) tiles)
+            (List.map (tile (fromTile >> render) tileTransform) tiles)
 
 
 tile : (Tile -> Svg msg) -> Transform -> Tile -> ( String, Svg msg )
