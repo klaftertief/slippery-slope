@@ -30,24 +30,29 @@ init =
         transform =
             Shared.transform
 
+        -- Change transform zoom to an integer as tile data is not available for float values in general.
+        tileTransform =
+            { transform | zoom = toFloat (round transform.zoom) }
+
+        -- As the zoom in the transform is changed the tiles need to be scaled to match the actual zoom value.
         scale =
             Transform.zoomScale
-                (toFloat (floor transform.zoom) - transform.zoom)
+                (transform.zoom - tileTransform.zoom)
 
         centerPoint =
-            Transform.locationToPoint transform transform.center
+            Transform.locationToPoint tileTransform tileTransform.center
 
-        topLeftCoordinate =
-            Transform.pointToCoordinate transform
-                { x = centerPoint.x - transform.width / 2
-                , y = centerPoint.y - transform.height / 2
+        -- Scale the bounds points to take the zoom differences into account
+        ( topLeftCoordinate, bottomRightCoordinate ) =
+            ( Transform.pointToCoordinate tileTransform
+                { x = centerPoint.x - tileTransform.width / 2 / scale
+                , y = centerPoint.y - tileTransform.height / 2 / scale
                 }
-
-        bottomRightCoordinate =
-            Transform.pointToCoordinate transform
-                { x = centerPoint.x + transform.width / 2
-                , y = centerPoint.y + transform.height / 2
+            , Transform.pointToCoordinate tileTransform
+                { x = centerPoint.x + tileTransform.width / 2 / scale
+                , y = centerPoint.y + tileTransform.height / 2 / scale
                 }
+            )
 
         bounds =
             { topLeft = topLeftCoordinate
@@ -62,7 +67,7 @@ init =
         tilesToLoad =
             Tile.cover bounds
     in
-        { transform = transform
+        { transform = tileTransform
         , tiles = Dict.empty
         }
             ! (List.map getGeoJsonTile tilesToLoad)
