@@ -17,6 +17,9 @@ tileLayer tileToGeoJsonTile transform =
 tile : Transform -> ( Tile, GeoJson ) -> Svg msg
 tile transform ( { z, x, y }, geojson ) =
     let
+        ( _, scale, _, _ ) =
+            LowLevel.toTransformScaleCoverCenter transform
+
         tileCoordinate =
             { column = toFloat x
             , row = toFloat y
@@ -28,7 +31,11 @@ tile transform ( { z, x, y }, geojson ) =
 
         project ( lon, lat, _ ) =
             Transform.locationToPoint transform { lon = lon, lat = lat }
-                |> (\{ x, y } -> { x = x - coordinatePoint.x, y = y - coordinatePoint.y })
+                |> (\{ x, y } ->
+                        { x = (x - coordinatePoint.x) / scale
+                        , y = (y - coordinatePoint.y) / scale
+                        }
+                   )
     in
         renderGeoJson project geojson
 

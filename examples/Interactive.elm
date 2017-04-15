@@ -98,47 +98,10 @@ update msg model =
             { model | zoom = model.zoom - 1 }
 
         ZoomInAround point ->
-            zoomToAround model (model.zoom + 1) point
+            LowLevel.zoomToAround model (model.zoom + 1) point
 
         ZoomByAround delta point ->
-            zoomToAround model (model.zoom + delta) point
-
-
-zoomToAround : Transform -> Float -> Point -> Transform
-zoomToAround transform newZoom around =
-    let
-        transformZoomed =
-            { transform | zoom = newZoom }
-
-        centerPoint =
-            Transform.locationToPoint transform transform.center
-
-        aroundPoint =
-            { x = around.x + centerPoint.x - transform.width / 2
-            , y = around.y + centerPoint.y - transform.height / 2
-            }
-
-        aroundLocation =
-            Transform.pointToLocation transform aroundPoint
-
-        aroundPointZoomed =
-            Transform.locationToPoint transformZoomed aroundLocation
-
-        aroundPointDiff =
-            { x = aroundPointZoomed.x - aroundPoint.x
-            , y = aroundPointZoomed.y - aroundPoint.y
-            }
-
-        newCenter =
-            Transform.pointToLocation transformZoomed
-                { x = centerPoint.x + aroundPointDiff.x
-                , y = centerPoint.y + aroundPointDiff.y
-                }
-    in
-        { transform
-            | zoom = newZoom
-            , center = newCenter
-        }
+            LowLevel.zoomToAround model (model.zoom + delta) point
 
 
 main : Program Never Model Msg

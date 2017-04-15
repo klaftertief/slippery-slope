@@ -21,6 +21,41 @@ container ({ width, height } as transform) elements =
 tileLayer : (Tile -> a) -> (a -> Svg msg) -> Transform -> Svg msg
 tileLayer fromTile render transform =
     let
+        ( tileTransform, scale, tiles, centerPoint ) =
+            toTransformScaleCoverCenter transform
+    in
+        Svg.Keyed.node "g"
+            [ Svg.Attributes.transform
+                (""
+                    ++ "translate("
+                    ++ toString (round centerPoint.x)
+                    ++ " "
+                    ++ toString (round centerPoint.y)
+                    ++ ")"
+                    ++ " "
+                    ++ "scale("
+                    ++ toString scale
+                    ++ ")"
+                    ++ " "
+                    ++ "translate("
+                    ++ toString (round -centerPoint.x)
+                    ++ " "
+                    ++ toString (round -centerPoint.y)
+                    ++ ")"
+                    ++ " "
+                    ++ "translate("
+                    ++ toString (round ((tileTransform.width / 2 - centerPoint.x) / scale))
+                    ++ " "
+                    ++ toString (round ((tileTransform.height / 2 - centerPoint.y) / scale))
+                    ++ ")"
+                )
+            ]
+            (List.map (tile (fromTile >> render) tileTransform) tiles)
+
+
+toTransformScaleCoverCenter : Transform -> ( Transform, Float, List Tile, Point )
+toTransformScaleCoverCenter transform =
+    let
         -- Change transform zoom to an integer as tile data is not available for float values in general.
         tileTransform =
             { transform | zoom = toFloat (round transform.zoom) }
@@ -57,33 +92,7 @@ tileLayer fromTile render transform =
         tiles =
             Tile.cover bounds
     in
-        Svg.Keyed.node "g"
-            [ Svg.Attributes.transform
-                (""
-                    ++ "translate("
-                    ++ toString (round centerPoint.x)
-                    ++ " "
-                    ++ toString (round centerPoint.y)
-                    ++ ")"
-                    ++ " "
-                    ++ "scale("
-                    ++ toString scale
-                    ++ ")"
-                    ++ " "
-                    ++ "translate("
-                    ++ toString (round -centerPoint.x)
-                    ++ " "
-                    ++ toString (round -centerPoint.y)
-                    ++ ")"
-                    ++ " "
-                    ++ "translate("
-                    ++ toString (round ((tileTransform.width / 2 - centerPoint.x) / scale))
-                    ++ " "
-                    ++ toString (round ((tileTransform.height / 2 - centerPoint.y) / scale))
-                    ++ ")"
-                )
-            ]
-            (List.map (tile (fromTile >> render) tileTransform) tiles)
+        ( tileTransform, scale, tiles, centerPoint )
 
 
 tile : (Tile -> Svg msg) -> Transform -> Tile -> ( String, Svg msg )
@@ -224,3 +233,40 @@ line ( p1, p2 ) =
         , Svg.Attributes.shapeRendering "crispEdges"
         ]
         []
+
+
+zoomToAround : Transform -> Float -> Point -> Transform
+zoomToAround transform newZoom around =
+    let
+        transformZoomed =
+            { transform | zoom = newZoom }
+
+        centerPoint =
+            Transform.locationToPoint transform transform.center
+
+        aroundPoint =
+            { x = around.x + centerPoint.x - transform.width / 2
+            , y = around.y + centerPoint.y - transform.height / 2
+            }
+
+        aroundLocation =
+            Transform.pointToLocation transform aroundPoint
+
+        aroundPointZoomed =
+            Transform.locationToPoint transformZoomed aroundLocation
+
+        aroundPointDiff =
+            { x = aroundPointZoomed.x - aroundPoint.x
+            , y = aroundPointZoomed.y - aroundPoint.y
+            }
+
+        newCenter =
+            Transform.pointToLocation transformZoomed
+                { x = centerPoint.x + aroundPointDiff.x
+                , y = centerPoint.y + aroundPointDiff.y
+                }
+    in
+        { transform
+            | zoom = newZoom
+            , center = newCenter
+        }
