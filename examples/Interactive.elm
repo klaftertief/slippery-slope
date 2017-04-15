@@ -20,6 +20,7 @@ type Msg
     = ZoomIn
     | ZoomOut
     | ZoomInAround Point
+    | ZoomByAround Float Point
 
 
 model : Model
@@ -36,8 +37,15 @@ view model =
             , Svg.Attributes.pointerEvents "all"
             , Svg.Attributes.width (toString model.width)
             , Svg.Attributes.height (toString model.height)
-            , Svg.Events.on "click"
+            , Svg.Events.on "dblclick"
                 (Decode.map ZoomInAround clientPosition)
+            , Svg.Events.on "wheel"
+                (Decode.map2 ZoomByAround
+                    (Decode.field "deltaY" Decode.float
+                        |> Decode.map (\y -> -y / 100)
+                    )
+                    clientPosition
+                )
             ]
             []
         , zoomControls
@@ -91,6 +99,9 @@ update msg model =
 
         ZoomInAround point ->
             zoomToAround model (model.zoom + 1) point
+
+        ZoomByAround delta point ->
+            zoomToAround model (model.zoom + delta) point
 
 
 zoomToAround : Transform -> Float -> Point -> Transform
