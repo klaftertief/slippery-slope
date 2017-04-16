@@ -7,11 +7,12 @@ import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
+import Svg.Lazy
 
 
 tileLayer : (Tile -> ( Tile, GeoJson )) -> Transform -> Svg msg
 tileLayer tileToGeoJsonTile transform =
-    LowLevel.tileLayer tileToGeoJsonTile (tile transform) transform
+    LowLevel.tileLayer tileToGeoJsonTile (Svg.Lazy.lazy (tile transform)) transform
 
 
 tile : Transform -> ( Tile, GeoJson ) -> Svg msg
