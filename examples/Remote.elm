@@ -16,11 +16,12 @@ import SlippyMap.SimpleGeoJson as SimpleGeoJson
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
+import Svg.Lazy
 
 
 type alias Model =
     { transform : Transform
-    , tiles : Dict Tile.Comparable (WebData GeoJson)
+    , tiles : Dict Tile.Comparable (WebData (List ( String, GeoJson )))
     , drag : Maybe Drag
     }
 
@@ -32,7 +33,7 @@ type alias Drag =
 
 
 type Msg
-    = GeoJsonTileResponse Tile.Comparable (WebData GeoJson)
+    = GeoJsonTileResponse Tile.Comparable (WebData (List ( String, GeoJson )))
     | ZoomIn
     | ZoomOut
     | ZoomInAround Point
@@ -62,7 +63,7 @@ init transform =
 view : Model -> Svg Msg
 view model =
     LowLevel.container model.transform
-        [ SimpleGeoJson.tileLayer (tileToGeoJson model) model.transform
+        [ tileLayer (tileToGeoJson model) model.transform
         , Svg.rect
             [ Svg.Attributes.visibility "hidden"
             , Svg.Attributes.pointerEvents "all"
@@ -90,6 +91,41 @@ view model =
             ]
             []
         ]
+
+
+tileLayer : (Tile -> ( Tile, List ( String, GeoJson ) )) -> Transform -> Svg msg
+tileLayer tileToGeoJsonTile transform =
+    LowLevel.tileLayer tileToGeoJsonTile (Svg.Lazy.lazy (tile transform)) transform
+
+
+tile : Transform -> ( Tile, List ( String, GeoJson ) ) -> Svg msg
+tile transform ( { z, x, y }, geojsonGroups ) =
+    let
+        ( _, scale, _, _ ) =
+            LowLevel.toTransformScaleCoverCenter transform
+
+        tileCoordinate =
+            { column = toFloat x
+            , row = toFloat y
+            , zoom = toFloat z
+            }
+
+        coordinatePoint =
+            Transform.coordinateToPoint transform tileCoordinate
+
+        project ( lon, lat, _ ) =
+            Transform.locationToPoint transform { lon = lon, lat = lat }
+                |> (\{ x, y } ->
+                        { x = (x - coordinatePoint.x) / scale
+                        , y = (y - coordinatePoint.y) / scale
+                        }
+                   )
+    in
+        Svg.g []
+            (geojsonGroups
+                |> List.map Tuple.second
+                |> List.map (SimpleGeoJson.renderGeoJson project)
+            )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -257,7 +293,7 @@ getGeoJsonTile ({ z, x, y } as tile) =
             Tile.toComparable tile
 
         url =
-            ("https://tile.mapzen.com/mapzen/vector/v1/earth/"
+            ("https://tile.mapzen.com/mapzen/vector/v1/all/"
                 ++ toString z
                 ++ "/"
                 ++ toString (x % (2 ^ z))
@@ -267,7 +303,7 @@ getGeoJsonTile ({ z, x, y } as tile) =
                 ++ "?api_key=mapzen-A4166oq"
             )
     in
-        Http.get url GeoJson.decoder
+        Http.get url vectorTileDecoder
             |> RemoteData.sendRequest
             |> Cmd.map (GeoJsonTileResponse comparable)
 
@@ -277,7 +313,7 @@ vectorTileDecoder =
     Decode.keyValuePairs GeoJson.decoder
 
 
-tileToGeoJson : Model -> Tile -> ( Tile, GeoJson )
+tileToGeoJson : Model -> Tile -> ( Tile, List ( String, GeoJson ) )
 tileToGeoJson model tile =
     let
         comparable =
@@ -288,7 +324,7 @@ tileToGeoJson model tile =
                 |> Maybe.withDefault RemoteData.NotAsked
                 |> RemoteData.toMaybe
                 |> Maybe.withDefault
-                    ( GeoJson.FeatureCollection [], Nothing )
+                    []
     in
         ( tile, tileGeoJson )
 
