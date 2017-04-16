@@ -53,6 +53,8 @@ tileLayer fromTile render transform =
             (List.map (tile (fromTile >> render) tileTransform) tiles)
 
 
+{-| TODO: rename at least
+-}
 toTransformScaleCoverCenter : Transform -> ( Transform, Float, List Tile, Point )
 toTransformScaleCoverCenter transform =
     let
@@ -270,3 +272,17 @@ zoomToAround transform newZoom around =
             | zoom = newZoom
             , center = newCenter
         }
+
+
+moveTo : Transform -> Point -> Transform
+moveTo transform toPoint =
+    let
+        currentCenterPoint =
+            Transform.locationToPoint transform transform.center
+
+        newCenterPoint =
+            { x = toPoint.x + currentCenterPoint.x - transform.width / 2
+            , y = toPoint.y + currentCenterPoint.y - transform.height / 2
+            }
+    in
+        { transform | center = Transform.pointToLocation transform newCenterPoint }

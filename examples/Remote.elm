@@ -5,6 +5,7 @@ import GeoJson exposing (GeoJson)
 import Html
 import Http
 import Json.Decode as Decode exposing (Decoder)
+import Mouse exposing (Position)
 import RemoteData exposing (WebData, RemoteData(..))
 import Shared
 import SlippyMap.Geo.Point as Point exposing (Point)
@@ -20,6 +21,13 @@ import Svg.Events
 type alias Model =
     { transform : Transform
     , tiles : Dict Tile.Comparable (WebData GeoJson)
+    , drag : Maybe Drag
+    }
+
+
+type alias Drag =
+    { last : Position
+    , current : Position
     }
 
 
@@ -29,6 +37,13 @@ type Msg
     | ZoomOut
     | ZoomInAround Point
     | ZoomByAround Float Point
+    | DragMsg DragMsg
+
+
+type DragMsg
+    = DragStart Position
+    | DragAt Position
+    | DragEnd Position
 
 
 init : Transform -> ( Model, Cmd Msg )
@@ -39,6 +54,7 @@ init transform =
     in
         { transform = transform
         , tiles = Dict.empty
+        , drag = Nothing
         }
             ! (List.map getGeoJsonTile tilesToLoad)
 
@@ -52,6 +68,14 @@ view model =
             , Svg.Attributes.pointerEvents "all"
             , Svg.Attributes.width (toString model.transform.width)
             , Svg.Attributes.height (toString model.transform.height)
+            , Svg.Attributes.style
+                (case model.drag of
+                    Just _ ->
+                        "cursor:-webkit-grabbing;cursor:grabbing;"
+
+                    Nothing ->
+                        "cursor:-webkit-grab;cursor:grab;"
+                )
             , Svg.Events.on "dblclick"
                 (Decode.map ZoomInAround clientPosition)
             , Svg.Events.on "wheel"
@@ -61,6 +85,8 @@ view model =
                     )
                     clientPosition
                 )
+            , Svg.Events.on "mousedown"
+                (Decode.map (DragMsg << DragStart) Mouse.position)
             ]
             []
         ]
@@ -68,54 +94,123 @@ view model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    withNewTilesToLoad <|
-        case msg of
-            GeoJsonTileResponse key data ->
-                { model | tiles = Dict.insert key data model.tiles }
+    case msg of
+        GeoJsonTileResponse key data ->
+            { model | tiles = Dict.insert key data model.tiles } ! []
 
-            ZoomIn ->
-                let
-                    transform =
-                        model.transform
+        ZoomIn ->
+            let
+                transform =
+                    model.transform
 
-                    newTransform =
-                        { transform | zoom = transform.zoom + 1 }
-                in
+                newTransform =
+                    { transform | zoom = transform.zoom + 1 }
+
+                newModel =
                     { model | transform = newTransform }
 
-            ZoomOut ->
-                let
-                    transform =
-                        model.transform
+                tilesToLoad =
+                    newGeoJsonTilesToLoad newModel
+            in
+                newModel ! (List.map getGeoJsonTile tilesToLoad)
 
-                    newTransform =
-                        { transform | zoom = transform.zoom - 1 }
-                in
+        ZoomOut ->
+            let
+                transform =
+                    model.transform
+
+                newTransform =
+                    { transform | zoom = transform.zoom - 1 }
+
+                newModel =
                     { model | transform = newTransform }
 
-            ZoomInAround point ->
-                let
-                    transform =
-                        model.transform
+                tilesToLoad =
+                    newGeoJsonTilesToLoad newModel
+            in
+                newModel ! (List.map getGeoJsonTile tilesToLoad)
 
-                    newTransform =
-                        LowLevel.zoomToAround transform (transform.zoom + 1) point
-                in
+        ZoomInAround point ->
+            let
+                transform =
+                    model.transform
+
+                newTransform =
+                    LowLevel.zoomToAround transform (transform.zoom + 1) point
+
+                newModel =
                     { model | transform = newTransform }
 
-            ZoomByAround delta point ->
-                let
-                    transform =
-                        model.transform
+                tilesToLoad =
+                    newGeoJsonTilesToLoad newModel
+            in
+                newModel ! (List.map getGeoJsonTile tilesToLoad)
 
-                    newTransform =
-                        LowLevel.zoomToAround transform (transform.zoom + delta) point
-                in
+        ZoomByAround delta point ->
+            let
+                transform =
+                    model.transform
+
+                newTransform =
+                    LowLevel.zoomToAround transform (transform.zoom + delta) point
+
+                newModel =
                     { model | transform = newTransform }
 
+                tilesToLoad =
+                    newGeoJsonTilesToLoad newModel
+            in
+                newModel ! (List.map getGeoJsonTile tilesToLoad)
 
-withNewTilesToLoad : Model -> ( Model, Cmd Msg )
-withNewTilesToLoad model =
+        DragMsg dragMsg ->
+            let
+                draggedModel =
+                    updateDrag dragMsg model
+
+                newModel =
+                    { draggedModel
+                        | transform = getTransform draggedModel
+                    }
+
+                tilesToLoad =
+                    newGeoJsonTilesToLoad newModel
+            in
+                newModel ! (List.map getGeoJsonTile tilesToLoad)
+
+
+updateDrag : DragMsg -> Model -> Model
+updateDrag dragMsg ({ drag } as model) =
+    case dragMsg of
+        DragStart xy ->
+            { model | drag = Just (Drag xy xy) }
+
+        DragAt xy ->
+            { model
+                | drag =
+                    Maybe.map
+                        (\{ current } -> Drag current xy)
+                        drag
+            }
+
+        DragEnd _ ->
+            { model | drag = Nothing }
+
+
+getTransform : Model -> Transform
+getTransform { transform, drag } =
+    case drag of
+        Nothing ->
+            transform
+
+        Just { last, current } ->
+            LowLevel.moveTo transform
+                { x = transform.width / 2 + toFloat (last.x - current.x)
+                , y = transform.height / 2 + toFloat (last.y - current.y)
+                }
+
+
+newGeoJsonTilesToLoad : Model -> List Tile
+newGeoJsonTilesToLoad model =
     let
         ( _, _, cover, _ ) =
             LowLevel.toTransformScaleCoverCenter model.transform
@@ -129,12 +224,20 @@ withNewTilesToLoad model =
                 |> Dict.keys
                 |> List.map Tile.fromComparable
     in
-        model ! (List.map getGeoJsonTile tilesToLoad)
+        tilesToLoad
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    case model.drag of
+        Nothing ->
+            Sub.none
+
+        Just _ ->
+            Sub.batch
+                [ Mouse.moves (DragMsg << DragAt)
+                , Mouse.ups (DragMsg << DragEnd)
+                ]
 
 
 main : Program Never Model Msg
