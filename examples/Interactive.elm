@@ -2,6 +2,7 @@ module Interactive exposing (..)
 
 import Html
 import Json.Decode as Decode exposing (Decoder)
+import Mouse exposing (Position)
 import Shared
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
@@ -13,7 +14,15 @@ import Svg.Events
 
 
 type alias Model =
-    Transform
+    { transform : Transform
+    , drag : Maybe Drag
+    }
+
+
+type alias Drag =
+    { last : Position
+    , current : Position
+    }
 
 
 type Msg
@@ -21,22 +30,40 @@ type Msg
     | ZoomOut
     | ZoomInAround Point
     | ZoomByAround Float Point
+    | DragMsg DragMsg
 
 
-model : Model
-model =
-    Shared.transform
+type DragMsg
+    = DragStart Position
+    | DragAt Position
+    | DragEnd Position
+
+
+init : ( Model, Cmd Msg )
+init =
+    { transform = Shared.transform
+    , drag = Nothing
+    }
+        ! []
 
 
 view : Model -> Svg Msg
 view model =
-    LowLevel.container model
-        [ StaticImage.tileLayer model
+    LowLevel.container model.transform
+        [ StaticImage.tileLayer model.transform
         , Svg.rect
             [ Svg.Attributes.visibility "hidden"
             , Svg.Attributes.pointerEvents "all"
-            , Svg.Attributes.width (toString model.width)
-            , Svg.Attributes.height (toString model.height)
+            , Svg.Attributes.width (toString model.transform.width)
+            , Svg.Attributes.height (toString model.transform.height)
+            , Svg.Attributes.style
+                (case model.drag of
+                    Just _ ->
+                        "cursor:-webkit-grabbing;cursor:grabbing;"
+
+                    Nothing ->
+                        "cursor:-webkit-grab;cursor:grab;"
+                )
             , Svg.Events.on "dblclick"
                 (Decode.map ZoomInAround clientPosition)
             , Svg.Events.on "wheel"
@@ -46,6 +73,8 @@ view model =
                     )
                     clientPosition
                 )
+            , Svg.Events.on "mousedown"
+                (Decode.map (DragMsg << DragStart) Mouse.position)
             ]
             []
         , zoomControls
@@ -88,26 +117,123 @@ zoomControls =
         ]
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ZoomIn ->
-            { model | zoom = model.zoom + 1 }
+            let
+                transform =
+                    model.transform
+
+                newTransform =
+                    { transform | zoom = transform.zoom + 1 }
+
+                newModel =
+                    { model | transform = newTransform }
+            in
+                newModel ! []
 
         ZoomOut ->
-            { model | zoom = model.zoom - 1 }
+            let
+                transform =
+                    model.transform
+
+                newTransform =
+                    { transform | zoom = transform.zoom - 1 }
+
+                newModel =
+                    { model | transform = newTransform }
+            in
+                newModel ! []
 
         ZoomInAround point ->
-            LowLevel.zoomToAround model (model.zoom + 1) point
+            let
+                transform =
+                    model.transform
+
+                newTransform =
+                    LowLevel.zoomToAround transform (transform.zoom + 1) point
+
+                newModel =
+                    { model | transform = newTransform }
+            in
+                newModel ! []
 
         ZoomByAround delta point ->
-            LowLevel.zoomToAround model (model.zoom + delta) point
+            let
+                transform =
+                    model.transform
+
+                newTransform =
+                    LowLevel.zoomToAround transform (transform.zoom + delta) point
+
+                newModel =
+                    { model | transform = newTransform }
+            in
+                newModel ! []
+
+        DragMsg dragMsg ->
+            let
+                draggedModel =
+                    updateDrag dragMsg model
+
+                newModel =
+                    { draggedModel
+                        | transform = getTransform draggedModel
+                    }
+            in
+                newModel ! []
+
+
+updateDrag : DragMsg -> Model -> Model
+updateDrag dragMsg ({ drag } as model) =
+    case dragMsg of
+        DragStart xy ->
+            { model | drag = Just (Drag xy xy) }
+
+        DragAt xy ->
+            { model
+                | drag =
+                    Maybe.map
+                        (\{ current } -> Drag current xy)
+                        drag
+            }
+
+        DragEnd _ ->
+            { model | drag = Nothing }
+
+
+getTransform : Model -> Transform
+getTransform { transform, drag } =
+    case drag of
+        Nothing ->
+            transform
+
+        Just { last, current } ->
+            LowLevel.moveTo transform
+                { x = transform.width / 2 + toFloat (last.x - current.x)
+                , y = transform.height / 2 + toFloat (last.y - current.y)
+                }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    case model.drag of
+        Nothing ->
+            Sub.none
+
+        Just _ ->
+            Sub.batch
+                [ Mouse.moves (DragMsg << DragAt)
+                , Mouse.ups (DragMsg << DragEnd)
+                ]
 
 
 main : Program Never Model Msg
 main =
-    Html.beginnerProgram
-        { model = model
+    Html.program
+        { init = init
         , view = view
         , update = update
+        , subscriptions = subscriptions
         }
