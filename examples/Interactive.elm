@@ -1,6 +1,8 @@
 module Interactive exposing (..)
 
 import Html
+import Html.Attributes
+import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import Mouse exposing (Position)
 import Shared
@@ -49,35 +51,44 @@ init =
 
 view : Model -> Svg Msg
 view model =
-    LowLevel.container model.transform
-        [ StaticImage.tileLayer model.transform
-        , Svg.rect
-            [ Svg.Attributes.visibility "hidden"
-            , Svg.Attributes.pointerEvents "all"
-            , Svg.Attributes.width (toString model.transform.width)
-            , Svg.Attributes.height (toString model.transform.height)
-            , Svg.Attributes.style
-                (case model.drag of
-                    Just _ ->
-                        "cursor:-webkit-grabbing;cursor:grabbing;"
+    Html.div []
+        [ LowLevel.container model.transform
+            [ StaticImage.tileLayer model.transform
+            , zoomControls
+            ]
+        , Html.div
+            [ Html.Attributes.style
+                [ ( "position", "absolute" )
+                , ( "top", "0" )
+                , ( "left", "0" )
+                , ( "width", toString model.transform.width ++ "px" )
+                , ( "height", toString model.transform.height ++ "px" )
+                , ( "cursor"
+                  , (case model.drag of
+                        Just _ ->
+                            "grabbing"
 
-                    Nothing ->
-                        "cursor:-webkit-grab;cursor:grab;"
-                )
-            , Svg.Events.on "dblclick"
+                        Nothing ->
+                            "grab"
+                    )
+                  )
+                ]
+            , Html.Events.on "dblclick"
                 (Decode.map ZoomInAround clientPosition)
-            , Svg.Events.on "wheel"
+            , Html.Events.onWithOptions "wheel"
+                { preventDefault = True
+                , stopPropagation = True
+                }
                 (Decode.map2 ZoomByAround
                     (Decode.field "deltaY" Decode.float
                         |> Decode.map (\y -> -y / 100)
                     )
                     clientPosition
                 )
-            , Svg.Events.on "mousedown"
+            , Html.Events.on "mousedown"
                 (Decode.map (DragMsg << DragStart) Mouse.position)
             ]
             []
-        , zoomControls
         ]
 
 

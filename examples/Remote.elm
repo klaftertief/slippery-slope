@@ -2,7 +2,9 @@ module Remote exposing (..)
 
 import Dict exposing (Dict)
 import GeoJson exposing (GeoJson)
-import Html
+import Html exposing (Html)
+import Html.Attributes
+import Html.Events
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Mouse exposing (Position)
@@ -14,9 +16,6 @@ import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.LowLevel as LowLevel
 import SlippyMap.SimpleGeoJson as SimpleGeoJson
 import Svg exposing (Svg)
-import Svg.Attributes
-import Svg.Events
-import Svg.Lazy
 
 
 type alias Model =
@@ -62,40 +61,128 @@ init transform =
 
 view : Model -> Svg Msg
 view model =
-    LowLevel.container model.transform
-        [ tileLayer (tileToGeoJson model) model.transform
-        , Svg.rect
-            [ Svg.Attributes.visibility "hidden"
-            , Svg.Attributes.pointerEvents "all"
-            , Svg.Attributes.width (toString model.transform.width)
-            , Svg.Attributes.height (toString model.transform.height)
-            , Svg.Attributes.style
-                (case model.drag of
+    Html.div []
+        [ Html.node "style" [] [ Html.text layerStyles ]
+        , LowLevel.container model.transform
+            [ tileLayer (tileToGeoJson model) model.transform
+            ]
+        , gestureLayer model
+        ]
+
+
+gestureLayer : Model -> Html Msg
+gestureLayer model =
+    Html.div
+        [ Html.Attributes.style
+            [ ( "position", "absolute" )
+            , ( "top", "0" )
+            , ( "left", "0" )
+            , ( "width", toString model.transform.width ++ "px" )
+            , ( "height", toString model.transform.height ++ "px" )
+            , ( "cursor"
+              , (case model.drag of
                     Just _ ->
-                        "cursor:-webkit-grabbing;cursor:grabbing;"
+                        "grabbing"
 
                     Nothing ->
-                        "cursor:-webkit-grab;cursor:grab;"
+                        "grab"
                 )
-            , Svg.Events.on "dblclick"
-                (Decode.map ZoomInAround clientPosition)
-            , Svg.Events.on "wheel"
-                (Decode.map2 ZoomByAround
-                    (Decode.field "deltaY" Decode.float
-                        |> Decode.map (\y -> -y / 100)
-                    )
-                    clientPosition
-                )
-            , Svg.Events.on "mousedown"
-                (Decode.map (DragMsg << DragStart) Mouse.position)
+              )
             ]
-            []
+        , Html.Events.on "dblclick"
+            (Decode.map ZoomInAround clientPosition)
+        , Html.Events.onWithOptions "wheel"
+            { preventDefault = True
+            , stopPropagation = True
+            }
+            (Decode.map2 ZoomByAround
+                (Decode.field "deltaY" Decode.float
+                    |> Decode.map (\y -> -y / 100)
+                )
+                clientPosition
+            )
+        , Html.Events.on "mousedown"
+            (Decode.map (DragMsg << DragStart) Mouse.position)
         ]
+        []
+
+
+layerStyles : String
+layerStyles =
+    """
+polyline {
+    fill: none;
+    stroke: rgba(0,0,0,0.5);
+    stroke-width: 1px;
+}
+polygon {
+    fill: rgba(0,0,0,0.2);
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 1px;
+}
+circle {
+    fill: rgba(255,0,0,0.2);
+    stroke: rgba(255,0,0,0.2);
+    stroke-width: 1px;
+}
+/*
+polyline {
+    fill: none;
+    stroke: #333;
+    stroke-width: 1px;
+}
+polygon {
+    fill: rgba(0,0,0,0.2);
+    stroke: rgba(0,0,0,0.2);
+    stroke-width: 1px;
+}
+circle {
+    fill: rgba(255,0,0,0.2);
+    stroke: rgba(255,0,0,0.2);
+    stroke-width: 1px;
+}
+.meadow polygon,
+.grass polygon,
+.scrub polygon,
+.farmland polygon {
+    fill: green;
+    stroke: green;
+    stroke-width: 1px;
+}
+.earth polygon {
+    fill: brown;
+    stroke: brown;
+    stroke-width: 1px;
+}
+.river *,
+.water *,
+.canal *,
+.basin *,
+.stream *,
+.ocean * {
+    stroke: blue;
+}
+.train polyline,
+.tram polyline,
+.subway polyline {
+    stroke: black;
+    stroke-dasharray: 5;
+}
+.county polyline,
+.locality polyline {
+    stroke: red;
+}
+.major_road polyline,
+.highway polyline {
+    stroke: orange;
+}
+*/
+    """
 
 
 tileLayer : (Tile -> ( Tile, List ( String, GeoJson ) )) -> Transform -> Svg msg
 tileLayer tileToGeoJsonTile transform =
-    LowLevel.tileLayer tileToGeoJsonTile (Svg.Lazy.lazy (tile transform)) transform
+    LowLevel.tileLayer tileToGeoJsonTile (tile transform) transform
 
 
 tile : Transform -> ( Tile, List ( String, GeoJson ) ) -> Svg msg
@@ -123,9 +210,17 @@ tile transform ( { z, x, y }, geojsonGroups ) =
     in
         Svg.g []
             (geojsonGroups
-                |> List.map Tuple.second
+                |> List.filterMap isInteresting
                 |> List.map (SimpleGeoJson.renderGeoJson project)
             )
+
+
+isInteresting : ( String, GeoJson ) -> Maybe GeoJson
+isInteresting ( groupName, geojson ) =
+    if groupName == "water" then
+        Just geojson
+    else
+        Nothing
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -209,7 +304,12 @@ update msg model =
                     }
 
                 tilesToLoad =
-                    newGeoJsonTilesToLoad newModel
+                    case dragMsg of
+                        DragEnd _ ->
+                            newGeoJsonTilesToLoad newModel
+
+                        _ ->
+                            []
             in
                 newModel ! (List.map getGeoJsonTile tilesToLoad)
 
