@@ -44,10 +44,10 @@ tile transform ( { z, x, y }, geojson ) =
 renderGeoJson : (GeoJson.Position -> Point) -> GeoJson -> Svg msg
 renderGeoJson project ( geoJsonObject, _ ) =
     Svg.g []
-        [ renderGeoJsonObject project geoJsonObject ]
+        (renderGeoJsonObject project geoJsonObject)
 
 
-renderGeoJsonObject : (GeoJson.Position -> Point) -> GeoJson.GeoJsonObject -> Svg msg
+renderGeoJsonObject : (GeoJson.Position -> Point) -> GeoJson.GeoJsonObject -> List (Svg msg)
 renderGeoJsonObject project geoJsonObject =
     case geoJsonObject of
         GeoJson.Geometry geometry ->
@@ -57,90 +57,86 @@ renderGeoJsonObject project geoJsonObject =
             renderGeoJsonFeatureObject project featureObject
 
         GeoJson.FeatureCollection featureCollection ->
-            Svg.g []
-                (List.map (renderGeoJsonFeatureObject project) featureCollection)
+            List.concatMap (renderGeoJsonFeatureObject project) featureCollection
 
 
-renderGeoJsonFeatureObject : (GeoJson.Position -> Point) -> GeoJson.FeatureObject -> Svg msg
+renderGeoJsonFeatureObject : (GeoJson.Position -> Point) -> GeoJson.FeatureObject -> List (Svg msg)
 renderGeoJsonFeatureObject project featureObject =
-    Maybe.map (renderGeoJsonGeometry project) featureObject.geometry
-        |> Maybe.withDefault (Svg.text "")
+    Maybe.map (renderGeoJsonGeometry project)
+        featureObject.geometry
+        |> Maybe.withDefault []
 
 
-renderGeoJsonGeometry : (GeoJson.Position -> Point) -> GeoJson.Geometry -> Svg msg
+renderGeoJsonGeometry : (GeoJson.Position -> Point) -> GeoJson.Geometry -> List (Svg msg)
 renderGeoJsonGeometry project geometry =
     case geometry of
         GeoJson.Point position ->
             renderGeoJsonPoint project position
 
         GeoJson.MultiPoint positionList ->
-            Svg.g []
-                (List.map (renderGeoJsonPoint project) positionList)
+            List.concatMap (renderGeoJsonPoint project) positionList
 
         GeoJson.LineString positionList ->
             renderGeoJsonLineString project positionList
 
         GeoJson.MultiLineString positionListList ->
-            Svg.g []
-                (List.map (renderGeoJsonLineString project) positionListList)
+            List.concatMap (renderGeoJsonLineString project) positionListList
 
         GeoJson.Polygon positionListList ->
             renderGeoJsonPolygon project positionListList
 
         GeoJson.MultiPolygon positionListListList ->
-            Svg.g []
-                (List.map (renderGeoJsonPolygon project) positionListListList)
+            List.concatMap (renderGeoJsonPolygon project) positionListListList
 
         GeoJson.GeometryCollection geometryList ->
-            Svg.g []
-                (List.map (renderGeoJsonGeometry project) geometryList)
+            List.concatMap (renderGeoJsonGeometry project) geometryList
 
 
-renderGeoJsonPoint : (GeoJson.Position -> Point) -> GeoJson.Position -> Svg msg
+renderGeoJsonPoint : (GeoJson.Position -> Point) -> GeoJson.Position -> List (Svg msg)
 renderGeoJsonPoint project position =
     let
         { x, y } =
             project position
     in
-        Svg.circle
+        [ Svg.circle
             [ Svg.Attributes.cx (toString x)
             , Svg.Attributes.cy (toString y)
             , Svg.Attributes.r "2"
             ]
             []
+        ]
 
 
-renderGeoJsonLineString : (GeoJson.Position -> Point) -> List GeoJson.Position -> Svg msg
+renderGeoJsonLineString : (GeoJson.Position -> Point) -> List GeoJson.Position -> List (Svg msg)
 renderGeoJsonLineString project positionList =
-    Svg.polyline
-        [ positionList
-            |> List.map project
-            |> List.map (\{ x, y } -> toString x ++ "," ++ toString y)
-            |> String.join " "
+    [ Svg.polyline
+        [ points project positionList
             |> Svg.Attributes.points
-        , Svg.Attributes.fill "none"
-        , Svg.Attributes.stroke "black"
-        , Svg.Attributes.strokeWidth "1"
         ]
         []
+    ]
 
 
-renderGeoJsonPolygon : (GeoJson.Position -> Point) -> List (List GeoJson.Position) -> Svg msg
+renderGeoJsonPolygon : (GeoJson.Position -> Point) -> List (List GeoJson.Position) -> List (Svg msg)
 renderGeoJsonPolygon project positionListList =
-    Svg.g []
-        (List.map
-            (\positionList ->
-                Svg.polygon
-                    [ positionList
-                        |> List.map project
-                        |> List.map (\{ x, y } -> toString x ++ "," ++ toString y)
-                        |> String.join " "
-                        |> Svg.Attributes.points
-                    , Svg.Attributes.fill "#999"
-                    , Svg.Attributes.stroke "#999"
-                    , Svg.Attributes.strokeWidth "1"
-                    ]
-                    []
-            )
-            positionListList
+    List.map
+        (\positionList ->
+            Svg.polygon
+                [ points project positionList
+                    |> Svg.Attributes.points
+                ]
+                []
         )
+        positionListList
+
+
+points : (GeoJson.Position -> Point) -> List GeoJson.Position -> String
+points project positionList =
+    List.foldl
+        (\position accum ->
+            project position
+                |> (\{ x, y } -> toString x ++ "," ++ toString y)
+                |> (\xy -> accum ++ " " ++ xy)
+        )
+        ""
+        positionList
