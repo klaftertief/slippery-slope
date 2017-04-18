@@ -51,7 +51,7 @@ renderGeoJsonObject : (GeoJson.Position -> Point) -> GeoJson.GeoJsonObject -> Li
 renderGeoJsonObject project geoJsonObject =
     case geoJsonObject of
         GeoJson.Geometry geometry ->
-            renderGeoJsonGeometry project geometry
+            renderGeoJsonGeometry project [] geometry
 
         GeoJson.Feature featureObject ->
             renderGeoJsonFeatureObject project featureObject
@@ -62,69 +62,74 @@ renderGeoJsonObject project geoJsonObject =
 
 renderGeoJsonFeatureObject : (GeoJson.Position -> Point) -> GeoJson.FeatureObject -> List (Svg msg)
 renderGeoJsonFeatureObject project featureObject =
-    Maybe.map (renderGeoJsonGeometry project)
+    Maybe.map (renderGeoJsonGeometry project [])
         featureObject.geometry
         |> Maybe.withDefault []
 
 
-renderGeoJsonGeometry : (GeoJson.Position -> Point) -> GeoJson.Geometry -> List (Svg msg)
-renderGeoJsonGeometry project geometry =
+renderGeoJsonGeometry : (GeoJson.Position -> Point) -> List (Svg.Attribute msg) -> GeoJson.Geometry -> List (Svg msg)
+renderGeoJsonGeometry project attributes geometry =
     case geometry of
         GeoJson.Point position ->
-            renderGeoJsonPoint project position
+            renderGeoJsonPoint project attributes position
 
         GeoJson.MultiPoint positionList ->
-            List.concatMap (renderGeoJsonPoint project) positionList
+            List.concatMap (renderGeoJsonPoint project attributes) positionList
 
         GeoJson.LineString positionList ->
-            renderGeoJsonLineString project positionList
+            renderGeoJsonLineString project attributes positionList
 
         GeoJson.MultiLineString positionListList ->
-            List.concatMap (renderGeoJsonLineString project) positionListList
+            List.concatMap (renderGeoJsonLineString project attributes) positionListList
 
         GeoJson.Polygon positionListList ->
-            renderGeoJsonPolygon project positionListList
+            renderGeoJsonPolygon project attributes positionListList
 
         GeoJson.MultiPolygon positionListListList ->
-            List.concatMap (renderGeoJsonPolygon project) positionListListList
+            List.concatMap (renderGeoJsonPolygon project attributes) positionListListList
 
         GeoJson.GeometryCollection geometryList ->
-            List.concatMap (renderGeoJsonGeometry project) geometryList
+            List.concatMap (renderGeoJsonGeometry project attributes) geometryList
 
 
-renderGeoJsonPoint : (GeoJson.Position -> Point) -> GeoJson.Position -> List (Svg msg)
-renderGeoJsonPoint project position =
+renderGeoJsonPoint : (GeoJson.Position -> Point) -> List (Svg.Attribute msg) -> GeoJson.Position -> List (Svg msg)
+renderGeoJsonPoint project attributes position =
     let
         { x, y } =
             project position
     in
         [ Svg.circle
-            [ Svg.Attributes.cx (toString x)
-            , Svg.Attributes.cy (toString y)
-            , Svg.Attributes.r "2"
-            ]
+            (attributes
+                ++ [ Svg.Attributes.cx (toString x)
+                   , Svg.Attributes.cy (toString y)
+                   ]
+            )
             []
         ]
 
 
-renderGeoJsonLineString : (GeoJson.Position -> Point) -> List GeoJson.Position -> List (Svg msg)
-renderGeoJsonLineString project positionList =
+renderGeoJsonLineString : (GeoJson.Position -> Point) -> List (Svg.Attribute msg) -> List GeoJson.Position -> List (Svg msg)
+renderGeoJsonLineString project attributes positionList =
     [ Svg.polyline
-        [ points project positionList
-            |> Svg.Attributes.points
-        ]
+        (attributes
+            ++ [ points project positionList
+                    |> Svg.Attributes.points
+               ]
+        )
         []
     ]
 
 
-renderGeoJsonPolygon : (GeoJson.Position -> Point) -> List (List GeoJson.Position) -> List (Svg msg)
-renderGeoJsonPolygon project positionListList =
+renderGeoJsonPolygon : (GeoJson.Position -> Point) -> List (Svg.Attribute msg) -> List (List GeoJson.Position) -> List (Svg msg)
+renderGeoJsonPolygon project attributes positionListList =
     List.map
         (\positionList ->
             Svg.polygon
-                [ points project positionList
-                    |> Svg.Attributes.points
-                ]
+                (attributes
+                    ++ [ points project positionList
+                            |> Svg.Attributes.points
+                       ]
+                )
                 []
         )
         positionListList
