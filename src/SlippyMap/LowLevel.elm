@@ -118,7 +118,8 @@ tile render transform ({ z, x, y } as tile) =
     in
         ( key
         , Svg.g
-            [ Svg.Attributes.transform
+            [ Svg.Attributes.class "tile"
+            , Svg.Attributes.transform
                 ("translate("
                     ++ toString point.x
                     ++ " "
