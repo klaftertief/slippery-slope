@@ -1,11 +1,15 @@
 module Interactive exposing (..)
 
-import Html
+import Collage
+import Color
+import Element
+import Html exposing (Html)
 import Html.Attributes
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import Mouse exposing (Position)
 import Shared
+import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.LowLevel as LowLevel
@@ -56,40 +60,93 @@ view model =
             [ StaticImage.tileLayer model.transform
             , zoomControls
             ]
-        , Html.div
+        , collageLayer model
+        , gestureLayer model
+        ]
+
+
+collageLayer : Model -> Html Msg
+collageLayer model =
+    let
+        locations =
+            List.range -18 18
+                |> List.concatMap
+                    (\lng ->
+                        List.range -8 8
+                            |> List.map ((*) 10 >> toFloat >> Location (10 * toFloat lng))
+                    )
+    in
+        Html.div
             [ Html.Attributes.style
                 [ ( "position", "absolute" )
+                , ( "pointer-events", "none" )
                 , ( "top", "0" )
                 , ( "left", "0" )
                 , ( "width", toString model.transform.width ++ "px" )
                 , ( "height", toString model.transform.height ++ "px" )
-                , ( "cursor"
-                  , (case model.drag of
-                        Just _ ->
-                            "-webkit-grabbing"
-
-                        Nothing ->
-                            "-webkit-grab"
-                    )
-                  )
                 ]
-            , Html.Events.on "dblclick"
-                (Decode.map ZoomInAround clientPosition)
-            , Html.Events.onWithOptions "wheel"
-                { preventDefault = True
-                , stopPropagation = True
-                }
-                (Decode.map2 ZoomByAround
-                    (Decode.field "deltaY" Decode.float
-                        |> Decode.map (\y -> -y / 100)
-                    )
-                    clientPosition
-                )
-            , Html.Events.on "mousedown"
-                (Decode.map (DragMsg << DragStart) Mouse.position)
             ]
-            []
+            [ Collage.collage
+                (round model.transform.width)
+                (round model.transform.height)
+                (List.map
+                    (\location ->
+                        Collage.filled Color.red (Collage.circle 5)
+                            |> Collage.move (move model.transform location)
+                    )
+                    locations
+                )
+                |> Element.toHtml
+            ]
+
+
+move : Transform -> Location -> ( Float, Float )
+move transform location =
+    let
+        centerPoint =
+            Transform.locationToPoint transform transform.center
+
+        point =
+            Transform.locationToPoint transform location
+    in
+        ( point.x - centerPoint.x, centerPoint.y - point.y )
+
+
+gestureLayer : Model -> Html Msg
+gestureLayer model =
+    Html.div
+        [ Html.Attributes.style
+            [ ( "position", "absolute" )
+            , ( "top", "0" )
+            , ( "left", "0" )
+            , ( "width", toString model.transform.width ++ "px" )
+            , ( "height", toString model.transform.height ++ "px" )
+            , ( "cursor"
+              , (case model.drag of
+                    Just _ ->
+                        "-webkit-grabbing"
+
+                    Nothing ->
+                        "-webkit-grab"
+                )
+              )
+            ]
+        , Html.Events.on "dblclick"
+            (Decode.map ZoomInAround clientPosition)
+        , Html.Events.onWithOptions "wheel"
+            { preventDefault = True
+            , stopPropagation = True
+            }
+            (Decode.map2 ZoomByAround
+                (Decode.field "deltaY" Decode.float
+                    |> Decode.map (\y -> -y / 100)
+                )
+                clientPosition
+            )
+        , Html.Events.on "mousedown"
+            (Decode.map (DragMsg << DragStart) Mouse.position)
         ]
+        []
 
 
 clientPosition : Decoder Point

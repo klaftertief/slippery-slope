@@ -5,12 +5,12 @@ import SlippyMap.Geo.Transform as Transform exposing (Transform)
 
 transform : Transform
 transform =
-    { tileSize = 512
+    { tileSize = 256
     , minZoom = 0
     , maxZoom = 20
     , width = 600
     , height = 400
-    , center = { lon = 7, lat = 51 }
-    , zoom = 4.5
+    , center = { lon = 6.9, lat = 50.9 }
+    , zoom = 10
     , bearing = 0
     }
