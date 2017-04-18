@@ -66,10 +66,10 @@ view model =
                 , ( "cursor"
                   , (case model.drag of
                         Just _ ->
-                            "grabbing"
+                            "-webkit-grabbing"
 
                         Nothing ->
-                            "grab"
+                            "-webkit-grab"
                     )
                   )
                 ]
