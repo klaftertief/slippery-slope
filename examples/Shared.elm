@@ -11,6 +11,8 @@ transform =
     , width = 600
     , height = 400
     , center = { lon = 6.9, lat = 50.9 }
+
+    --, center = { lon = 175.475, lat = -37.87 }
     , zoom = 10
     , bearing = 0
     }

@@ -18,6 +18,8 @@ container ({ width, height } as transform) elements =
         elements
 
 
+{-| TODO: probably switch to a `Tile a` type that contains the actual data for a tile. See also the GeoJson layer.
+-}
 tileLayer : (Tile -> a) -> (a -> Svg msg) -> Transform -> Svg msg
 tileLayer fromTile render transform =
     let
@@ -51,6 +53,40 @@ tileLayer fromTile render transform =
                 )
             ]
             (List.map (tile (fromTile >> render) tileTransform) tiles)
+
+
+tile : (Tile -> Svg msg) -> Transform -> Tile -> ( String, Svg msg )
+tile render transform ({ z, x, y } as tile) =
+    let
+        key =
+            toString z
+                ++ "/"
+                ++ toString (x % (2 ^ z))
+                ++ "/"
+                ++ toString (y % (2 ^ z))
+
+        tileCoordinate =
+            { column = toFloat x
+            , row = toFloat y
+            , zoom = toFloat z
+            }
+
+        point =
+            Transform.coordinateToPoint transform tileCoordinate
+    in
+        ( key
+        , Svg.g
+            [ Svg.Attributes.class "tile"
+            , Svg.Attributes.transform
+                ("translate("
+                    ++ toString point.x
+                    ++ " "
+                    ++ toString point.y
+                    ++ ")"
+                )
+            ]
+            [ render tile ]
+        )
 
 
 {-| TODO: rename at least
@@ -97,40 +133,6 @@ toTransformScaleCoverCenter transform =
         ( tileTransform, scale, tiles, centerPoint )
 
 
-tile : (Tile -> Svg msg) -> Transform -> Tile -> ( String, Svg msg )
-tile render transform ({ z, x, y } as tile) =
-    let
-        key =
-            toString z
-                ++ "/"
-                ++ toString (x % (2 ^ z))
-                ++ "/"
-                ++ toString (y % (2 ^ z))
-
-        tileCoordinate =
-            { column = toFloat x
-            , row = toFloat y
-            , zoom = toFloat z
-            }
-
-        point =
-            Transform.coordinateToPoint transform tileCoordinate
-    in
-        ( key
-        , Svg.g
-            [ Svg.Attributes.class "tile"
-            , Svg.Attributes.transform
-                ("translate("
-                    ++ toString point.x
-                    ++ " "
-                    ++ toString point.y
-                    ++ ")"
-                )
-            ]
-            [ render tile ]
-        )
-
-
 markerLayer : Svg msg -> Transform -> List Location -> Svg msg
 markerLayer markerSvg transform markerLocations =
     let
@@ -166,6 +168,53 @@ marker markerSvg transform markerLocation =
                 )
             ]
             [ markerSvg ]
+
+
+overlayLayer : Transform -> List ( Location.Bounds, String ) -> Svg msg
+overlayLayer transform boundedItems =
+    let
+        centerPoint =
+            Transform.locationToPoint transform transform.center
+    in
+        Svg.g
+            [ Svg.Attributes.transform
+                (""
+                    ++ "translate("
+                    ++ toString (round (transform.width / 2 - centerPoint.x))
+                    ++ " "
+                    ++ toString (round (transform.height / 2 - centerPoint.y))
+                    ++ ")"
+                )
+            ]
+            (List.map (overlay transform) boundedItems)
+
+
+overlay : Transform -> ( Location.Bounds, String ) -> Svg msg
+overlay transform ( bounds, url ) =
+    let
+        southWestPoint =
+            Transform.locationToPoint transform
+                bounds.southWest
+
+        northEastPoint =
+            Transform.locationToPoint transform
+                bounds.northEast
+    in
+        Svg.image
+            [ Svg.Attributes.transform
+                ("translate("
+                    ++ toString southWestPoint.x
+                    ++ " "
+                    ++ toString northEastPoint.y
+                    ++ ")"
+                )
+            , Svg.Attributes.width
+                (toString <| northEastPoint.x - southWestPoint.x)
+            , Svg.Attributes.height
+                (toString <| southWestPoint.y - northEastPoint.y)
+            , Svg.Attributes.xlinkHref url
+            ]
+            []
 
 
 gridLayer : Transform -> Svg msg
