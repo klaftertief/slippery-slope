@@ -8,43 +8,63 @@ import Svg.Attributes
 import Svg.Keyed
 
 
-type alias Layer msg =
+{-| Base configuration for all layers.
+
+Note: Your Config should never be held in your model. It should only appear in view code.
+-}
+type Config
+    = Config
+        { attribution : Maybe String
+        }
+
+
+type Layer msg
+    = Layer Config (Render msg)
+
+
+type alias Render msg =
     Transform -> Svg msg
 
 
-tileLayer : (Tile -> a) -> (a -> Svg msg) -> Transform -> Svg msg
-tileLayer fromTile render transform =
-    let
-        ( tileTransform, scale, tiles, centerPoint ) =
-            toTransformScaleCoverCenter transform
-    in
-        Svg.Keyed.node "g"
-            [ Svg.Attributes.transform
-                (""
-                    ++ "translate("
-                    ++ toString (round centerPoint.x)
-                    ++ " "
-                    ++ toString (round centerPoint.y)
-                    ++ ")"
-                    ++ " "
-                    ++ "scale("
-                    ++ toString scale
-                    ++ ")"
-                    ++ " "
-                    ++ "translate("
-                    ++ toString (round -centerPoint.x)
-                    ++ " "
-                    ++ toString (round -centerPoint.y)
-                    ++ ")"
-                    ++ " "
-                    ++ "translate("
-                    ++ toString (round ((tileTransform.width / 2 - centerPoint.x) / scale))
-                    ++ " "
-                    ++ toString (round ((tileTransform.height / 2 - centerPoint.y) / scale))
-                    ++ ")"
-                )
-            ]
-            (List.map (tile (fromTile >> render) tileTransform) tiles)
+tileLayer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Config -> Layer msg
+tileLayer fromTile renderTile config =
+    Layer config
+        (\transform ->
+            let
+                ( tileTransform, scale, tiles, centerPoint ) =
+                    toTransformScaleCoverCenter transform
+            in
+                Svg.Keyed.node "g"
+                    [ Svg.Attributes.transform
+                        (""
+                            ++ "translate("
+                            ++ toString (round centerPoint.x)
+                            ++ " "
+                            ++ toString (round centerPoint.y)
+                            ++ ")"
+                            ++ " "
+                            ++ "scale("
+                            ++ toString scale
+                            ++ ")"
+                            ++ " "
+                            ++ "translate("
+                            ++ toString (round -centerPoint.x)
+                            ++ " "
+                            ++ toString (round -centerPoint.y)
+                            ++ ")"
+                            ++ " "
+                            ++ "translate("
+                            ++ toString (round ((tileTransform.width / 2 - centerPoint.x) / scale))
+                            ++ " "
+                            ++ toString (round ((tileTransform.height / 2 - centerPoint.y) / scale))
+                            ++ ")"
+                        )
+                    ]
+                    (List.map
+                        (tile (fromTile >> renderTile tileTransform) tileTransform)
+                        tiles
+                    )
+        )
 
 
 tile : (Tile -> Svg msg) -> Transform -> Tile -> ( String, Svg msg )

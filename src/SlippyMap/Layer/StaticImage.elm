@@ -22,10 +22,6 @@ type Config
     = Config
         { toUrl : Config -> Tile -> String
         , subDomains : List String
-
-        --, minZoom : Float
-        --, maxZoom : Float
-        --, attribution : Maybe String
         }
 
 
@@ -59,14 +55,9 @@ config { toUrl } =
 -- LAYER
 
 
-layer : Config -> Layer msg
-layer config =
-    layerHelp config
-
-
-layerHelp : Config -> Transform -> Svg msg
-layerHelp config transform =
-    Layer.tileLayer identity (tile config transform) transform
+layer : Config -> Layer.Config -> Layer msg
+layer config layerConfig =
+    Layer.tileLayer identity (tile config) layerConfig
 
 
 tile : Config -> Transform -> Tile -> Svg msg

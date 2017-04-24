@@ -8,13 +8,10 @@ import SlippyMap.Geo.Mercator as Mercator
 
 type alias Transform =
     { tileSize : Int
-    , minZoom : Float
-    , maxZoom : Float
     , width : Float
     , height : Float
     , center : Location
     , zoom : Float
-    , bearing : Float
     }
 
 
