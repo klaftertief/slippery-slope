@@ -26,6 +26,11 @@ type alias Render msg =
     Transform -> Svg msg
 
 
+attribution : Layer msg -> Maybe String
+attribution (Layer (Config config) render) =
+    config.attribution
+
+
 tileLayer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Config -> Layer msg
 tileLayer fromTile renderTile config =
     Layer config
