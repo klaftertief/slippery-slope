@@ -6,10 +6,14 @@ module SlippyMap.Map.LowLevel
         , State
         , center
         , view
+        , subscriptions
         )
 
+import Json.Decode as Decode
+import Mouse exposing (Position)
 import SlippyMap.Control.Attribution as Attribution
 import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer(Layer))
 import Svg exposing (Svg)
@@ -58,19 +62,40 @@ dynamicConfig toMsg =
 -- STATE
 
 
+{-| TODO: Do not have full Transfrom as the State.
+Have a function `toTransform : Config msg -> State -> Transform`.
+-}
 type State
-    = State { transform : Transform }
+    = State
+        { transform : Transform
+        , drag : Maybe Drag
+        }
+
+
+type alias Drag =
+    { last : Position
+    , current : Position
+    }
 
 
 defaultState : State
 defaultState =
-    State { transform = defaultTransform }
+    State
+        { transform = defaultTransform
+        , drag = Nothing
+        }
 
 
 setTransform : Transform -> State -> State
 setTransform newTransform (State state) =
     State
         { state | transform = newTransform }
+
+
+setDrag : Maybe Drag -> State -> State
+setDrag newDrag (State state) =
+    State
+        { state | drag = newDrag }
 
 
 defaultTransform : Transform
@@ -101,6 +126,72 @@ center initialCenter initialZoom =
 
 
 
+-- SUBSCRIPTIONS
+
+
+subscriptions : Config msg -> State -> Sub msg
+subscriptions (Config config) ((State { drag }) as state) =
+    case config.toMsg of
+        Just toMsg ->
+            case drag of
+                Nothing ->
+                    Sub.none
+
+                Just _ ->
+                    Sub.batch
+                        [ Mouse.moves
+                            (\xy ->
+                                let
+                                    newDrag =
+                                        Maybe.map
+                                            (\{ current } -> Drag current xy)
+                                            drag
+                                in
+                                    setDrag newDrag state
+                                        |> withDragTransform
+                                        |> toMsg
+                            )
+                        , Mouse.ups
+                            (\_ ->
+                                setDrag Nothing state
+                                    |> withDragTransform
+                                    |> toMsg
+                            )
+                        ]
+
+        Nothing ->
+            Sub.none
+
+
+withDragTransform : State -> State
+withDragTransform ((State { transform, drag }) as state) =
+    case drag of
+        Nothing ->
+            state
+
+        Just { last, current } ->
+            moveTo transform
+                { x = transform.width / 2 + toFloat (last.x - current.x)
+                , y = transform.height / 2 + toFloat (last.y - current.y)
+                }
+                |> (flip setTransform) state
+
+
+moveTo : Transform -> Point -> Transform
+moveTo transform toPoint =
+    let
+        currentCenterPoint =
+            Transform.locationToPoint transform transform.center
+
+        newCenterPoint =
+            { x = toPoint.x + currentCenterPoint.x - transform.width / 2
+            , y = toPoint.y + currentCenterPoint.y - transform.height / 2
+            }
+    in
+        { transform | center = Transform.pointToLocation transform newCenterPoint }
+
+
+
 -- VIEW
 
 
@@ -111,10 +202,22 @@ view (Config config) ((State { transform }) as state) layers =
             List.map Layer.attribution layers
                 |> List.filterMap identity
 
+        -- TODO: Somehow inject event attributes, only for dynamic maps
         handlers =
             case config.toMsg of
                 Just toMsg ->
-                    [ Svg.Events.onClick (toMsg (setZoom (transform.zoom + 1) state)) ]
+                    [ -- Svg.Events.onClick
+                      --(toMsg (setZoom (transform.zoom + 1) state))
+                      Svg.Events.on "mousedown"
+                        (Decode.map
+                            (\xy ->
+                                setDrag (Just (Drag xy xy)) state
+                                    |> withDragTransform
+                                    |> toMsg
+                            )
+                            Mouse.position
+                        )
+                    ]
 
                 Nothing ->
                     []

@@ -28,9 +28,14 @@ update msg model =
             Model newMapState ! []
 
 
+mapConfig : Map.Config Msg
+mapConfig =
+    Map.dynamicConfig NewMapState
+
+
 view : Model -> Html Msg
 view model =
-    StaticMap.view (Map.dynamicConfig NewMapState)
+    StaticMap.view mapConfig
         model.mapState
         [ StaticImage.layer
             (StaticImage.url "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
@@ -40,11 +45,16 @@ view model =
         ]
 
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Map.subscriptions mapConfig model.mapState
+
+
 main : Program Never Model Msg
 main =
     Html.program
         { init = init
         , view = view
         , update = update
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }
