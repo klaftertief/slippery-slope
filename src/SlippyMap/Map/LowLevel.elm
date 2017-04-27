@@ -13,7 +13,6 @@ import Json.Decode as Decode
 import Mouse exposing (Position)
 import SlippyMap.Control.Attribution as Attribution
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer(Layer))
 import Svg exposing (Svg)
@@ -170,25 +169,11 @@ withDragTransform ((State { transform, drag }) as state) =
             state
 
         Just { last, current } ->
-            moveTo transform
+            Transform.moveTo transform
                 { x = transform.width / 2 + toFloat (last.x - current.x)
                 , y = transform.height / 2 + toFloat (last.y - current.y)
                 }
                 |> (flip setTransform) state
-
-
-moveTo : Transform -> Point -> Transform
-moveTo transform toPoint =
-    let
-        currentCenterPoint =
-            Transform.locationToPoint transform transform.center
-
-        newCenterPoint =
-            { x = toPoint.x + currentCenterPoint.x - transform.width / 2
-            , y = toPoint.y + currentCenterPoint.y - transform.height / 2
-            }
-    in
-        { transform | center = Transform.pointToLocation transform newCenterPoint }
 
 
 

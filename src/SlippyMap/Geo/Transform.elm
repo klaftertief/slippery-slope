@@ -135,3 +135,58 @@ tileZoom =
 zoomScale : Float -> Float
 zoomScale zoom =
     2 ^ zoom
+
+
+
+-- UPDATE HELPER
+
+
+moveTo : Transform -> Point -> Transform
+moveTo transform toPoint =
+    let
+        currentCenterPoint =
+            locationToPoint transform transform.center
+
+        newCenterPoint =
+            { x = toPoint.x + currentCenterPoint.x - transform.width / 2
+            , y = toPoint.y + currentCenterPoint.y - transform.height / 2
+            }
+    in
+        { transform | center = pointToLocation transform newCenterPoint }
+
+
+zoomToAround : Transform -> Float -> Point -> Transform
+zoomToAround transform newZoom around =
+    let
+        transformZoomed =
+            { transform | zoom = newZoom }
+
+        centerPoint =
+            locationToPoint transform transform.center
+
+        aroundPoint =
+            { x = around.x + centerPoint.x - transform.width / 2
+            , y = around.y + centerPoint.y - transform.height / 2
+            }
+
+        aroundLocation =
+            pointToLocation transform aroundPoint
+
+        aroundPointZoomed =
+            locationToPoint transformZoomed aroundLocation
+
+        aroundPointDiff =
+            { x = aroundPointZoomed.x - aroundPoint.x
+            , y = aroundPointZoomed.y - aroundPoint.y
+            }
+
+        newCenter =
+            pointToLocation transformZoomed
+                { x = centerPoint.x + aroundPointDiff.x
+                , y = centerPoint.y + aroundPointDiff.y
+                }
+    in
+        { transform
+            | zoom = newZoom
+            , center = newCenter
+        }

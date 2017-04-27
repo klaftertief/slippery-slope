@@ -433,7 +433,7 @@ update msg model =
                     model.transform
 
                 newTransform =
-                    LowLevel.zoomToAround transform (transform.zoom + 1) point
+                    Transform.zoomToAround transform (transform.zoom + 1) point
 
                 newModel =
                     { model | transform = newTransform }
@@ -449,7 +449,7 @@ update msg model =
                     model.transform
 
                 newTransform =
-                    LowLevel.zoomToAround transform (transform.zoom + delta) point
+                    Transform.zoomToAround transform (transform.zoom + delta) point
 
                 newModel =
                     { model | transform = newTransform }
@@ -505,7 +505,7 @@ getTransform { transform, drag } =
             transform
 
         Just { last, current } ->
-            LowLevel.moveTo transform
+            Transform.moveTo transform
                 { x = transform.width / 2 + toFloat (last.x - current.x)
                 , y = transform.height / 2 + toFloat (last.y - current.y)
                 }
