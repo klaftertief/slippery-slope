@@ -9,10 +9,11 @@ module SlippyMap.Map.LowLevel
         , subscriptions
         )
 
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (Decoder)
 import Mouse exposing (Position)
 import SlippyMap.Control.Attribution as Attribution
 import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer(Layer))
 import Svg exposing (Svg)
@@ -191,13 +192,22 @@ view (Config config) ((State { transform }) as state) layers =
         handlers =
             case config.toMsg of
                 Just toMsg ->
-                    [ -- Svg.Events.onClick
-                      --(toMsg (setZoom (transform.zoom + 1) state))
-                      Svg.Events.on "mousedown"
+                    [ Svg.Events.on "click"
+                        (Decode.map
+                            (\_ ->
+                                setZoom (transform.zoom + 1) state
+                                    |> withDragTransform
+                                    |> Debug.log "click"
+                                    |> toMsg
+                            )
+                            (Decode.succeed ())
+                        )
+                    , Svg.Events.on "mousedown"
                         (Decode.map
                             (\xy ->
                                 setDrag (Just (Drag xy xy)) state
                                     |> withDragTransform
+                                    |> Debug.log "mousedown"
                                     |> toMsg
                             )
                             Mouse.position
@@ -224,3 +234,10 @@ view (Config config) ((State { transform }) as state) layers =
                     layerAttributions
                 ]
             ]
+
+
+clientPosition : Decoder Point
+clientPosition =
+    Decode.map2 Point
+        (Decode.field "offsetX" Decode.float)
+        (Decode.field "offsetY" Decode.float)
