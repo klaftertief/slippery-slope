@@ -11,6 +11,7 @@ module SlippyMap.Map.LowLevel
         , subscriptions
         )
 
+import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import Mouse exposing (Position)
 import SlippyMap.Control.Attribution as Attribution
@@ -273,6 +274,16 @@ view (Config config) ((State { transform }) as state) layers =
                         (Decode.map (ZoomInAround >> toMsg) clientPosition)
                     , Svg.Events.on "mousedown"
                         (Decode.map (DragStart >> DragMsg >> toMsg) Mouse.position)
+                    , Html.Events.onWithOptions "wheel"
+                        { preventDefault = True
+                        , stopPropagation = True
+                        }
+                        (Decode.map2 (\offset point -> ZoomByAround offset point |> toMsg)
+                            (Decode.field "deltaY" Decode.float
+                                |> Decode.map (\y -> -y / 100)
+                            )
+                            clientPosition
+                        )
                     ]
 
                 Nothing ->

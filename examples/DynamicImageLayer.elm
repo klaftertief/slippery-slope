@@ -1,6 +1,7 @@
 module DynamicImageLayer exposing (..)
 
 import Html exposing (Html)
+import Html.Attributes
 import SlippyMap.Layer.StaticImage as StaticImage
 import SlippyMap.Layer.LowLevel as Layer
 import SlippyMap.Map.LowLevel as Map
@@ -39,13 +40,17 @@ mapConfig =
 
 view : Model -> Html Msg
 view model =
-    StaticMap.view mapConfig
-        model.mapState
-        [ StaticImage.layer
-            (StaticImage.url "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
-            (Layer.Config
-                { attribution = Just "© OpenStreetMap contributors" }
-            )
+    Html.div [ Html.Attributes.style [ ( "padding", "50px" ) ] ]
+        [ StaticMap.view mapConfig
+            model.mapState
+            [ StaticImage.layer
+                (StaticImage.url "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+                (Layer.Config
+                    { attribution = Just "© OpenStreetMap contributors" }
+                )
+            ]
+        , Html.div []
+            [ Html.text (toString model.mapState) ]
         ]
 
 
