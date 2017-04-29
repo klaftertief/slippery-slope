@@ -12,7 +12,7 @@ type alias Model =
 
 
 type Msg
-    = NewMapState Map.State
+    = MapMsg Map.Msg
 
 
 init : ( Model, Cmd Msg )
@@ -24,13 +24,17 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NewMapState newMapState ->
-            Model newMapState ! []
+        MapMsg mapMsg ->
+            let
+                newMapState =
+                    Map.update mapMsg model.mapState
+            in
+                Model newMapState ! []
 
 
 mapConfig : Map.Config Msg
 mapConfig =
-    Map.dynamicConfig NewMapState
+    Map.dynamicConfig MapMsg
 
 
 view : Model -> Html Msg

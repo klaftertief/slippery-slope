@@ -5,6 +5,8 @@ module SlippyMap.Map.LowLevel
         , dynamicConfig
         , State
         , center
+        , Msg
+        , update
         , view
         , subscriptions
         )
@@ -34,7 +36,7 @@ type Config msg
         { attributionPrefix : Maybe String
         , minZoom : Float
         , maxZoom : Float
-        , toMsg : Maybe (State -> msg)
+        , toMsg : Maybe (Msg -> msg)
         }
 
 
@@ -48,7 +50,7 @@ staticConfig =
         }
 
 
-dynamicConfig : (State -> msg) -> Config msg
+dynamicConfig : (Msg -> msg) -> Config msg
 dynamicConfig toMsg =
     Config
         { attributionPrefix = Just "ESMd"
@@ -126,41 +128,94 @@ center initialCenter initialZoom =
 
 
 
--- SUBSCRIPTIONS
+-- UPDATE
 
 
-subscriptions : Config msg -> State -> Sub msg
-subscriptions (Config config) ((State { drag }) as state) =
-    case config.toMsg of
-        Just toMsg ->
-            case drag of
-                Nothing ->
-                    Sub.none
+type Msg
+    = ZoomIn
+    | ZoomOut
+    | ZoomInAround Point
+    | ZoomByAround Float Point
+    | DragMsg DragMsg
 
-                Just _ ->
-                    Sub.batch
-                        [ Mouse.moves
-                            (\xy ->
-                                let
-                                    newDrag =
-                                        Maybe.map
-                                            (\{ current } -> Drag current xy)
-                                            drag
-                                in
-                                    setDrag newDrag state
-                                        |> withDragTransform
-                                        |> toMsg
-                            )
-                        , Mouse.ups
-                            (\_ ->
-                                setDrag Nothing state
-                                    |> withDragTransform
-                                    |> toMsg
-                            )
-                        ]
 
-        Nothing ->
-            Sub.none
+type DragMsg
+    = DragStart Position
+    | DragAt Position
+    | DragEnd Position
+
+
+update : Msg -> State -> State
+update msg (State ({ transform, drag } as state)) =
+    case msg of
+        ZoomIn ->
+            let
+                newTransform =
+                    { transform | zoom = transform.zoom + 1 }
+
+                newState =
+                    { state | transform = newTransform }
+            in
+                State newState
+
+        ZoomOut ->
+            let
+                newTransform =
+                    { transform | zoom = transform.zoom - 1 }
+
+                newState =
+                    { state | transform = newTransform }
+            in
+                State newState
+
+        ZoomInAround point ->
+            let
+                newTransform =
+                    Transform.zoomToAround transform (transform.zoom + 1) point
+
+                newState =
+                    { state | transform = newTransform }
+            in
+                State newState
+
+        ZoomByAround delta point ->
+            let
+                newTransform =
+                    Transform.zoomToAround transform (transform.zoom + delta) point
+
+                newState =
+                    { state | transform = newTransform }
+            in
+                State newState
+
+        DragMsg dragMsg ->
+            let
+                draggedState =
+                    updateDrag dragMsg (State state)
+                        |> withDragTransform
+            in
+                draggedState
+
+
+updateDrag : DragMsg -> State -> State
+updateDrag dragMsg (State ({ drag } as state)) =
+    case dragMsg of
+        DragStart xy ->
+            State
+                { state | drag = Just (Drag xy xy) }
+
+        DragAt xy ->
+            State
+                { state
+                    | drag =
+                        Maybe.map
+                            (\{ current } -> Drag current xy)
+                            drag
+                }
+
+        DragEnd _ ->
+            State
+                { state | drag = Nothing }
 
 
 withDragTransform : State -> State
@@ -178,6 +233,28 @@ withDragTransform ((State { transform, drag }) as state) =
 
 
 
+-- SUBSCRIPTIONS
+
+
+subscriptions : Config msg -> State -> Sub msg
+subscriptions (Config config) ((State { drag }) as state) =
+    case config.toMsg of
+        Just toMsg ->
+            case drag of
+                Nothing ->
+                    Sub.none
+
+                Just _ ->
+                    Sub.batch
+                        [ Mouse.moves (DragAt >> DragMsg >> toMsg)
+                        , Mouse.ups (DragEnd >> DragMsg >> toMsg)
+                        ]
+
+        Nothing ->
+            Sub.none
+
+
+
 -- VIEW
 
 
@@ -192,26 +269,10 @@ view (Config config) ((State { transform }) as state) layers =
         handlers =
             case config.toMsg of
                 Just toMsg ->
-                    [ Svg.Events.on "click"
-                        (Decode.map
-                            (\_ ->
-                                setZoom (transform.zoom + 1) state
-                                    |> withDragTransform
-                                    |> Debug.log "click"
-                                    |> toMsg
-                            )
-                            (Decode.succeed ())
-                        )
+                    [ Svg.Events.on "dblclick"
+                        (Decode.map (ZoomInAround >> toMsg) clientPosition)
                     , Svg.Events.on "mousedown"
-                        (Decode.map
-                            (\xy ->
-                                setDrag (Just (Drag xy xy)) state
-                                    |> withDragTransform
-                                    |> Debug.log "mousedown"
-                                    |> toMsg
-                            )
-                            Mouse.position
-                        )
+                        (Decode.map (DragStart >> DragMsg >> toMsg) Mouse.position)
                     ]
 
                 Nothing ->
