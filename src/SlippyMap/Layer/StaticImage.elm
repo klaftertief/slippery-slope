@@ -1,4 +1,4 @@
-module SlippyMap.Layer.StaticImage exposing (layer, url)
+module SlippyMap.Layer.StaticImage exposing (withUrl, layer)
 
 {-| A layer to display static image tiles.
 -}
@@ -20,35 +20,29 @@ Note: Your Config should never be held in your model. It should only appear in v
 -}
 type Config
     = Config
-        { toUrl : Config -> Tile -> String
-        , subDomains : List String
+        { toUrl : Tile -> String
         }
 
 
 {-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
 -}
-url : String -> Config
-url template =
+withUrl : String -> List String -> Config
+withUrl template subDomains =
     let
-        toUrl : Config -> Tile -> String
-        toUrl (Config config) { z, x, y } =
+        toUrl : Tile -> String
+        toUrl { z, x, y } =
             template
                 |> replace "{z}" (toString z)
                 |> replace "{x}" (toString (x % (2 ^ z)))
                 |> replace "{y}" (toString (y % (2 ^ z)))
                 |> replace "{s}"
-                    ((abs (x + y) % (max 1 <| List.length config.subDomains))
-                        |> (flip List.drop) config.subDomains
+                    ((abs (x + y) % (max 1 <| List.length subDomains))
+                        |> (flip List.drop) subDomains
                         |> List.head
                         |> Maybe.withDefault ""
                     )
     in
-        config { toUrl = toUrl }
-
-
-config : { toUrl : Config -> Tile -> String } -> Config
-config { toUrl } =
-    Config { toUrl = toUrl, subDomains = [ "a", "b", "c" ] }
+        Config { toUrl = toUrl }
 
 
 
@@ -61,11 +55,11 @@ layer config layerConfig =
 
 
 tile : Config -> Transform -> Tile -> Svg msg
-tile ((Config config) as cfg) transform ({ z, x, y } as tile) =
+tile (Config config) transform ({ z, x, y } as tile) =
     Svg.image
         [ Svg.Attributes.width (toString transform.tileSize)
         , Svg.Attributes.height (toString transform.tileSize)
-        , Svg.Attributes.xlinkHref (config.toUrl cfg tile)
+        , Svg.Attributes.xlinkHref (config.toUrl tile)
         ]
         []
 

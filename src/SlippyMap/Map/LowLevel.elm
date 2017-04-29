@@ -18,7 +18,7 @@ import SlippyMap.Control.Attribution as Attribution
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer(Layer))
+import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Events
@@ -263,7 +263,7 @@ view : Config msg -> State -> List (Layer msg) -> Svg msg
 view (Config config) ((State { transform }) as state) layers =
     let
         layerAttributions =
-            List.map Layer.attribution layers
+            List.map Layer.getAttribution layers
                 |> List.filterMap identity
 
         -- TODO: Somehow inject event attributes, only for dynamic maps
@@ -298,7 +298,7 @@ view (Config config) ((State { transform }) as state) layers =
             )
             [ Svg.g [ Svg.Attributes.class "esm__layers" ]
                 (List.map
-                    (\(Layer layerconfig render) -> render transform)
+                    (\layer -> Layer.render layer transform)
                     layers
                 )
             , Svg.g [ Svg.Attributes.class "esm__controls" ]

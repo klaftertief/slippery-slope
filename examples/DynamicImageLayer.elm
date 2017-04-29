@@ -44,10 +44,8 @@ view model =
         [ StaticMap.view mapConfig
             model.mapState
             [ StaticImage.layer
-                (StaticImage.url "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
-                (Layer.Config
-                    { attribution = Just "© OpenStreetMap contributors" }
-                )
+                (StaticImage.withUrl "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
+                (Layer.withAttribution "© OpenStreetMap contributors")
             ]
         , Html.div []
             [ Html.text (toString model.mapState) ]

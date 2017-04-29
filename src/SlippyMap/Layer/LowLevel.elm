@@ -1,4 +1,12 @@
-module SlippyMap.Layer.LowLevel exposing (..)
+module SlippyMap.Layer.LowLevel
+    exposing
+        ( Config
+        , withAttribution
+        , Layer
+        , getAttribution
+        , render
+        , tileLayer
+        )
 
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
@@ -18,6 +26,12 @@ type Config
         }
 
 
+withAttribution : String -> Config
+withAttribution attribution =
+    Config
+        { attribution = Just attribution }
+
+
 type Layer msg
     = Layer Config (Render msg)
 
@@ -26,9 +40,14 @@ type alias Render msg =
     Transform -> Svg msg
 
 
-attribution : Layer msg -> Maybe String
-attribution (Layer (Config config) render) =
+getAttribution : Layer msg -> Maybe String
+getAttribution (Layer (Config config) render) =
     config.attribution
+
+
+render : Layer msg -> Render msg
+render (Layer (Config config) render) =
+    render
 
 
 tileLayer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Config -> Layer msg
