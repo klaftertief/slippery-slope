@@ -6,6 +6,7 @@ module SlippyMap.Layer.LowLevel
         , getAttribution
         , render
         , tileLayer
+        , toTransformScaleCoverCenter
         )
 
 import SlippyMap.Geo.Point as Point exposing (Point)

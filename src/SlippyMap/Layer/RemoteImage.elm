@@ -1,16 +1,22 @@
-module SlippyMap.Layer.StaticImage
+module SlippyMap.Layer.RemoteImage
     exposing
         ( Config
         , withUrl
+        , withTile
+        , toUrl
         , layer
-        , tile
         )
 
-{-| A layer to display static image tiles.
+{-| A layer to display remote image tiles.
 -}
 
 import Regex
+import RemoteData exposing (WebData)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+
+
+--import SlippyMap.Layer.StaticImage as StaticImage
+
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
@@ -27,6 +33,7 @@ Note: Your Config should never be held in your model. It should only appear in v
 type Config
     = Config
         { toUrl : Tile -> String
+        , fromTile : Tile -> WebData Tile
         }
 
 
@@ -48,7 +55,21 @@ withUrl template subDomains =
                         |> Maybe.withDefault ""
                     )
     in
-        Config { toUrl = toUrl }
+        Config
+            { toUrl = toUrl
+            , fromTile = always RemoteData.NotAsked
+            }
+
+
+withTile : (Tile -> WebData Tile) -> Config -> Config
+withTile fromTile (Config config) =
+    Config
+        { config | fromTile = fromTile }
+
+
+toUrl : Config -> Tile -> String
+toUrl (Config { toUrl }) =
+    toUrl
 
 
 
@@ -56,18 +77,29 @@ withUrl template subDomains =
 
 
 layer : Config -> Layer.Config -> Layer msg
-layer config layerConfig =
-    Layer.tileLayer identity (tile config) layerConfig
+layer ((Config { fromTile }) as config) layerConfig =
+    Layer.tileLayer fromTile (tile config) layerConfig
 
 
-tile : Config -> Transform -> Tile -> Svg msg
-tile (Config config) transform ({ z, x, y } as tile) =
-    Svg.image
-        [ Svg.Attributes.width (toString transform.tileSize)
-        , Svg.Attributes.height (toString transform.tileSize)
-        , Svg.Attributes.xlinkHref (config.toUrl tile)
-        ]
-        []
+tile : Config -> Transform -> WebData Tile -> Svg msg
+tile (Config config) transform tileResponse =
+    case tileResponse of
+        RemoteData.NotAsked ->
+            Svg.text_ [] [ Svg.text "Not Asked" ]
+
+        RemoteData.Loading ->
+            Svg.text_ [] [ Svg.text "Loading" ]
+
+        RemoteData.Failure e ->
+            Svg.text_ [] [ Svg.text ("Error: " ++ toString e) ]
+
+        RemoteData.Success tile ->
+            Svg.image
+                [ Svg.Attributes.width (toString transform.tileSize)
+                , Svg.Attributes.height (toString transform.tileSize)
+                , Svg.Attributes.xlinkHref (config.toUrl tile)
+                ]
+                []
 
 
 

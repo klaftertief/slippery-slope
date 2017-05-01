@@ -5,6 +5,7 @@ module SlippyMap.Map.LowLevel
         , dynamicConfig
         , State
         , center
+        , getTransform
         , Msg
         , update
         , view
@@ -126,6 +127,11 @@ center initialCenter initialZoom =
     defaultState
         |> setCenter initialCenter
         |> setZoom initialZoom
+
+
+getTransform : State -> Transform
+getTransform (State { transform }) =
+    transform
 
 
 
