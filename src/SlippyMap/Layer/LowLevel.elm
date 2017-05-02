@@ -2,7 +2,9 @@ module SlippyMap.Layer.LowLevel
     exposing
         ( Config
         , withAttribution
+        , withoutAttribution
         , Layer
+        , withRender
         , getAttribution
         , render
         , tileLayer
@@ -31,8 +33,19 @@ withAttribution attribution =
         { attribution = Just attribution }
 
 
+withoutAttribution : Config
+withoutAttribution =
+    Config
+        { attribution = Nothing }
+
+
 type Layer msg
     = Layer Config (Render msg)
+
+
+withRender : Config -> Render msg -> Layer msg
+withRender =
+    Layer
 
 
 type alias Render msg =
@@ -53,6 +66,7 @@ tileLayer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Config -> Layer msg
 tileLayer fromTile renderTile config =
     Layer config
         (\transform ->
+            -- TODO: should those be properties of the map state?
             let
                 tileTransform =
                     Transform.tileTransform transform

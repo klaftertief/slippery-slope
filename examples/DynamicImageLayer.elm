@@ -2,8 +2,9 @@ module DynamicImageLayer exposing (..)
 
 import Html exposing (Html)
 import Html.Attributes
-import SlippyMap.Layer.StaticImage as StaticImage
+import SlippyMap.Layer.Grid as Grid
 import SlippyMap.Layer.LowLevel as Layer
+import SlippyMap.Layer.StaticImage as StaticImage
 import SlippyMap.Map.LowLevel as Map
 import SlippyMap.Map.Static as StaticMap
 
@@ -46,6 +47,7 @@ view model =
             [ StaticImage.layer
                 (StaticImage.withUrl "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
                 (Layer.withAttribution "© OpenStreetMap contributors")
+            , Grid.layer Grid.defaultConfig
             ]
         , Html.div []
             [ Html.text (toString model.mapState) ]
