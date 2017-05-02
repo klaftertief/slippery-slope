@@ -138,6 +138,69 @@ zoomScale zoom =
 
 
 
+-- MAP AND LAYER HELPER
+
+
+{-| Change transform zoom to an integer as tile data is not available for float values in general.
+-}
+tileTransform : Transform -> Transform
+tileTransform transform =
+    { transform | zoom = toFloat (round transform.zoom) }
+
+
+tileScale : Transform -> Float
+tileScale transform =
+    zoomScale
+        (transform.zoom - (tileTransform transform |> .zoom))
+
+
+centerPoint : Transform -> Point
+centerPoint transform =
+    locationToPoint transform transform.center
+
+
+bounds : Transform -> Coordinate.Bounds
+bounds =
+    scaledBounds 1
+
+
+tileBounds : Transform -> Coordinate.Bounds
+tileBounds transform =
+    scaledBounds (tileScale transform)
+        (tileTransform transform)
+
+
+scaledBounds : Float -> Transform -> Coordinate.Bounds
+scaledBounds scale transform =
+    let
+        center =
+            centerPoint transform
+
+        ( topLeftCoordinate, bottomRightCoordinate ) =
+            ( pointToCoordinate transform
+                { x = center.x - transform.width / 2 / scale
+                , y = center.y - transform.height / 2 / scale
+                }
+            , pointToCoordinate transform
+                { x = center.x + transform.width / 2 / scale
+                , y = center.y + transform.height / 2 / scale
+                }
+            )
+    in
+        { topLeft = topLeftCoordinate
+        , topRight =
+            { topLeftCoordinate
+                | column = bottomRightCoordinate.column
+            }
+        , bottomRight = bottomRightCoordinate
+        , bottomLeft =
+            { topLeftCoordinate
+                | row = bottomRightCoordinate.row
+            }
+        }
+
+
+
 -- UPDATE HELPER
 
 
@@ -145,7 +208,7 @@ moveTo : Transform -> Point -> Transform
 moveTo transform toPoint =
     let
         currentCenterPoint =
-            locationToPoint transform transform.center
+            centerPoint transform
 
         newCenterPoint =
             { x = toPoint.x + currentCenterPoint.x - transform.width / 2
@@ -161,12 +224,12 @@ zoomToAround transform newZoom around =
         transformZoomed =
             { transform | zoom = newZoom }
 
-        centerPoint =
-            locationToPoint transform transform.center
+        currentCenterPoint =
+            centerPoint transform
 
         aroundPoint =
-            { x = around.x + centerPoint.x - transform.width / 2
-            , y = around.y + centerPoint.y - transform.height / 2
+            { x = around.x + currentCenterPoint.x - transform.width / 2
+            , y = around.y + currentCenterPoint.y - transform.height / 2
             }
 
         aroundLocation =
@@ -182,8 +245,8 @@ zoomToAround transform newZoom around =
 
         newCenter =
             pointToLocation transformZoomed
-                { x = centerPoint.x + aroundPointDiff.x
-                , y = centerPoint.y + aroundPointDiff.y
+                { x = currentCenterPoint.x + aroundPointDiff.x
+                , y = currentCenterPoint.y + aroundPointDiff.y
                 }
     in
         { transform

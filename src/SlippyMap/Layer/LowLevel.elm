@@ -6,10 +6,8 @@ module SlippyMap.Layer.LowLevel
         , getAttribution
         , render
         , tileLayer
-        , toTransformScaleCoverCenter
         )
 
-import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
@@ -56,8 +54,18 @@ tileLayer fromTile renderTile config =
     Layer config
         (\transform ->
             let
-                ( tileTransform, scale, tiles, centerPoint ) =
-                    toTransformScaleCoverCenter transform
+                tileTransform =
+                    Transform.tileTransform transform
+
+                scale =
+                    Transform.tileScale transform
+
+                centerPoint =
+                    Transform.centerPoint tileTransform
+
+                tiles =
+                    Transform.tileBounds transform
+                        |> Tile.cover
             in
                 Svg.Keyed.node "g"
                     [ Svg.Attributes.transform
@@ -124,47 +132,3 @@ tile render transform ({ z, x, y } as tile) =
             ]
             [ render tile ]
         )
-
-
-{-| TODO: rename at least
--}
-toTransformScaleCoverCenter : Transform -> ( Transform, Float, List Tile, Point )
-toTransformScaleCoverCenter transform =
-    let
-        -- Change transform zoom to an integer as tile data is not available for float values in general.
-        tileTransform =
-            { transform | zoom = toFloat (round transform.zoom) }
-
-        -- As the zoom in the transform is changed the tiles need to be scaled to match the actual zoom value.
-        scale =
-            Transform.zoomScale
-                (transform.zoom - tileTransform.zoom)
-
-        centerPoint =
-            Transform.locationToPoint tileTransform tileTransform.center
-
-        -- Scale the bounds points to take the zoom differences into account
-        ( topLeftCoordinate, bottomRightCoordinate ) =
-            ( Transform.pointToCoordinate tileTransform
-                { x = centerPoint.x - tileTransform.width / 2 / scale
-                , y = centerPoint.y - tileTransform.height / 2 / scale
-                }
-            , Transform.pointToCoordinate tileTransform
-                { x = centerPoint.x + tileTransform.width / 2 / scale
-                , y = centerPoint.y + tileTransform.height / 2 / scale
-                }
-            )
-
-        bounds =
-            { topLeft = topLeftCoordinate
-            , topRight =
-                { topLeftCoordinate | column = bottomRightCoordinate.column }
-            , bottomRight = bottomRightCoordinate
-            , bottomLeft =
-                { topLeftCoordinate | row = bottomRightCoordinate.row }
-            }
-
-        tiles =
-            Tile.cover bounds
-    in
-        ( tileTransform, scale, tiles, centerPoint )
