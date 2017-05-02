@@ -68,6 +68,16 @@ render config locatedMarkers transform =
     let
         centerPoint =
             Transform.centerPoint transform
+
+        bounds =
+            Transform.locationBounds transform
+
+        locatedMarkersFiltered =
+            List.filter
+                (\( location, _ ) ->
+                    Location.isInsideBounds bounds location
+                )
+                locatedMarkers
     in
         Svg.g
             [ Svg.Attributes.transform
@@ -79,7 +89,7 @@ render config locatedMarkers transform =
                     ++ ")"
                 )
             ]
-            (List.map (renderMarker config transform) locatedMarkers)
+            (List.map (renderMarker config transform) locatedMarkersFiltered)
 
 
 renderMarker : Config marker msg -> Transform -> ( Location, marker ) -> Svg msg

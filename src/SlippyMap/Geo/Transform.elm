@@ -200,6 +200,29 @@ scaledBounds scale transform =
         }
 
 
+locationBounds : Transform -> Location.Bounds
+locationBounds transform =
+    let
+        center =
+            centerPoint transform
+
+        southWest =
+            pointToLocation transform
+                { x = center.x - transform.width / 2
+                , y = center.y + transform.height / 2
+                }
+
+        northEast =
+            pointToLocation transform
+                { x = center.x + transform.width / 2
+                , y = center.y - transform.height / 2
+                }
+    in
+        { southWest = southWest
+        , northEast = northEast
+        }
+
+
 
 -- UPDATE HELPER
 

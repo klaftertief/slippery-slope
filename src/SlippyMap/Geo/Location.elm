@@ -26,3 +26,11 @@ center { southWest, northEast } =
 wrap : Location -> Location
 wrap ({ lon } as location) =
     { location | lon = clamp -180 180 lon }
+
+
+isInsideBounds : Bounds -> Location -> Bool
+isInsideBounds { southWest, northEast } { lon, lat } =
+    (lon > southWest.lon)
+        && (lon < northEast.lon)
+        && (lat > southWest.lat)
+        && (lat < northEast.lat)

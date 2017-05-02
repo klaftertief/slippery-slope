@@ -53,39 +53,30 @@ render (Config config) transform =
         centerPoint =
             Transform.locationToPoint transform transform.center
 
-        nw =
-            { x = centerPoint.x - transform.width / 2
-            , y = centerPoint.y - transform.height / 2
-            }
-                |> Transform.pointToLocation transform
-
-        se =
-            { x = centerPoint.x + transform.width / 2
-            , y = centerPoint.y + transform.height / 2
-            }
-                |> Transform.pointToLocation transform
+        { southWest, northEast } =
+            Transform.locationBounds transform
 
         lons =
-            List.range (floor nw.lon) (ceiling se.lon)
+            List.range (floor southWest.lon) (ceiling northEast.lon)
                 |> List.map toFloat
                 |> List.map
                     (\lon ->
                         ( Transform.locationToPoint transform
-                            { lon = lon, lat = se.lat }
+                            { lon = lon, lat = southWest.lat }
                         , Transform.locationToPoint transform
-                            { lon = lon, lat = nw.lat }
+                            { lon = lon, lat = northEast.lat }
                         )
                     )
 
         lats =
-            List.range (floor se.lat) (ceiling nw.lat)
+            List.range (floor southWest.lat) (ceiling northEast.lat)
                 |> List.map toFloat
                 |> List.map
                     (\lat ->
                         ( Transform.locationToPoint transform
-                            { lon = nw.lon, lat = lat }
+                            { lon = southWest.lon, lat = lat }
                         , Transform.locationToPoint transform
-                            { lon = se.lon, lat = lat }
+                            { lon = northEast.lon, lat = lat }
                         )
                     )
     in
