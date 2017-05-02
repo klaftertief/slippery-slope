@@ -5,7 +5,7 @@ module SlippyMap.Layer.Grid
         , layer
         )
 
-{-| A layer to display static image tiles.
+{-| A layer to display Lon/Lat grids.
 -}
 
 import Color exposing (Color)

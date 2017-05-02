@@ -4,6 +4,7 @@ import Html exposing (Html)
 import Html.Attributes
 import SlippyMap.Layer.Grid as Grid
 import SlippyMap.Layer.LowLevel as Layer
+import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Layer.StaticImage as StaticImage
 import SlippyMap.Map.LowLevel as Map
 import SlippyMap.Map.Static as StaticMap
@@ -48,6 +49,11 @@ view model =
                 (StaticImage.withUrl "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
                 (Layer.withAttribution "© OpenStreetMap contributors")
             , Grid.layer Grid.defaultConfig
+            , Marker.simpleLayer Marker.defaultConfig
+                [ { lon = 6, lat = 50 }
+                , { lon = 7, lat = 51 }
+                , { lon = 8, lat = 52 }
+                ]
             ]
         , Html.div []
             [ Html.text (toString model.mapState) ]
