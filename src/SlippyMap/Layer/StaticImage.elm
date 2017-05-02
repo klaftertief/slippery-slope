@@ -11,6 +11,7 @@ module SlippyMap.Layer.StaticImage
 
 import Regex
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer.Tile as TileLayer
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
@@ -57,7 +58,7 @@ withUrl template subDomains =
 
 layer : Config -> Layer.Config -> Layer msg
 layer config layerConfig =
-    Layer.tileLayer identity (tile config) layerConfig
+    TileLayer.layer identity (tile config) layerConfig
 
 
 tile : Config -> Transform -> Tile -> Svg msg

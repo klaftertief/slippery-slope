@@ -13,6 +13,7 @@ module SlippyMap.Layer.RemoteImage
 import Regex
 import RemoteData exposing (WebData)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer.Tile as TileLayer
 
 
 --import SlippyMap.Layer.StaticImage as StaticImage
@@ -78,7 +79,7 @@ toUrl (Config { toUrl }) =
 
 layer : Config -> Layer.Config -> Layer msg
 layer ((Config { fromTile }) as config) layerConfig =
-    Layer.tileLayer fromTile (tile config) layerConfig
+    TileLayer.layer fromTile (tile config) layerConfig
 
 
 tile : Config -> Transform -> WebData Tile -> Svg msg
