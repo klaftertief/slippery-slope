@@ -5,6 +5,7 @@ import Html.Attributes
 import SlippyMap.Layer.Grid as Grid
 import SlippyMap.Layer.LowLevel as Layer
 import SlippyMap.Layer.Marker as Marker
+import SlippyMap.Layer.Overlay as Overlay
 import SlippyMap.Layer.StaticImage as StaticImage
 import SlippyMap.Map.LowLevel as Map
 import SlippyMap.Map.Static as StaticMap
@@ -48,7 +49,15 @@ view model =
             [ StaticImage.layer
                 (StaticImage.withUrl "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
                 (Layer.withAttribution "© OpenStreetMap contributors")
-            , Grid.layer Grid.defaultConfig
+
+            --, Grid.layer Grid.defaultConfig
+            , Overlay.layer Overlay.defaultConfig
+                [ ( { southWest = { lon = -74.22655, lat = 40.712216 }
+                    , northEast = { lon = -74.12544, lat = 40.773941 }
+                    }
+                  , "http://www.lib.utexas.edu/maps/historical/newark_nj_1922.jpg"
+                  )
+                ]
             , Marker.simpleLayer Marker.defaultConfig
                 [ { lon = 6, lat = 50 }
                 , { lon = 7, lat = 51 }
