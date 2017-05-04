@@ -1,8 +1,10 @@
 module DynamicImageLayer exposing (..)
 
+import Data
 import Html exposing (Html)
 import Html.Attributes
 import SlippyMap.Layer.Grid as Grid
+import SlippyMap.Layer.Heatmap as Heatmap
 import SlippyMap.Layer.LowLevel as Layer
 import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Layer.Overlay as Overlay
@@ -21,7 +23,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    Model (StaticMap.center { lon = 7, lat = 51 } 8)
+    Model (StaticMap.center { lon = 175.5, lat = -37.85 } 13)
         ! []
 
 
@@ -63,6 +65,22 @@ view model =
                 , { lon = 7, lat = 51 }
                 , { lon = 8, lat = 52 }
                 ]
+            , Heatmap.layer Heatmap.defaultConfig
+                (List.map
+                    (\{ location, value } ->
+                        ( location
+                          --, Maybe.withDefault 10 value
+                          --    |> (\v ->
+                          --            if isNaN v then
+                          --                5
+                          --            else
+                          --                clamp 0 25 (v / 10)
+                          --       )
+                        , 15
+                        )
+                    )
+                    Data.locationData
+                )
             ]
         , Html.div []
             [ Html.text (toString model.mapState) ]
