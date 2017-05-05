@@ -18,6 +18,7 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
+import Svg.Lazy
 
 
 -- CONFIG
@@ -82,8 +83,9 @@ render (Config config) dataLocations transform =
         clusteredPoints =
             cluster (Config config)
                 transform
-                --dataLocationsFiltered
-                dataLocations
+                dataLocationsFiltered
+
+        --dataLocations
     in
         Svg.g
             [ Svg.Attributes.transform
@@ -98,27 +100,7 @@ render (Config config) dataLocations transform =
             [ gradientDefinition
             , heatmapFilter config.palette
             , Svg.g [ Svg.Attributes.filter "url(#heatmapFilter)" ]
-                ((Svg.rect
-                    [ Svg.Attributes.x "-100"
-                    , Svg.Attributes.y "-100"
-                    , Svg.Attributes.width (toString (transform.width + 200))
-                    , Svg.Attributes.height (toString (transform.height + 200))
-                    , Svg.Attributes.fill "white"
-                    , Svg.Attributes.fillOpacity "0.2"
-                    , Svg.Attributes.transform
-                        (""
-                            ++ "translate("
-                            ++ toString (centerPoint.x - transform.width / 2)
-                            ++ " "
-                            ++ toString (centerPoint.y - transform.height / 2)
-                            ++ ")"
-                        )
-                    ]
-                    []
-                 )
-                    --:: (List.map (renderLocation (Config config) transform) dataLocationsFiltered)
-                    :: (List.map renderWeightedPoint clusteredPoints)
-                )
+                (List.map renderWeightedPoint clusteredPoints)
             ]
 
 
@@ -162,7 +144,7 @@ cluster (Config config) transform dataLocations =
 
 
 type alias Grid =
-    Dict Int (Dict Int ( Point, Float ))
+    Dict ( Int, Int ) ( Point, Float )
 
 
 clusterHelp : Grid -> List ( Point, Float ) -> Grid
@@ -171,43 +153,27 @@ clusterHelp grid weightedPoints =
         ( { x, y } as point, weight ) :: rest ->
             let
                 xCell =
-                    floor (x / 10)
+                    floor (x / 30)
 
                 yCell =
-                    floor (y / 10)
+                    floor (y / 30)
 
                 newGrid =
-                    case Dict.get xCell grid of
-                        Just colDict ->
-                            case Dict.get yCell colDict of
-                                Just cell ->
-                                    Dict.update xCell
-                                        (Maybe.map <|
-                                            (Dict.update yCell
-                                                (Maybe.map
-                                                    (\( p, w ) ->
-                                                        ( { x = (p.x * w + x * weight) / (w + weight)
-                                                          , y = (p.y * w + y * weight) / (w + weight)
-                                                          }
-                                                        , min (weight + w) 50
-                                                        )
-                                                    )
-                                                )
-                                            )
+                    Dict.update ( xCell, yCell )
+                        (\maybeWeightedPoint ->
+                            case maybeWeightedPoint of
+                                Just ( p, w ) ->
+                                    Just
+                                        ( { x = (p.x * w + x * weight) / (w + weight)
+                                          , y = (p.y * w + y * weight) / (w + weight)
+                                          }
+                                        , min (weight + w) 50
                                         )
-                                        grid
 
                                 Nothing ->
-                                    Dict.update xCell
-                                        (Maybe.map <|
-                                            Dict.insert yCell ( point, weight )
-                                        )
-                                        grid
-
-                        Nothing ->
-                            Dict.insert xCell
-                                (Dict.singleton yCell ( point, weight ))
-                                grid
+                                    Just ( point, weight )
+                        )
+                        grid
             in
                 clusterHelp newGrid rest
 
@@ -216,10 +182,8 @@ clusterHelp grid weightedPoints =
 
 
 gridToList : Grid -> List ( Point, Float )
-gridToList grid =
-    grid
-        |> Dict.values
-        |> List.concatMap Dict.values
+gridToList =
+    Dict.values
 
 
 heatmapFilter : Palette -> Svg msg
@@ -243,22 +207,33 @@ heatmapFilter palette =
                 |> String.join " "
     in
         Svg.filter
-            [ Svg.Attributes.id "heatmapFilter" ]
+            [ Svg.Attributes.id "heatmapFilter"
+            ]
             [ Svg.feGaussianBlur
-                [ Svg.Attributes.stdDeviation "15"
+                [ Svg.Attributes.in_ "SourceAlpha"
+                , Svg.Attributes.stdDeviation "15"
+                , Svg.Attributes.result "blur"
                 ]
                 []
+            , Svg.feFlood
+                [ Svg.Attributes.floodColor "white"
+                , Svg.Attributes.floodOpacity "0.1"
+                , Svg.Attributes.result "floodFill"
 
-            --, Svg.feFlood
-            --    [ Svg.Attributes.x "0"
-            --    , Svg.Attributes.y "0"
-            --    , Svg.Attributes.width "100%"
-            --    , Svg.Attributes.height "100%"
-            --    , Svg.Attributes.floodColor "green"
-            --    , Svg.Attributes.floodOpacity "0.5"
-            --    ]
-            --    []
-            , Svg.feComponentTransfer []
+                --, Svg.Attributes.x "0"
+                --, Svg.Attributes.y "0"
+                --, Svg.Attributes.width "100%"
+                --, Svg.Attributes.height "100%"
+                ]
+                []
+            , Svg.feBlend
+                [ Svg.Attributes.in_ "blur"
+                , Svg.Attributes.in2 "floodFill"
+                , Svg.Attributes.mode "multiply"
+                , Svg.Attributes.result "toTransfer"
+                ]
+                []
+            , Svg.feComponentTransfer [ Svg.Attributes.in_ "toTransfer" ]
                 [ Svg.feFuncR
                     [ Svg.Attributes.type_ "table"
                     , Svg.Attributes.tableValues
@@ -294,7 +269,7 @@ gradientDefinition =
             [ Svg.stop
                 [ Svg.Attributes.offset "0%"
                 , Svg.Attributes.stopColor "black"
-                , Svg.Attributes.stopOpacity "0.4"
+                , Svg.Attributes.stopOpacity "0.6"
                 ]
                 []
             , Svg.stop
