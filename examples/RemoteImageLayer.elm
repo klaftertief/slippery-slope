@@ -69,7 +69,7 @@ newTilesToLoad : Model -> List Tile
 newTilesToLoad model =
     let
         tiles =
-            Transform.tileBounds (Map.getTransform model.mapState)
+            Map.getCoordinateBounds model.mapState
                 |> Tile.cover
 
         tilesToLoad =

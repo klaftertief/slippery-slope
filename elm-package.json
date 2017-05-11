@@ -7,6 +7,7 @@
         "src"
     ],
     "exposed-modules": [
+        "SlippyMap.Geo.Coordinate",
         "SlippyMap.Geo.Location",
         "SlippyMap.Geo.Point",
         "SlippyMap.Geo.Tile",

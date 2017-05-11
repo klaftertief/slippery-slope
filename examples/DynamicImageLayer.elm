@@ -65,24 +65,25 @@ view model =
                 , { lon = 7, lat = 51 }
                 , { lon = 8, lat = 52 }
                 ]
-            , Heatmap.layer Heatmap.defaultConfig
-                (List.map
-                    (\{ location, value } ->
-                        ( location
-                        , Maybe.withDefault 10 value
-                            |> (\v ->
-                                    (if isNaN v then
-                                        5
-                                     else
-                                        clamp 15 25 (v / 10)
-                                    )
-                                        / 25
-                               )
-                          --, 15
-                        )
-                    )
-                    Data.locationData
-                )
+
+            --, Heatmap.layer Heatmap.defaultConfig
+            --    (List.map
+            --        (\{ location, value } ->
+            --            ( location
+            --            , Maybe.withDefault 10 value
+            --                |> (\v ->
+            --                        (if isNaN v then
+            --                            5
+            --                         else
+            --                            clamp 15 25 (v / 10)
+            --                        )
+            --                            / 25
+            --                   )
+            --              --, 15
+            --            )
+            --        )
+            --        Data.locationData
+            --    )
             ]
         , Html.div []
             [ Html.text (toString model.mapState) ]

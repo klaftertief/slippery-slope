@@ -1,4 +1,22 @@
-module SlippyMap.Geo.Transform exposing (..)
+module SlippyMap.Geo.Transform
+    exposing
+        ( Transform
+        , locationToPoint
+        , pointToLocation
+        , coordinateToPoint
+        , pointToCoordinate
+        , centerPoint
+        , locationBounds
+        , tileBounds
+        , tileTransform
+        , tileScale
+        , zoomToAround
+        , moveTo
+        )
+
+{-| Transform
+@docs Transform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform
+-}
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
 import SlippyMap.Geo.Location as Location exposing (Location)
@@ -6,6 +24,7 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Mercator as Mercator
 
 
+{-| -}
 type alias Transform =
     { tileSize : Int
     , width : Float
@@ -15,12 +34,14 @@ type alias Transform =
     }
 
 
+{-| -}
 locationToPoint : Transform -> Location -> Point
 locationToPoint transform location =
     locationToCoordinate transform location
         |> coordinateToPoint transform
 
 
+{-| -}
 pointToLocation : Transform -> Point -> Location
 pointToLocation transform point =
     pointToCoordinate transform point
@@ -41,12 +62,14 @@ locationToCoordinate transform location =
         |> mercatorPointToCoordinate transform
 
 
+{-| -}
 coordinateToLocation : Transform -> Coordinate -> Location
 coordinateToLocation transform coordinate =
     coordinateToMercatorPoint transform coordinate
         |> Mercator.unproject
 
 
+{-| -}
 pointToCoordinate : Transform -> Point -> Coordinate
 pointToCoordinate transform { x, y } =
     let
@@ -59,6 +82,7 @@ pointToCoordinate transform { x, y } =
         }
 
 
+{-| -}
 coordinateToPoint : Transform -> Coordinate -> Point
 coordinateToPoint transform coordinate =
     let
@@ -148,22 +172,26 @@ tileTransform transform =
     { transform | zoom = toFloat (round transform.zoom) }
 
 
+{-| -}
 tileScale : Transform -> Float
 tileScale transform =
     zoomScale
         (transform.zoom - (tileTransform transform |> .zoom))
 
 
+{-| -}
 centerPoint : Transform -> Point
 centerPoint transform =
     locationToPoint transform transform.center
 
 
+{-| -}
 bounds : Transform -> Coordinate.Bounds
 bounds =
     scaledBounds 1
 
 
+{-| -}
 tileBounds : Transform -> Coordinate.Bounds
 tileBounds transform =
     scaledBounds (tileScale transform)
@@ -200,6 +228,7 @@ scaledBounds scale transform =
         }
 
 
+{-| -}
 locationBounds : Transform -> Location.Bounds
 locationBounds transform =
     let
@@ -227,6 +256,7 @@ locationBounds transform =
 -- UPDATE HELPER
 
 
+{-| -}
 moveTo : Transform -> Point -> Transform
 moveTo transform toPoint =
     let
@@ -241,6 +271,7 @@ moveTo transform toPoint =
         { transform | center = pointToLocation transform newCenterPoint }
 
 
+{-| -}
 zoomToAround : Transform -> Float -> Point -> Transform
 zoomToAround transform newZoom around =
     let

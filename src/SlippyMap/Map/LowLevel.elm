@@ -6,18 +6,25 @@ module SlippyMap.Map.LowLevel
         , State
         , center
         , getTransform
+        , getCoordinateBounds
         , Msg
         , update
         , view
         , subscriptions
         )
 
+{-|
+@docs Config, staticConfig, dynamicConfig, State, center, getTransform, Msg, update, view, subscriptions
+-}
+
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import Mouse exposing (Position)
 import SlippyMap.Control.Attribution as Attribution
+import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
@@ -42,6 +49,7 @@ type Config msg
         }
 
 
+{-| -}
 staticConfig : Config msg
 staticConfig =
     Config
@@ -52,6 +60,7 @@ staticConfig =
         }
 
 
+{-| -}
 dynamicConfig : (Msg -> msg) -> Config msg
 dynamicConfig toMsg =
     Config
@@ -122,6 +131,7 @@ setZoom newZoom ((State { transform }) as state) =
     setTransform { transform | zoom = newZoom } state
 
 
+{-| -}
 center : Location -> Float -> State
 center initialCenter initialZoom =
     defaultState
@@ -129,15 +139,35 @@ center initialCenter initialZoom =
         |> setZoom initialZoom
 
 
+{-| -}
 getTransform : State -> Transform
 getTransform (State { transform }) =
     transform
+
+
+{-| -}
+getLocationBounds : State -> Location.Bounds
+getLocationBounds =
+    getTransform >> Transform.locationBounds
+
+
+{-| -}
+getCoordinateBounds : State -> Coordinate.Bounds
+getCoordinateBounds =
+    getTransform >> Transform.tileBounds
+
+
+{-| -}
+getTileCover : State -> List Tile
+getTileCover =
+    getTransform >> getCoordinateBounds >> Tile.cover
 
 
 
 -- UPDATE
 
 
+{-| -}
 type Msg
     = ZoomIn
     | ZoomOut
@@ -152,6 +182,7 @@ type DragMsg
     | DragEnd Position
 
 
+{-| -}
 update : Msg -> State -> State
 update msg (State ({ transform, drag } as state)) =
     case msg of
@@ -243,6 +274,7 @@ withDragTransform ((State { transform, drag }) as state) =
 -- SUBSCRIPTIONS
 
 
+{-| -}
 subscriptions : Config msg -> State -> Sub msg
 subscriptions (Config config) ((State { drag }) as state) =
     case config.toMsg of
@@ -265,6 +297,7 @@ subscriptions (Config config) ((State { drag }) as state) =
 -- VIEW
 
 
+{-| -}
 view : Config msg -> State -> List (Layer msg) -> Svg msg
 view (Config config) ((State { transform }) as state) layers =
     let
@@ -304,6 +337,7 @@ view (Config config) ((State { transform }) as state) layers =
             )
             [ Svg.g [ Svg.Attributes.class "esm__layers" ]
                 (List.map
+                    -- TODO: should the have access to the full state and not only the transform?
                     (\layer -> Layer.render layer transform)
                     layers
                 )

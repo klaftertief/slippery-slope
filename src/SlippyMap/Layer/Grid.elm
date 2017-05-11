@@ -6,6 +6,8 @@ module SlippyMap.Layer.Grid
         )
 
 {-| A layer to display Lon/Lat grids.
+
+@docs Config, defaultConfig, layer
 -}
 
 import Color exposing (Color)
@@ -30,6 +32,7 @@ type Config
         }
 
 
+{-| -}
 defaultConfig : Config
 defaultConfig =
     Config
@@ -42,6 +45,7 @@ defaultConfig =
 -- LAYER
 
 
+{-| -}
 layer : Config -> Layer msg
 layer config =
     Layer.withRender (Layer.withoutAttribution) (render config)
