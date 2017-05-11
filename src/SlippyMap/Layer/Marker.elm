@@ -7,6 +7,8 @@ module SlippyMap.Layer.Marker
         )
 
 {-| A layer to display markers.
+
+@docs Config, defaultConfig, layer, simpleLayer
 -}
 
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
@@ -27,6 +29,7 @@ type Config marker msg
     = Config { renderMarker : marker -> Svg msg }
 
 
+{-| -}
 defaultConfig : Config () msg
 defaultConfig =
     Config
@@ -49,6 +52,7 @@ circleMarker =
 -- LAYER
 
 
+{-| -}
 simpleLayer : Config () msg -> List Location -> Layer msg
 simpleLayer config locations =
     let
@@ -58,6 +62,7 @@ simpleLayer config locations =
         Layer.withRender (Layer.withoutAttribution) (render config locatedMarkers)
 
 
+{-| -}
 layer : Config marker msg -> List ( Location, marker ) -> Layer msg
 layer config locatedMarkers =
     Layer.withRender (Layer.withoutAttribution) (render config locatedMarkers)

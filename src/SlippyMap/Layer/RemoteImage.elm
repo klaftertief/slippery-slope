@@ -8,16 +8,14 @@ module SlippyMap.Layer.RemoteImage
         )
 
 {-| A layer to display remote image tiles.
+
+@docs Config, layer, toUrl, withTile, withUrl
 -}
 
 import Regex
 import RemoteData exposing (WebData)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
-
-
---import SlippyMap.Layer.StaticImage as StaticImage
-
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
@@ -28,8 +26,6 @@ import Svg.Attributes
 
 
 {-| Configuration for the layer.
-
-Note: Your Config should never be held in your model. It should only appear in view code.
 -}
 type Config
     = Config
@@ -62,12 +58,14 @@ withUrl template subDomains =
             }
 
 
+{-| -}
 withTile : (Tile -> WebData Tile) -> Config -> Config
 withTile fromTile (Config config) =
     Config
         { config | fromTile = fromTile }
 
 
+{-| -}
 toUrl : Config -> Tile -> String
 toUrl (Config { toUrl }) =
     toUrl
@@ -77,6 +75,7 @@ toUrl (Config { toUrl }) =
 -- LAYER
 
 
+{-| -}
 layer : Config -> Layer.Config -> Layer msg
 layer ((Config { fromTile }) as config) layerConfig =
     TileLayer.layer fromTile (tile config) layerConfig

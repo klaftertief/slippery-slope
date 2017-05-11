@@ -23,7 +23,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    Model (StaticMap.center { lon = 175.5, lat = -37.85 } 13)
+    Model (StaticMap.center { lon = 7, lat = 51 } 6)
         ! []
 
 

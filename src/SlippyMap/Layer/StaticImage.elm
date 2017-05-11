@@ -3,10 +3,11 @@ module SlippyMap.Layer.StaticImage
         ( Config
         , withUrl
         , layer
-        , tile
         )
 
 {-| A layer to display static image tiles.
+
+@docs Config, layer, withUrl
 -}
 
 import Regex
@@ -56,6 +57,7 @@ withUrl template subDomains =
 -- LAYER
 
 
+{-| -}
 layer : Config -> Layer.Config -> Layer msg
 layer config layerConfig =
     TileLayer.layer identity (tile config) layerConfig

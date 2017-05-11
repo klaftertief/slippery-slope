@@ -5,7 +5,9 @@ module SlippyMap.Layer.Heatmap
         , layer
         )
 
-{-| A layer to display markers.
+{-| A heatmap layer.
+
+@docs Config, defaultConfig, layer
 -}
 
 import Color exposing (Color)
@@ -22,8 +24,6 @@ import Svg.Attributes
 
 
 {-| Configuration for the layer.
-
-Note: Your Config should never be held in your model. It should only appear in view code.
 -}
 type Config data
     = Config
@@ -31,6 +31,7 @@ type Config data
         }
 
 
+{-| -}
 defaultConfig : Config Float
 defaultConfig =
     Config
@@ -68,6 +69,7 @@ defaultGradient =
 -- LAYER
 
 
+{-| -}
 layer : Config data -> List ( Location, data ) -> Layer msg
 layer config dataLocations =
     Layer.withRender (Layer.withoutAttribution) (render config dataLocations)

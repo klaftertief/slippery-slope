@@ -6,6 +6,8 @@ module SlippyMap.Layer.Overlay
         )
 
 {-| A layer to show something at specific bounds.
+
+@docs Config, defaultConfig, layer
 -}
 
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
@@ -19,13 +21,12 @@ import Svg.Attributes
 
 
 {-| Configuration for the layer.
-
-Note: Your Config should never be held in your model. It should only appear in view code.
 -}
 type Config overlay msg
     = Config { renderOverlay : ( Float, Float ) -> overlay -> Svg msg }
 
 
+{-| -}
 defaultConfig : Config String msg
 defaultConfig =
     Config
@@ -47,6 +48,7 @@ imageOverlay ( width, height ) url =
 -- LAYER
 
 
+{-| -}
 layer : Config overlay msg -> List ( Location.Bounds, overlay ) -> Layer msg
 layer config boundedOverlays =
     Layer.withRender (Layer.withoutAttribution) (render config boundedOverlays)
