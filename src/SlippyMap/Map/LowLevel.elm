@@ -18,8 +18,11 @@ module SlippyMap.Map.LowLevel
 @docs Config, staticConfig, dynamicConfig, State, center, getTransform, getCoordinateBounds, getTileCover, Msg, update, view, subscriptions
 -}
 
+import Html exposing (Html)
+import Html.Attributes
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
+import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Control.Attribution as Attribution
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
@@ -30,7 +33,6 @@ import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
 import Svg.Attributes
-import Svg.Events
 
 
 -- CONFIG
@@ -83,6 +85,7 @@ type State
     = State
         { transform : Transform
         , drag : Maybe Drag
+        , focus : Focus
         }
 
 
@@ -92,11 +95,17 @@ type alias Drag =
     }
 
 
+type Focus
+    = HasFocus
+    | HasNoFocus
+
+
 defaultState : State
 defaultState =
     State
         { transform = defaultTransform
         , drag = Nothing
+        , focus = HasNoFocus
         }
 
 
@@ -175,6 +184,8 @@ type Msg
     | ZoomInAround Point
     | ZoomByAround Float Point
     | DragMsg DragMsg
+    | SetFocus Focus
+    | KeyboardNavigation KeyCode
 
 
 type DragMsg
@@ -235,6 +246,38 @@ update msg (State ({ transform, drag } as state)) =
             in
                 draggedState
 
+        SetFocus focus ->
+            State { state | focus = focus }
+
+        KeyboardNavigation keyCode ->
+            let
+                moveBy =
+                    case keyCode of
+                        -- Left
+                        37 ->
+                            { x = -10, y = 0 }
+
+                        -- Up
+                        38 ->
+                            { x = 0, y = -10 }
+
+                        -- Right
+                        39 ->
+                            { x = 10, y = 0 }
+
+                        -- Down
+                        40 ->
+                            { x = 0, y = 10 }
+
+                        _ ->
+                            { x = 0, y = 0 }
+            in
+                Transform.moveTo transform
+                    { x = transform.width / 2 + moveBy.x
+                    , y = transform.height / 2 + moveBy.y
+                    }
+                    |> (flip setTransform) (State state)
+
 
 updateDrag : DragMsg -> State -> State
 updateDrag dragMsg (State ({ drag } as state)) =
@@ -277,18 +320,31 @@ withDragTransform ((State { transform, drag }) as state) =
 
 {-| -}
 subscriptions : Config msg -> State -> Sub msg
-subscriptions (Config config) ((State { drag }) as state) =
+subscriptions (Config config) ((State { drag, focus }) as state) =
     case config.toMsg of
         Just toMsg ->
-            case drag of
-                Nothing ->
-                    Sub.none
+            let
+                dragSubscriptions =
+                    case drag of
+                        Nothing ->
+                            []
 
-                Just _ ->
-                    Sub.batch
-                        [ Mouse.moves (DragAt >> DragMsg >> toMsg)
-                        , Mouse.ups (DragEnd >> DragMsg >> toMsg)
-                        ]
+                        Just _ ->
+                            [ Mouse.moves (DragAt >> DragMsg)
+                            , Mouse.ups (DragEnd >> DragMsg)
+                            ]
+
+                keyboardNavigationSubscriptions =
+                    case focus of
+                        HasFocus ->
+                            [ Keyboard.downs KeyboardNavigation ]
+
+                        HasNoFocus ->
+                            []
+            in
+                (dragSubscriptions ++ keyboardNavigationSubscriptions)
+                    |> List.map (Sub.map toMsg)
+                    |> Sub.batch
 
         Nothing ->
             Sub.none
@@ -299,7 +355,7 @@ subscriptions (Config config) ((State { drag }) as state) =
 
 
 {-| -}
-view : Config msg -> State -> List (Layer msg) -> Svg msg
+view : Config msg -> State -> List (Layer msg) -> Html msg
 view (Config config) ((State { transform }) as state) layers =
     let
         layerAttributions =
@@ -310,41 +366,55 @@ view (Config config) ((State { transform }) as state) layers =
         handlers =
             case config.toMsg of
                 Just toMsg ->
-                    [ Svg.Events.on "dblclick"
-                        (Decode.map (ZoomInAround >> toMsg) clientPosition)
-                    , Svg.Events.on "mousedown"
-                        (Decode.map (DragStart >> DragMsg >> toMsg) Mouse.position)
-                    , Html.Events.onWithOptions "wheel"
-                        { preventDefault = True
-                        , stopPropagation = True
-                        }
-                        (Decode.map2 (\offset point -> ZoomByAround offset point |> toMsg)
-                            (Decode.field "deltaY" Decode.float
-                                |> Decode.map (\y -> -y / 100)
+                    List.map
+                        (Html.Attributes.map toMsg)
+                        [ Html.Events.on "dblclick"
+                            (Decode.map ZoomInAround clientPosition)
+                        , Html.Events.on "mousedown"
+                            (Decode.map (DragStart >> DragMsg) Mouse.position)
+                        , Html.Events.onWithOptions "wheel"
+                            { preventDefault = True
+                            , stopPropagation = True
+                            }
+                            (Decode.map2 (\offset point -> ZoomByAround offset point)
+                                (Decode.field "deltaY" Decode.float
+                                    |> Decode.map (\y -> -y / 100)
+                                )
+                                clientPosition
                             )
-                            clientPosition
-                        )
-                    ]
+                        , Html.Events.onFocus (SetFocus HasFocus)
+                        , Html.Events.onBlur (SetFocus HasNoFocus)
+                        ]
 
                 Nothing ->
                     []
     in
-        Svg.svg
-            ([ Svg.Attributes.class "esm__map"
-             , Svg.Attributes.height (toString transform.height)
-             , Svg.Attributes.width (toString transform.width)
+        Html.div
+            ([ Html.Attributes.tabindex 0
+             , Html.Attributes.style
+                [ ( "position", "relative" )
+                , ( "width", toString transform.width ++ "px" )
+                , ( "height", toString transform.height ++ "px" )
+                , ( "background", "#eee" )
+                ]
              ]
                 ++ handlers
             )
-            [ Svg.g [ Svg.Attributes.class "esm__layers" ]
-                (List.map
-                    -- TODO: should the have access to the full state and not only the transform?
-                    (\layer -> Layer.render layer transform)
-                    layers
-                )
-            , Svg.g [ Svg.Attributes.class "esm__controls" ]
-                [ Attribution.attribution config.attributionPrefix
-                    layerAttributions
+            [ Svg.svg
+                [ Svg.Attributes.class "esm__map"
+                , Svg.Attributes.height (toString transform.height)
+                , Svg.Attributes.width (toString transform.width)
+                ]
+                [ Svg.g [ Svg.Attributes.class "esm__layers" ]
+                    (List.map
+                        -- TODO: should the have access to the full state and not only the transform?
+                        (\layer -> Layer.render layer transform)
+                        layers
+                    )
+                , Svg.g [ Svg.Attributes.class "esm__controls" ]
+                    [ Attribution.attribution config.attributionPrefix
+                        layerAttributions
+                    ]
                 ]
             ]
 
