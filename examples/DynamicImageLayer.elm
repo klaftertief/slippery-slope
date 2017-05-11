@@ -69,14 +69,14 @@ view model =
                 (List.map
                     (\{ location, value } ->
                         ( location
-                          --, Maybe.withDefault 10 value
-                          --    |> (\v ->
-                          --            if isNaN v then
-                          --                5
-                          --            else
-                          --                clamp 0 25 (v / 10)
-                          --       )
-                        , 15
+                        , Maybe.withDefault 10 value
+                            |> (\v ->
+                                    if isNaN v then
+                                        5
+                                    else
+                                        clamp 15 25 (v / 10)
+                               )
+                          --, 15
                         )
                     )
                     Data.locationData
