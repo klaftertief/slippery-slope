@@ -71,10 +71,12 @@ view model =
                         ( location
                         , Maybe.withDefault 10 value
                             |> (\v ->
-                                    if isNaN v then
+                                    (if isNaN v then
                                         5
-                                    else
+                                     else
                                         clamp 15 25 (v / 10)
+                                    )
+                                        / 25
                                )
                           --, 15
                         )

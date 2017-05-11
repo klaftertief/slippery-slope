@@ -1,19 +1,31 @@
 {
     "version": "1.0.0",
     "summary": "helpful summary of your project, less than 80 characters",
-    "repository": "https://github.com/user/project.git",
+    "repository": "https://github.com/klaftertief/elm-slippy-map.git",
     "license": "BSD3",
     "source-directories": [
         "src"
     ],
-    "exposed-modules": [],
+    "exposed-modules": [
+        "SlippyMap.Geo.Location",
+        "SlippyMap.Geo.Point",
+        "SlippyMap.Geo.Transform",
+        "SlippyMap.Layer.Grid",
+        "SlippyMap.Layer.Heatmap",
+        "SlippyMap.Layer.LowLevel",
+        "SlippyMap.Layer.Marker",
+        "SlippyMap.Layer.Overlay",
+        "SlippyMap.Layer.StaticImage",
+        "SlippyMap.Map.LowLevel",
+        "SlippyMap.Map.Static"
+    ],
     "dependencies": {
         "elm-lang/core": "5.0.0 <= v < 6.0.0",
         "elm-lang/html": "2.0.0 <= v < 3.0.0",
         "elm-lang/http": "1.0.0 <= v < 2.0.0",
         "elm-lang/mouse": "1.0.1 <= v < 2.0.0",
         "elm-lang/svg": "2.0.0 <= v < 3.0.0",
-        "eskimoblood/elm-color-extra": "5.0.0 <= v < 6.0.0",
+        "klaftertief/elm-heatmap": "1.0.0 <= v < 2.0.0",
         "krisajenkins/remotedata": "4.3.0 <= v < 5.0.0",
         "mgold/elm-geojson": "2.0.0 <= v < 3.0.0"
     },

@@ -4,8 +4,7 @@
     "repository": "https://github.com/user/project.git",
     "license": "BSD-3-Clause",
     "source-directories": [
-        ".",
-        "../src"
+        "."
     ],
     "exposed-modules": [],
     "dependencies": {
@@ -14,10 +13,13 @@
         "elm-lang/http": "1.0.0 <= v < 2.0.0",
         "elm-lang/mouse": "1.0.1 <= v < 2.0.0",
         "elm-lang/svg": "2.0.0 <= v < 3.0.0",
-        "eskimoblood/elm-color-extra": "5.0.0 <= v < 6.0.0",
         "evancz/elm-graphics": "1.0.1 <= v < 2.0.0",
+        "klaftertief/elm-slippy-map": "1.0.0 <= v < 2.0.0",
         "krisajenkins/remotedata": "4.3.0 <= v < 5.0.0",
         "mgold/elm-geojson": "2.0.0 <= v < 3.0.0"
+    },
+    "dependency-sources": {
+        "klaftertief/elm-slippy-map": ".."
     },
     "elm-version": "0.18.0 <= v < 0.19.0"
 }
