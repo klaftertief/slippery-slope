@@ -9,12 +9,14 @@
     "exposed-modules": [
         "SlippyMap.Geo.Location",
         "SlippyMap.Geo.Point",
+        "SlippyMap.Geo.Tile",
         "SlippyMap.Geo.Transform",
         "SlippyMap.Layer.Grid",
         "SlippyMap.Layer.Heatmap",
         "SlippyMap.Layer.LowLevel",
         "SlippyMap.Layer.Marker",
         "SlippyMap.Layer.Overlay",
+        "SlippyMap.Layer.RemoteImage",
         "SlippyMap.Layer.StaticImage",
         "SlippyMap.Map.LowLevel",
         "SlippyMap.Map.Static"
