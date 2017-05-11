@@ -38,9 +38,9 @@ circleMarker : Svg msg
 circleMarker =
     Svg.circle
         [ Svg.Attributes.r "8"
-        , Svg.Attributes.fill "green"
-        , Svg.Attributes.stroke "black"
-        , Svg.Attributes.strokeWidth "2"
+        , Svg.Attributes.fill "#3388ff"
+        , Svg.Attributes.stroke "white"
+        , Svg.Attributes.strokeWidth "3"
         ]
         []
 
