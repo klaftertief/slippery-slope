@@ -78,8 +78,10 @@ dynamicConfig toMsg =
 -- STATE
 
 
-{-| TODO: Do not have full Transfrom as the State.
+{-|
+TODO: Do not have full Transfrom as the State?
 Have a function `toTransform : Config msg -> State -> Transform`.
+TODO: Add type alias for internal record
 -}
 type State
     = State
@@ -121,6 +123,12 @@ setDrag newDrag (State state) =
         { state | drag = newDrag }
 
 
+setFocus : Focus -> State -> State
+setFocus newFocus (State state) =
+    State
+        { state | focus = newFocus }
+
+
 defaultTransform : Transform
 defaultTransform =
     { tileSize = 256
@@ -139,6 +147,31 @@ setCenter newCenter ((State { transform }) as state) =
 setZoom : Float -> State -> State
 setZoom newZoom ((State { transform }) as state) =
     setTransform { transform | zoom = newZoom } state
+
+
+zoomIn : State -> State
+zoomIn ((State { transform }) as state) =
+    setZoom (transform.zoom + 1) state
+
+
+zoomOut : State -> State
+zoomOut ((State { transform }) as state) =
+    setZoom (transform.zoom - 1) state
+
+
+zoomInAround : Point -> State -> State
+zoomInAround =
+    zoomToAround 1
+
+
+zoomToAround : Float -> Point -> State -> State
+zoomToAround delta point ((State { transform }) as state) =
+    setTransform
+        (Transform.zoomToAround transform
+            (transform.zoom + delta)
+            point
+        )
+        state
 
 
 {-| -}
@@ -196,108 +229,78 @@ type DragMsg
 
 {-| -}
 update : Msg -> State -> State
-update msg (State ({ transform, drag } as state)) =
+update msg ((State { transform, drag }) as state) =
     case msg of
         ZoomIn ->
-            let
-                newTransform =
-                    { transform | zoom = transform.zoom + 1 }
-
-                newState =
-                    { state | transform = newTransform }
-            in
-                State newState
+            zoomIn state
 
         ZoomOut ->
-            let
-                newTransform =
-                    { transform | zoom = transform.zoom - 1 }
-
-                newState =
-                    { state | transform = newTransform }
-            in
-                State newState
+            zoomOut state
 
         ZoomInAround point ->
-            let
-                newTransform =
-                    Transform.zoomToAround transform (transform.zoom + 1) point
-
-                newState =
-                    { state | transform = newTransform }
-            in
-                State newState
+            zoomInAround point state
 
         ZoomByAround delta point ->
-            let
-                newTransform =
-                    Transform.zoomToAround transform (transform.zoom + delta) point
-
-                newState =
-                    { state | transform = newTransform }
-            in
-                State newState
+            zoomToAround delta point state
 
         DragMsg dragMsg ->
-            let
-                draggedState =
-                    updateDrag dragMsg (State state)
-                        |> withDragTransform
-            in
-                draggedState
+            updateDrag dragMsg state
 
         SetFocus focus ->
-            State { state | focus = focus }
+            setFocus focus state
 
         KeyboardNavigation keyCode ->
             let
+                offset =
+                    50
+
                 moveBy =
                     case keyCode of
                         -- Left
                         37 ->
-                            { x = -10, y = 0 }
+                            { x = -offset, y = 0 }
 
                         -- Up
                         38 ->
-                            { x = 0, y = -10 }
+                            { x = 0, y = -offset }
 
                         -- Right
                         39 ->
-                            { x = 10, y = 0 }
+                            { x = offset, y = 0 }
 
                         -- Down
                         40 ->
-                            { x = 0, y = 10 }
+                            { x = 0, y = offset }
 
                         _ ->
                             { x = 0, y = 0 }
             in
-                Transform.moveTo transform
-                    { x = transform.width / 2 + moveBy.x
-                    , y = transform.height / 2 + moveBy.y
-                    }
-                    |> (flip setTransform) (State state)
+                setTransform
+                    (Transform.moveTo transform
+                        { x = transform.width / 2 + moveBy.x
+                        , y = transform.height / 2 + moveBy.y
+                        }
+                    )
+                    state
 
 
 updateDrag : DragMsg -> State -> State
-updateDrag dragMsg (State ({ drag } as state)) =
-    case dragMsg of
-        DragStart xy ->
-            State
-                { state | drag = Just (Drag xy xy) }
+updateDrag dragMsg ((State { drag }) as state) =
+    withDragTransform <|
+        case dragMsg of
+            DragStart xy ->
+                setDrag (Just (Drag xy xy)) state
 
-        DragAt xy ->
-            State
-                { state
-                    | drag =
-                        Maybe.map
-                            (\{ current } -> Drag current xy)
-                            drag
-                }
+            DragAt xy ->
+                setDrag
+                    (Maybe.map
+                        (\{ current } -> Drag current xy)
+                        drag
+                    )
+                    state
 
-        DragEnd _ ->
-            State
-                { state | drag = Nothing }
+            DragEnd _ ->
+                setDrag Nothing state
 
 
 withDragTransform : State -> State
@@ -307,11 +310,13 @@ withDragTransform ((State { transform, drag }) as state) =
             state
 
         Just { last, current } ->
-            Transform.moveTo transform
-                { x = transform.width / 2 + toFloat (last.x - current.x)
-                , y = transform.height / 2 + toFloat (last.y - current.y)
-                }
-                |> (flip setTransform) state
+            setTransform
+                (Transform.moveTo transform
+                    { x = transform.width / 2 + toFloat (last.x - current.x)
+                    , y = transform.height / 2 + toFloat (last.y - current.y)
+                    }
+                )
+                state
 
 
 
