@@ -6,7 +6,6 @@ import Html.Attributes
 import Http
 import RemoteData exposing (WebData)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Layer.RemoteImage as RemoteImage
 import SlippyMap.Layer.LowLevel as Layer
 import SlippyMap.Map.LowLevel as Map
@@ -69,12 +68,17 @@ newTilesToLoad : Model -> List Tile
 newTilesToLoad model =
     let
         tiles =
-            Map.getCoordinateBounds model.mapState
-                |> Tile.cover
+            Map.getTileCover model.mapState
 
         tilesToLoad =
             Dict.diff
-                (List.map (\tile -> ( Tile.toComparable tile, RemoteData.NotAsked )) tiles
+                (List.map
+                    (\tile ->
+                        ( Tile.toComparable tile
+                        , RemoteData.NotAsked
+                        )
+                    )
+                    tiles
                     |> Dict.fromList
                 )
                 model.tiles

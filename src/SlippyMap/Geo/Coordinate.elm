@@ -1,8 +1,17 @@
-module SlippyMap.Geo.Coordinate exposing (..)
+module SlippyMap.Geo.Coordinate
+    exposing
+        ( Coordinate
+        , Bounds
+        , zoomTo
+        , center
+        )
+
+{-|
+@docs Coordinate, Bounds, zoomTo, center
+-}
+
 
 {-| -}
-
-
 type alias Coordinate =
     { column : Float
     , row : Float
@@ -10,6 +19,7 @@ type alias Coordinate =
     }
 
 
+{-| -}
 type alias Bounds =
     { topLeft : Coordinate
     , topRight : Coordinate
@@ -18,6 +28,7 @@ type alias Bounds =
     }
 
 
+{-| -}
 zoomTo : Float -> Coordinate -> Coordinate
 zoomTo zoom coordinate =
     let
@@ -30,6 +41,7 @@ zoomTo zoom coordinate =
         }
 
 
+{-| -}
 center : ( Coordinate, Coordinate ) -> Coordinate
 center ( start, end ) =
     let

@@ -1,9 +1,14 @@
-module SlippyMap.Geo.Tile exposing (..)
+module SlippyMap.Geo.Tile exposing (Tile, Comparable, toComparable, fromComparable, cover)
+
+{-|
+@docs Tile, Comparable, toComparable, fromComparable, cover
+-}
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
 import Set exposing (Set)
 
 
+{-| -}
 type alias Tile =
     { z : Int
     , x : Int
@@ -11,15 +16,18 @@ type alias Tile =
     }
 
 
+{-| -}
 type alias Comparable =
     ( Int, Int, Int )
 
 
+{-| -}
 toComparable : Tile -> Comparable
 toComparable { z, x, y } =
     ( z, x, y )
 
 
+{-| -}
 fromComparable : Comparable -> Tile
 fromComparable ( z, x, y ) =
     { z = z, x = x, y = y }
@@ -41,6 +49,7 @@ normalize { z, x, y } =
     }
 
 
+{-| -}
 cover : Coordinate.Bounds -> List Tile
 cover { topLeft, topRight, bottomRight, bottomLeft } =
     (triangleCover ( topLeft, topRight, bottomRight )

@@ -7,6 +7,7 @@ module SlippyMap.Map.LowLevel
         , center
         , getTransform
         , getCoordinateBounds
+        , getTileCover
         , Msg
         , update
         , view
@@ -14,7 +15,7 @@ module SlippyMap.Map.LowLevel
         )
 
 {-|
-@docs Config, staticConfig, dynamicConfig, State, center, getTransform, Msg, update, view, subscriptions
+@docs Config, staticConfig, dynamicConfig, State, center, getTransform, getCoordinateBounds, getTileCover, Msg, update, view, subscriptions
 -}
 
 import Html.Events
@@ -160,7 +161,7 @@ getCoordinateBounds =
 {-| -}
 getTileCover : State -> List Tile
 getTileCover =
-    getTransform >> getCoordinateBounds >> Tile.cover
+    getCoordinateBounds >> Tile.cover
 
 
 
