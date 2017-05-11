@@ -19,6 +19,7 @@
         "SlippyMap.Layer.Overlay",
         "SlippyMap.Layer.RemoteImage",
         "SlippyMap.Layer.StaticImage",
+        "SlippyMap.Layer.Tile",
         "SlippyMap.Map.LowLevel",
         "SlippyMap.Map.Static"
     ],

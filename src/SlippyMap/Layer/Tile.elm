@@ -3,6 +3,11 @@ module SlippyMap.Layer.Tile
         ( layer
         )
 
+{-| Prototype for tile layers.
+
+@docs layer
+-}
+
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
@@ -11,6 +16,7 @@ import Svg.Attributes
 import Svg.Keyed
 
 
+{-| -}
 layer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Layer.Config -> Layer msg
 layer fromTile renderTile layerConfig =
     Layer.withRender layerConfig (render fromTile renderTile)
