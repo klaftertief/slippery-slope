@@ -49,7 +49,7 @@ view model =
         [ StaticMap.view mapConfig
             model.mapState
             [ StaticImage.layer
-                (StaticImage.withUrl "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
+                (StaticImage.withUrl "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
                 (Layer.withAttribution "© OpenStreetMap contributors")
 
             --, Grid.layer Grid.defaultConfig
