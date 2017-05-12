@@ -22,8 +22,6 @@ import Svg.Attributes
 
 
 {-| Configuration for the layer.
-
-Note: Your Config should never be held in your model. It should only appear in view code.
 -}
 type Config marker msg
     = Config { renderMarker : marker -> Svg msg }

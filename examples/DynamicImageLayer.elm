@@ -1,8 +1,11 @@
 module DynamicImageLayer exposing (..)
 
 import Data
+import GeoJson exposing (GeoJson)
 import Html exposing (Html)
 import Html.Attributes
+import Layer.Debug
+import SlippyMap.Layer.GeoJson as GeoJsonLayer
 import SlippyMap.Layer.Grid as Grid
 import SlippyMap.Layer.Heatmap as Heatmap
 import SlippyMap.Layer.LowLevel as Layer
@@ -65,6 +68,8 @@ view model =
                 , { lon = 7, lat = 51 }
                 , { lon = 8, lat = 52 }
                 ]
+            , GeoJsonLayer.layer GeoJsonLayer.defaultConfig
+                myGeoJson
 
             --, Heatmap.layer Heatmap.defaultConfig
             --    (List.map
@@ -84,6 +89,7 @@ view model =
             --        )
             --        Data.locationData
             --    )
+            , Layer.Debug.layer
             ]
         , Html.div []
             [ Html.text (toString model.mapState) ]
@@ -103,3 +109,55 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+myGeoJson : GeoJson
+myGeoJson =
+    ( GeoJson.Geometry
+        (GeoJson.Polygon
+            [ [ ( -6.3281250000000036
+                , 42.032974332441356
+                , 0
+                )
+              , ( 14.414062499999996
+                , 33.431441335575265
+                , 0
+                )
+              , ( 29.179687499999996
+                , 62.75472592723181
+                , 0
+                )
+              , ( -5.273437500000001
+                , 62.103882522897855
+                , 0
+                )
+              , ( -17.226562500000004
+                , 47.98992166741417
+                , 0
+                )
+              , ( -6.3281250000000036
+                , 42.032974332441356
+                , 0
+                )
+              ]
+            , [ ( 4.21875
+                , 56.36525013685606
+                , 0
+                )
+              , ( 1.40625
+                , 46.558860303117164
+                , 0
+                )
+              , ( 16.171875
+                , 55.37911044801047
+                , 0
+                )
+              , ( 4.21875
+                , 56.36525013685606
+                , 0
+                )
+              ]
+            ]
+        )
+    , Nothing
+    )

@@ -12,6 +12,7 @@
         "SlippyMap.Geo.Point",
         "SlippyMap.Geo.Tile",
         "SlippyMap.Geo.Transform",
+        "SlippyMap.Layer.GeoJson",
         "SlippyMap.Layer.Grid",
         "SlippyMap.Layer.Heatmap",
         "SlippyMap.Layer.LowLevel",

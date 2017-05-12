@@ -1,44 +1,9 @@
-module SlippyMap.SimpleGeoJson exposing (..)
+module SlippyMap.Layer.GeoJson.Render exposing (..)
 
 import GeoJson exposing (GeoJson)
 import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.LowLevel as LowLevel
-import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
-import Svg.Lazy
-
-
-tileLayer : (Tile -> ( Tile, GeoJson )) -> Transform -> Svg msg
-tileLayer tileToGeoJsonTile transform =
-    LowLevel.tileLayer tileToGeoJsonTile (Svg.Lazy.lazy (tile transform)) transform
-
-
-tile : Transform -> ( Tile, GeoJson ) -> Svg msg
-tile transform ( { z, x, y }, geojson ) =
-    let
-        ( _, scale, _, _ ) =
-            LowLevel.toTransformScaleCoverCenter transform
-
-        tileCoordinate =
-            { column = toFloat x
-            , row = toFloat y
-            , zoom = toFloat z
-            }
-
-        coordinatePoint =
-            Transform.coordinateToPoint transform tileCoordinate
-
-        project ( lon, lat, _ ) =
-            Transform.locationToPoint transform { lon = lon, lat = lat }
-                |> (\{ x, y } ->
-                        { x = (x - coordinatePoint.x) / scale
-                        , y = (y - coordinatePoint.y) / scale
-                        }
-                   )
-    in
-        renderGeoJson project geojson
 
 
 renderGeoJson : (GeoJson.Position -> Point) -> GeoJson -> Svg msg
@@ -122,17 +87,30 @@ renderGeoJsonLineString project attributes positionList =
 
 renderGeoJsonPolygon : (GeoJson.Position -> Point) -> List (Svg.Attribute msg) -> List (List GeoJson.Position) -> List (Svg msg)
 renderGeoJsonPolygon project attributes positionListList =
-    List.map
-        (\positionList ->
-            Svg.polygon
-                (attributes
-                    ++ [ points project positionList
-                            |> Svg.Attributes.points
-                       ]
-                )
-                []
-        )
-        positionListList
+    let
+        pathDefinition =
+            positionListList
+                |> List.map (pathPoints project)
+                |> String.join " "
+    in
+        [ Svg.path
+            (attributes
+                ++ [ Svg.Attributes.fillRule "evenodd", Svg.Attributes.d pathDefinition ]
+            )
+            []
+        ]
+
+
+pathPoints : (GeoJson.Position -> Point) -> List GeoJson.Position -> String
+pathPoints project positionList =
+    positionList
+        |> List.map
+            (\position ->
+                project position
+                    |> (\{ x, y } -> toString x ++ " " ++ toString y)
+            )
+        |> String.join "L"
+        |> (\ll -> "M" ++ ll)
 
 
 points : (GeoJson.Position -> Point) -> List GeoJson.Position -> String
