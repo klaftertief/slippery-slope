@@ -1,67 +1,82 @@
 module SlippyMap.Layer.GeoJson.Render exposing (..)
 
 import GeoJson exposing (GeoJson)
+import Json.Encode as Json
 import SlippyMap.Geo.Point as Point exposing (Point)
 import Svg exposing (Svg)
 import Svg.Attributes
 
 
-renderGeoJson : (GeoJson.Position -> Point) -> GeoJson -> Svg msg
-renderGeoJson project ( geoJsonObject, _ ) =
+{-| TODO: support custom point rendering, see leaflet
+-}
+type Config msg
+    = Config
+        { project : GeoJson.Position -> Point
+        , style : GeoJson.FeatureObject -> List (Svg.Attribute msg)
+        }
+
+
+renderGeoJson : Config msg -> GeoJson -> Svg msg
+renderGeoJson config ( geoJsonObject, _ ) =
     Svg.g []
-        (renderGeoJsonObject project geoJsonObject)
+        (renderGeoJsonObject config geoJsonObject)
 
 
-renderGeoJsonObject : (GeoJson.Position -> Point) -> GeoJson.GeoJsonObject -> List (Svg msg)
-renderGeoJsonObject project geoJsonObject =
+renderGeoJsonObject : Config msg -> GeoJson.GeoJsonObject -> List (Svg msg)
+renderGeoJsonObject config geoJsonObject =
     case geoJsonObject of
         GeoJson.Geometry geometry ->
-            renderGeoJsonGeometry project [] geometry
+            --renderGeoJsonGeometry config [] geometry
+            renderGeoJsonFeatureObject config
+                { id = Nothing
+                , properties = Json.null
+                , geometry = Just geometry
+                }
 
         GeoJson.Feature featureObject ->
-            renderGeoJsonFeatureObject project featureObject
+            renderGeoJsonFeatureObject config featureObject
 
         GeoJson.FeatureCollection featureCollection ->
-            List.concatMap (renderGeoJsonFeatureObject project) featureCollection
+            List.concatMap (renderGeoJsonFeatureObject config) featureCollection
 
 
-renderGeoJsonFeatureObject : (GeoJson.Position -> Point) -> GeoJson.FeatureObject -> List (Svg msg)
-renderGeoJsonFeatureObject project featureObject =
-    Maybe.map (renderGeoJsonGeometry project [])
+renderGeoJsonFeatureObject : Config msg -> GeoJson.FeatureObject -> List (Svg msg)
+renderGeoJsonFeatureObject ((Config { style }) as config) featureObject =
+    Maybe.map (renderGeoJsonGeometry config (style featureObject))
         featureObject.geometry
         |> Maybe.withDefault []
 
 
-renderGeoJsonGeometry : (GeoJson.Position -> Point) -> List (Svg.Attribute msg) -> GeoJson.Geometry -> List (Svg msg)
-renderGeoJsonGeometry project attributes geometry =
+renderGeoJsonGeometry : Config msg -> List (Svg.Attribute msg) -> GeoJson.Geometry -> List (Svg msg)
+renderGeoJsonGeometry config attributes geometry =
     case geometry of
         GeoJson.Point position ->
-            renderGeoJsonPoint project attributes position
+            renderGeoJsonPoint config attributes position
 
         GeoJson.MultiPoint positionList ->
-            List.concatMap (renderGeoJsonPoint project attributes) positionList
+            List.concatMap (renderGeoJsonPoint config attributes) positionList
 
         GeoJson.LineString positionList ->
-            renderGeoJsonLineString project attributes positionList
+            renderGeoJsonLineString config attributes positionList
 
         GeoJson.MultiLineString positionListList ->
-            List.concatMap (renderGeoJsonLineString project attributes) positionListList
+            List.concatMap (renderGeoJsonLineString config attributes) positionListList
 
         GeoJson.Polygon positionListList ->
-            renderGeoJsonPolygon project attributes positionListList
+            renderGeoJsonPolygon config attributes positionListList
 
         GeoJson.MultiPolygon positionListListList ->
-            List.concatMap (renderGeoJsonPolygon project attributes) positionListListList
+            List.concatMap (renderGeoJsonPolygon config attributes) positionListListList
 
         GeoJson.GeometryCollection geometryList ->
-            List.concatMap (renderGeoJsonGeometry project attributes) geometryList
+            List.concatMap (renderGeoJsonGeometry config attributes) geometryList
 
 
-renderGeoJsonPoint : (GeoJson.Position -> Point) -> List (Svg.Attribute msg) -> GeoJson.Position -> List (Svg msg)
-renderGeoJsonPoint project attributes position =
+renderGeoJsonPoint : Config msg -> List (Svg.Attribute msg) -> GeoJson.Position -> List (Svg msg)
+renderGeoJsonPoint (Config internalConfig) attributes position =
     let
         { x, y } =
-            project position
+            internalConfig.project position
     in
         [ Svg.circle
             (attributes
@@ -73,11 +88,11 @@ renderGeoJsonPoint project attributes position =
         ]
 
 
-renderGeoJsonLineString : (GeoJson.Position -> Point) -> List (Svg.Attribute msg) -> List GeoJson.Position -> List (Svg msg)
-renderGeoJsonLineString project attributes positionList =
+renderGeoJsonLineString : Config msg -> List (Svg.Attribute msg) -> List GeoJson.Position -> List (Svg msg)
+renderGeoJsonLineString config attributes positionList =
     [ Svg.polyline
         (attributes
-            ++ [ points project positionList
+            ++ [ points config positionList
                     |> Svg.Attributes.points
                ]
         )
@@ -85,12 +100,12 @@ renderGeoJsonLineString project attributes positionList =
     ]
 
 
-renderGeoJsonPolygon : (GeoJson.Position -> Point) -> List (Svg.Attribute msg) -> List (List GeoJson.Position) -> List (Svg msg)
-renderGeoJsonPolygon project attributes positionListList =
+renderGeoJsonPolygon : Config msg -> List (Svg.Attribute msg) -> List (List GeoJson.Position) -> List (Svg msg)
+renderGeoJsonPolygon config attributes positionListList =
     let
         pathDefinition =
             positionListList
-                |> List.map (pathPoints project)
+                |> List.map (pathPoints config)
                 |> String.join " "
     in
         [ Svg.path
@@ -101,23 +116,23 @@ renderGeoJsonPolygon project attributes positionListList =
         ]
 
 
-pathPoints : (GeoJson.Position -> Point) -> List GeoJson.Position -> String
-pathPoints project positionList =
+pathPoints : Config msg -> List GeoJson.Position -> String
+pathPoints (Config internalConfig) positionList =
     positionList
         |> List.map
             (\position ->
-                project position
+                internalConfig.project position
                     |> (\{ x, y } -> toString x ++ " " ++ toString y)
             )
         |> String.join "L"
         |> (\ll -> "M" ++ ll)
 
 
-points : (GeoJson.Position -> Point) -> List GeoJson.Position -> String
-points project positionList =
+points : Config msg -> List GeoJson.Position -> String
+points (Config internalConfig) positionList =
     List.foldl
         (\position accum ->
-            project position
+            internalConfig.project position
                 |> (\{ x, y } -> toString x ++ "," ++ toString y)
                 |> (\xy -> accum ++ " " ++ xy)
         )

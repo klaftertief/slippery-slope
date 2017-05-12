@@ -1,6 +1,7 @@
 module DynamicImageLayer exposing (..)
 
 import Data
+import Data.World
 import GeoJson exposing (GeoJson)
 import Html exposing (Html)
 import Html.Attributes
@@ -68,6 +69,9 @@ view model =
                 , { lon = 7, lat = 51 }
                 , { lon = 8, lat = 52 }
                 ]
+
+            --, GeoJsonLayer.layer GeoJsonLayer.defaultConfig
+            --    (Maybe.withDefault myGeoJson Data.World.geoJson)
             , GeoJsonLayer.layer GeoJsonLayer.defaultConfig
                 myGeoJson
 

@@ -23,14 +23,26 @@ import Svg.Attributes
 
 {-| Configuration for the layer.
 -}
-type Config
+type Config msg
     = Config
+        { style : GeoJson.FeatureObject -> List (Svg.Attribute msg)
+        }
 
 
 {-| -}
-defaultConfig : Config
+defaultConfig : Config msg
 defaultConfig =
     Config
+        { style =
+            always
+                [ Svg.Attributes.stroke "#3388ff"
+                , Svg.Attributes.strokeWidth "3"
+                , Svg.Attributes.fill "#3388ff"
+                , Svg.Attributes.fillOpacity "0.2"
+                , Svg.Attributes.strokeLinecap "round"
+                , Svg.Attributes.strokeLinejoin "round"
+                ]
+        }
 
 
 
@@ -38,13 +50,13 @@ defaultConfig =
 
 
 {-| -}
-layer : Config -> GeoJson -> Layer msg
+layer : Config msg -> GeoJson -> Layer msg
 layer config geoJson =
     Layer.withRender (Layer.withoutAttribution) (render config geoJson)
 
 
-render : Config -> GeoJson -> Transform -> Svg msg
-render config geoJson transform =
+render : Config msg -> GeoJson -> Transform -> Svg msg
+render (Config internalConfig) geoJson transform =
     let
         centerPoint =
             Transform.centerPoint transform
@@ -52,6 +64,12 @@ render config geoJson transform =
         project ( lon, lat, _ ) =
             Transform.locationToPoint transform
                 { lon = lon, lat = lat }
+
+        renderConfig =
+            Render.Config
+                { project = project
+                , style = internalConfig.style
+                }
     in
         Svg.g
             [ Svg.Attributes.transform
@@ -63,4 +81,4 @@ render config geoJson transform =
                     ++ ")"
                 )
             ]
-            [ Render.renderGeoJson project geoJson ]
+            [ Render.renderGeoJson renderConfig geoJson ]
