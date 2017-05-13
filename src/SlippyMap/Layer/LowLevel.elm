@@ -23,9 +23,12 @@ import Svg exposing (Svg)
 Note: Your Config should never be held in your model. It should only appear in view code.
 -}
 type Config
-    = Config
-        { attribution : Maybe String
-        }
+    = Config ConfigInternal
+
+
+type alias ConfigInternal =
+    { attribution : Maybe String
+    }
 
 
 {-| -}
@@ -46,13 +49,22 @@ withoutAttribution =
 TODO: probably move config and render into internal record
 -}
 type Layer msg
-    = Layer Config (Render msg)
+    = Layer (LayerInternal msg)
+
+
+type alias LayerInternal msg =
+    { config : ConfigInternal
+    , render : Render msg
+    }
 
 
 {-| -}
 withRender : Config -> Render msg -> Layer msg
-withRender =
+withRender (Config configInternal) render =
     Layer
+        { config = configInternal
+        , render = render
+        }
 
 
 {-|
@@ -65,11 +77,11 @@ type alias Render msg =
 
 {-| -}
 getAttribution : Layer msg -> Maybe String
-getAttribution (Layer (Config config) render) =
+getAttribution (Layer { config }) =
     config.attribution
 
 
 {-| -}
 render : Layer msg -> Render msg
-render (Layer (Config config) render) =
+render (Layer { render }) =
     render
