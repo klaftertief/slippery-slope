@@ -1,13 +1,14 @@
 module SlippyMap.Layer.StaticImage
     exposing
         ( Config
-        , withUrl
+        , config
+        , withAttribution
         , layer
         )
 
 {-| A layer to display static image tiles.
 
-@docs Config, layer, withUrl
+@docs Config, config, withAttribution, layer
 -}
 
 import Regex
@@ -24,22 +25,23 @@ import Svg.Attributes
 
 {-| Configuration for the layer.
 
-Note: Your Config should never be held in your model. It should only appear in view code.
+TODO: add type alias for internal config
 -}
 type Config
     = Config
         { toUrl : Tile -> String
+        , attribution : Maybe String
         }
 
 
 {-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
 -}
-withUrl : String -> List String -> Config
-withUrl template subDomains =
+config : String -> List String -> Config
+config urlTemplate subDomains =
     let
         toUrl : Tile -> String
         toUrl { z, x, y } =
-            template
+            urlTemplate
                 |> replace "{z}" (toString z)
                 |> replace "{x}" (toString (x % (2 ^ z)))
                 |> replace "{y}" (toString (y % (2 ^ z)))
@@ -50,17 +52,32 @@ withUrl template subDomains =
                         |> Maybe.withDefault ""
                     )
     in
-        Config { toUrl = toUrl }
+        Config
+            { toUrl = toUrl
+            , attribution = Nothing
+            }
+
+
+{-| -}
+withAttribution : String -> Config -> Config
+withAttribution attribution (Config configInternal) =
+    Config
+        { configInternal
+            | attribution = Just attribution
+        }
 
 
 
 -- LAYER
 
 
-{-| -}
-layer : Config -> Layer.Config -> Layer msg
-layer config layerConfig =
-    TileLayer.layer identity (tile config) layerConfig
+{-|
+-}
+layer : Config -> Layer msg
+layer config =
+    TileLayer.layer identity
+        (tile config)
+        (TileLayer.config config)
 
 
 tile : Config -> Transform -> Tile -> Svg msg

@@ -26,6 +26,8 @@ import Svg.Attributes
 
 
 {-| Configuration for the layer.
+
+TODO: add type alias for internal config
 -}
 type Config
     = Config
@@ -76,9 +78,9 @@ toUrl (Config { toUrl }) =
 
 
 {-| -}
-layer : Config -> Layer.Config -> Layer msg
-layer ((Config { fromTile }) as config) layerConfig =
-    TileLayer.layer fromTile (tile config) layerConfig
+layer : Config -> Layer msg
+layer ((Config { fromTile }) as config) =
+    TileLayer.layer fromTile (tile config) (TileLayer.config config)
 
 
 tile : Config -> Transform -> WebData Tile -> Svg msg

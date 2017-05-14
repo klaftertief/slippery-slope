@@ -72,7 +72,7 @@ defaultGradient =
 {-| -}
 layer : Config data -> List ( Location, data ) -> Layer msg
 layer config dataLocations =
-    Layer.withRender (Layer.withoutAttribution) (render config dataLocations)
+    Layer.withRender Layer.overlay (render config dataLocations)
 
 
 render : Config data -> List ( Location, data ) -> Transform -> Svg msg

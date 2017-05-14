@@ -57,13 +57,13 @@ simpleLayer config locations =
         locatedMarkers =
             List.map (\location -> ( location, () )) locations
     in
-        Layer.withRender (Layer.withoutAttribution) (render config locatedMarkers)
+        Layer.withRender Layer.marker (render config locatedMarkers)
 
 
 {-| -}
 layer : Config marker msg -> List ( Location, marker ) -> Layer msg
 layer config locatedMarkers =
-    Layer.withRender (Layer.withoutAttribution) (render config locatedMarkers)
+    Layer.withRender Layer.marker (render config locatedMarkers)
 
 
 render : Config marker msg -> List ( Location, marker ) -> Transform -> Svg msg

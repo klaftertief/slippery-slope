@@ -7,6 +7,8 @@ module SlippyMap.Layer.Grid
 
 {-| A layer to display Lon/Lat grids.
 
+TODO: rename to Graticule
+
 @docs Config, defaultConfig, layer
 -}
 
@@ -48,7 +50,7 @@ defaultConfig =
 {-| -}
 layer : Config -> Layer msg
 layer config =
-    Layer.withRender (Layer.withoutAttribution) (render config)
+    Layer.withRender (Layer.overlay config) (render config)
 
 
 render : Config -> Transform -> Svg msg

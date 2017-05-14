@@ -51,7 +51,7 @@ imageOverlay ( width, height ) url =
 {-| -}
 layer : Config overlay msg -> List ( Location.Bounds, overlay ) -> Layer msg
 layer config boundedOverlays =
-    Layer.withRender (Layer.withoutAttribution) (render config boundedOverlays)
+    Layer.withRender Layer.overlay (render config boundedOverlays)
 
 
 render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Transform -> Svg msg

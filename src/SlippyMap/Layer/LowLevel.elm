@@ -2,8 +2,10 @@ module SlippyMap.Layer.LowLevel
     exposing
         ( Config
         , Pane(..)
+        , marker
+        , overlay
+        , tile
         , withAttribution
-        , withoutAttribution
         , Layer
         , withRender
         , getAttribution
@@ -17,7 +19,7 @@ module SlippyMap.Layer.LowLevel
 
 {-| LowLevel Layer
 
-@docs Config, Pane, withAttribution, withoutAttribution, Layer, withRender, getAttribution, getPane, panes, isTileLayer, isOverlayLayer, isMarkerLayer, render
+@docs Config, Pane, marker, overlay, tile, withAttribution, Layer, withRender, getAttribution, getPane, panes, isTileLayer, isOverlayLayer, isMarkerLayer, render
 -}
 
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
@@ -25,8 +27,6 @@ import Svg exposing (Svg)
 
 
 {-| Base configuration for all layers.
-
-Note: Your Config should never be held in your model. It should only appear in view code.
 -}
 type Config
     = Config ConfigInternal
@@ -46,20 +46,38 @@ type Pane
 
 
 {-| -}
-withAttribution : String -> Config
-withAttribution attribution =
+tile : Config
+tile =
     Config
-        { attribution = Just attribution
+        { attribution = Nothing
+        , pane = TilePane
+        }
+
+
+{-| -}
+overlay : Config
+overlay =
+    Config
+        { attribution = Nothing
         , pane = OverlayPane
         }
 
 
 {-| -}
-withoutAttribution : Config
-withoutAttribution =
+marker : Config
+marker =
     Config
         { attribution = Nothing
-        , pane = OverlayPane
+        , pane = MarkerPane
+        }
+
+
+{-| -}
+withAttribution : String -> Config -> Config
+withAttribution attribution (Config configInternal) =
+    Config
+        { configInternal
+            | attribution = Just attribution
         }
 
 

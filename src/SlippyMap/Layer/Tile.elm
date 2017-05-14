@@ -1,11 +1,12 @@
 module SlippyMap.Layer.Tile
     exposing
-        ( layer
+        ( config
+        , layer
         )
 
 {-| Prototype for tile layers.
 
-@docs layer
+@docs config, layer
 -}
 
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
@@ -17,9 +18,29 @@ import Svg.Keyed
 
 
 {-| -}
-layer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Layer.Config -> Layer msg
-layer fromTile renderTile layerConfig =
-    Layer.withRender layerConfig (render fromTile renderTile)
+type Config config
+    = Config (ConfigInternal config)
+
+
+type alias ConfigInternal config =
+    { layerConfig : Layer.Config
+    , config : config
+    }
+
+
+{-| -}
+config : config -> Config config
+config config =
+    Config
+        { layerConfig = Layer.tile
+        , config = config
+        }
+
+
+{-| -}
+layer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Config config -> Layer msg
+layer fromTile renderTile (Config configInternal) =
+    Layer.withRender configInternal.layerConfig (render fromTile renderTile)
 
 
 render : (Tile -> a) -> (Transform -> a -> Svg msg) -> Transform -> Svg msg

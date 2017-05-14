@@ -52,7 +52,7 @@ defaultConfig =
 {-| -}
 layer : Config msg -> GeoJson -> Layer msg
 layer config geoJson =
-    Layer.withRender (Layer.withoutAttribution) (render config geoJson)
+    Layer.withRender Layer.overlay (render config geoJson)
 
 
 render : Config msg -> GeoJson -> Transform -> Svg msg
