@@ -40,7 +40,7 @@ import Svg.Attributes
 
 {-| Configuration for the map.
 
-Note: Your Config should never be held in your model. It should only appear in view code.
+TODO: add ConfigInternal alias
 -}
 type Config msg
     = Config
@@ -363,6 +363,7 @@ subscriptions (Config config) ((State { drag, focus }) as state) =
 view : Config msg -> State -> List (Layer msg) -> Html msg
 view (Config config) ((State { transform }) as state) layers =
     let
+        -- TODO: onlye get attributions from currentlyc visible layers, whater that means or it's implemented
         layerAttributions =
             List.map Layer.getAttribution layers
                 |> List.filterMap identity
@@ -411,10 +412,9 @@ view (Config config) ((State { transform }) as state) layers =
                 , Svg.Attributes.width (toString transform.width)
                 ]
                 [ Svg.g [ Svg.Attributes.class "esm__layers" ]
-                    (List.map
-                        -- TODO: should the have access to the full state and not only the transform?
-                        (\layer -> Layer.render layer transform)
-                        layers
+                    (List.concatMap
+                        (viewPane (Config config) state layers)
+                        Layer.panes
                     )
                 , Svg.g [ Svg.Attributes.class "esm__controls" ]
                     [ Attribution.attribution config.attributionPrefix
@@ -422,6 +422,13 @@ view (Config config) ((State { transform }) as state) layers =
                     ]
                 ]
             ]
+
+
+viewPane : Config msg -> State -> List (Layer msg) -> Layer.Pane -> List (Svg msg)
+viewPane (Config config) ((State { transform }) as state) layers pane =
+    layers
+        |> List.filter (Layer.getPane >> (==) pane)
+        |> List.map (\layer -> Layer.render layer transform)
 
 
 clientPosition : Decoder Point
