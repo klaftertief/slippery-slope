@@ -1,12 +1,15 @@
 module SlippyMap.Layer.Tile
     exposing
-        ( config
+        ( Config
+        , config
+        , getLayerConfig
+        , withAttribution
         , layer
         )
 
 {-| Prototype for tile layers.
 
-@docs config, layer
+@docs Config, config, getLayerConfig, withAttribution, layer
 -}
 
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
@@ -23,6 +26,7 @@ type Config config
 
 
 type alias ConfigInternal config =
+    -- TODO: hm, maybe swap field names
     { layerConfig : Layer.Config
     , config : config
     }
@@ -38,6 +42,23 @@ config config =
 
 
 {-| -}
+getLayerConfig : Config config -> config
+getLayerConfig (Config { config }) =
+    config
+
+
+{-| -}
+withAttribution : String -> Config config -> Config config
+withAttribution attribution (Config configInternal) =
+    Config
+        { configInternal
+            | layerConfig =
+                Layer.withAttribution attribution configInternal.layerConfig
+        }
+
+
+{-| TODO: should the function params live in a/the config?
+-}
 layer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Config config -> Layer msg
 layer fromTile renderTile (Config configInternal) =
     Layer.withRender configInternal.layerConfig (render fromTile renderTile)

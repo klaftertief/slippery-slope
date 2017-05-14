@@ -82,6 +82,7 @@ withAttribution attribution (Config configInternal) =
 
 
 {-|
+NOTE: It is important that the Layer depends only on `msg` so that different layers can be grouped together.
 -}
 type Layer msg
     = Layer (LayerInternal msg)

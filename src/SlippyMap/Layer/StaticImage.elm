@@ -24,19 +24,20 @@ import Svg.Attributes
 
 
 {-| Configuration for the layer.
-
-TODO: add type alias for internal config
 -}
 type Config
-    = Config
-        { toUrl : Tile -> String
-        , attribution : Maybe String
-        }
+    = Config ConfigInternal
+
+
+type alias ConfigInternal =
+    { toUrl : Tile -> String
+    , attribution : Maybe String
+    }
 
 
 {-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
 -}
-config : String -> List String -> Config
+config : String -> List String -> TileLayer.Config Config
 config urlTemplate subDomains =
     let
         toUrl : Tile -> String
@@ -52,19 +53,18 @@ config urlTemplate subDomains =
                         |> Maybe.withDefault ""
                     )
     in
-        Config
-            { toUrl = toUrl
-            , attribution = Nothing
-            }
+        TileLayer.config
+            (Config
+                { toUrl = toUrl
+                , attribution = Nothing
+                }
+            )
 
 
 {-| -}
-withAttribution : String -> Config -> Config
-withAttribution attribution (Config configInternal) =
-    Config
-        { configInternal
-            | attribution = Just attribution
-        }
+withAttribution : String -> TileLayer.Config Config -> TileLayer.Config Config
+withAttribution =
+    TileLayer.withAttribution
 
 
 
@@ -73,11 +73,11 @@ withAttribution attribution (Config configInternal) =
 
 {-|
 -}
-layer : Config -> Layer msg
-layer config =
+layer : TileLayer.Config Config -> Layer msg
+layer tileLayerConfig =
     TileLayer.layer identity
-        (tile config)
-        (TileLayer.config config)
+        (tile <| TileLayer.getLayerConfig tileLayerConfig)
+        tileLayerConfig
 
 
 tile : Config -> Transform -> Tile -> Svg msg
