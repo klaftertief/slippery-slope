@@ -18,6 +18,6 @@ center =
 
 
 {-| -}
-view : Config msg -> State -> List (Layer msg) -> Svg msg
+view : State -> List (Layer msg) -> Svg msg
 view =
-    Map.view
+    Map.view Map.staticConfig
