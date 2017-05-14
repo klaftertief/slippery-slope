@@ -50,7 +50,7 @@ defaultConfig =
 {-| -}
 layer : Config -> Layer msg
 layer config =
-    Layer.withRender (Layer.overlay config) (render config)
+    Layer.withRender Layer.overlay (render config)
 
 
 render : Config -> Transform -> Svg msg
