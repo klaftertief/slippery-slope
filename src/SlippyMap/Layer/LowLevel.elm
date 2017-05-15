@@ -46,6 +46,15 @@ type Pane
 
 
 {-| -}
+panes : List Pane
+panes =
+    [ TilePane
+    , OverlayPane
+    , MarkerPane
+    ]
+
+
+{-| -}
 tile : Config
 tile =
     Config
@@ -121,15 +130,6 @@ getAttribution (Layer { config }) =
 getPane : Layer msg -> Pane
 getPane (Layer { config }) =
     config.pane
-
-
-{-| -}
-panes : List Pane
-panes =
-    [ TilePane
-    , OverlayPane
-    , MarkerPane
-    ]
 
 
 {-| -}
