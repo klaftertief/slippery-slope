@@ -20,7 +20,7 @@ import Svg exposing (Svg)
 {-| -}
 layer : Layer msg
 layer =
-    TileLayer.layer identity tile Layer.withoutAttribution
+    TileLayer.layer identity tile (TileLayer.config ())
 
 
 {-| TODO: think about how to make it not always depend on Transform.

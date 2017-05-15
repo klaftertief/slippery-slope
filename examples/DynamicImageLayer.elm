@@ -9,7 +9,6 @@ import Layer.Debug
 import SlippyMap.Layer.GeoJson as GeoJsonLayer
 import SlippyMap.Layer.Grid as Grid
 import SlippyMap.Layer.Heatmap as Heatmap
-import SlippyMap.Layer.LowLevel as Layer
 import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Layer.Overlay as Overlay
 import SlippyMap.Layer.StaticImage as StaticImage
@@ -50,11 +49,12 @@ mapConfig =
 view : Model -> Html Msg
 view model =
     Html.div [ Html.Attributes.style [ ( "padding", "50px" ) ] ]
-        [ StaticMap.view mapConfig
+        [ Map.view mapConfig
             model.mapState
             [ StaticImage.layer
-                (StaticImage.withUrl "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
-                (Layer.withAttribution "© OpenStreetMap contributors")
+                (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
+                    |> StaticImage.withAttribution "© OpenStreetMap contributors"
+                )
 
             --, Grid.layer Grid.defaultConfig
             , Overlay.layer Overlay.defaultConfig
@@ -64,17 +64,11 @@ view model =
                   , "http://www.lib.utexas.edu/maps/historical/newark_nj_1922.jpg"
                   )
                 ]
-            , Marker.simpleLayer Marker.defaultConfig
-                [ { lon = 6, lat = 50 }
-                , { lon = 7, lat = 51 }
-                , { lon = 8, lat = 52 }
-                ]
+            , GeoJsonLayer.layer GeoJsonLayer.defaultConfig
+                (Maybe.withDefault myGeoJson Data.World.geoJson)
 
             --, GeoJsonLayer.layer GeoJsonLayer.defaultConfig
-            --    (Maybe.withDefault myGeoJson Data.World.geoJson)
-            , GeoJsonLayer.layer GeoJsonLayer.defaultConfig
-                myGeoJson
-
+            --    myGeoJson
             --, Heatmap.layer Heatmap.defaultConfig
             --    (List.map
             --        (\{ location, value } ->
@@ -94,6 +88,11 @@ view model =
             --        Data.locationData
             --    )
             , Layer.Debug.layer
+            , Marker.simpleLayer Marker.defaultConfig
+                [ { lon = 6, lat = 50 }
+                , { lon = 7, lat = 51 }
+                , { lon = 8, lat = 52 }
+                ]
             ]
         , Html.div []
             [ Html.text (toString model.mapState) ]
