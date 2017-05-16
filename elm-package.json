@@ -7,6 +7,8 @@
         "src"
     ],
     "exposed-modules": [
+        "SlippyMap.Static",
+        "SlippyMap.Map.LowLevel",
         "SlippyMap.Geo.Coordinate",
         "SlippyMap.Geo.Location",
         "SlippyMap.Geo.Point",
@@ -20,9 +22,7 @@
         "SlippyMap.Layer.Overlay",
         "SlippyMap.Layer.RemoteImage",
         "SlippyMap.Layer.StaticImage",
-        "SlippyMap.Layer.Tile",
-        "SlippyMap.Map.LowLevel",
-        "SlippyMap.Map.Static"
+        "SlippyMap.Layer.Tile"
     ],
     "dependencies": {
         "elm-lang/core": "5.0.0 <= v < 6.0.0",

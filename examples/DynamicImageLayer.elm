@@ -13,7 +13,7 @@ import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Layer.Overlay as Overlay
 import SlippyMap.Layer.StaticImage as StaticImage
 import SlippyMap.Map.LowLevel as Map
-import SlippyMap.Map.Static as StaticMap
+import SlippyMap.Static as StaticMap
 
 
 type alias Model =

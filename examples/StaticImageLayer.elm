@@ -1,8 +1,7 @@
 module StaticImageLayer exposing (..)
 
 import SlippyMap.Layer.StaticImage as StaticImage
-import SlippyMap.Map.LowLevel as Map
-import SlippyMap.Map.Static as StaticMap
+import SlippyMap.Static as StaticMap
 import Svg exposing (Svg)
 
 
