@@ -8,7 +8,7 @@
     ],
     "exposed-modules": [
         "SlippyMap.Static",
-        "SlippyMap.Map.LowLevel",
+        "SlippyMap.Interactive",
         "SlippyMap.Geo.Coordinate",
         "SlippyMap.Geo.Location",
         "SlippyMap.Geo.Point",

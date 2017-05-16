@@ -3,6 +3,7 @@ module SlippyMap.Map.State
         ( State(..)
         , Drag
         , Focus(..)
+        , defaultState
         , center
         , getTransform
         , withDragTransform
@@ -11,6 +12,8 @@ module SlippyMap.Map.State
         , setTransform
         , setDrag
         , setFocus
+        , setCenter
+        , setZoom
         , zoomIn
         , zoomOut
         , zoomToAround

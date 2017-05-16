@@ -1,4 +1,4 @@
-module SlippyMap.Static exposing (view, center, State)
+module SlippyMap.Static exposing (State, center, view)
 
 {-| Just a static map.
 

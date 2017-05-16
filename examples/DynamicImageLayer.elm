@@ -6,14 +6,13 @@ import GeoJson exposing (GeoJson)
 import Html exposing (Html)
 import Html.Attributes
 import Layer.Debug
+import SlippyMap.Interactive as Map
 import SlippyMap.Layer.GeoJson as GeoJsonLayer
 import SlippyMap.Layer.Grid as Grid
 import SlippyMap.Layer.Heatmap as Heatmap
 import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Layer.Overlay as Overlay
 import SlippyMap.Layer.StaticImage as StaticImage
-import SlippyMap.Map.LowLevel as Map
-import SlippyMap.Static as StaticMap
 
 
 type alias Model =
@@ -26,7 +25,7 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    Model (StaticMap.center { lon = 7, lat = 51 } 6)
+    Model (Map.center { lon = 7, lat = 51 } 6)
         ! []
 
 
@@ -43,7 +42,7 @@ update msg model =
 
 mapConfig : Map.Config Msg
 mapConfig =
-    Map.dynamicConfig MapMsg
+    Map.config MapMsg
 
 
 view : Model -> Html Msg
