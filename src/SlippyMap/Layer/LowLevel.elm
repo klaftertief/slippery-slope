@@ -7,6 +7,8 @@ module SlippyMap.Layer.LowLevel
         , tile
         , withAttribution
         , Layer
+        , RenderState
+        , transformToRenderState
         , withRender
         , getAttribution
         , getPane
@@ -19,9 +21,13 @@ module SlippyMap.Layer.LowLevel
 
 {-| LowLevel Layer
 
-@docs Config, Pane, marker, overlay, tile, withAttribution, Layer, withRender, getAttribution, getPane, panes, isTileLayer, isOverlayLayer, isMarkerLayer, render
+@docs Config, Pane, marker, overlay, tile, withAttribution, Layer, RenderState, transformToRenderState, withRender, getAttribution, getPane, panes, isTileLayer, isOverlayLayer, isMarkerLayer, render
 -}
 
+import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
+import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 
@@ -112,12 +118,43 @@ withRender (Config configInternal) render =
         }
 
 
-{-|
-TODO: Should this be Tansform -> Svg or Map.State -> Svg?
-    The idea is to precalculate often needed accessors like bound, tileCover...
+{-| TODO: add `project...` fields for projections between different coordinate systems
 -}
+type alias RenderState =
+    { transform : Transform
+    , tileTransform : Transform
+    , centerPoint : Point
+    , tileTransformCenterPoint : Point
+    , tileScale : Float
+    , locationBounds : Location.Bounds
+    , coordinateBounds : Coordinate.Bounds
+    , coordinateTileBounds : Coordinate.Bounds
+    , tileCover : List Tile
+    }
+
+
+{-| -}
+transformToRenderState : Transform -> RenderState
+transformToRenderState transform =
+    let
+        tileTransform =
+            Transform.tileTransform transform
+    in
+        { transform = transform
+        , tileTransform = tileTransform
+        , centerPoint = Transform.centerPoint transform
+        , tileTransformCenterPoint = Transform.centerPoint tileTransform
+        , tileScale = Transform.tileScale transform
+        , locationBounds = Transform.locationBounds transform
+        , coordinateBounds = Transform.bounds transform
+        , coordinateTileBounds = Transform.tileBounds transform
+        , tileCover = Transform.tileBounds transform |> Tile.cover
+        }
+
+
+{-| -}
 type alias Render msg =
-    Transform -> Svg msg
+    RenderState -> Svg msg
 
 
 {-| -}

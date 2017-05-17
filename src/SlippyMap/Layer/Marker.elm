@@ -66,14 +66,14 @@ layer config locatedMarkers =
     Layer.withRender Layer.marker (render config locatedMarkers)
 
 
-render : Config marker msg -> List ( Location, marker ) -> Transform -> Svg msg
-render config locatedMarkers transform =
+render : Config marker msg -> List ( Location, marker ) -> Layer.RenderState -> Svg msg
+render config locatedMarkers ({ transform } as renderState) =
     let
         centerPoint =
-            Transform.centerPoint transform
+            renderState.centerPoint
 
         bounds =
-            Transform.locationBounds transform
+            renderState.locationBounds
 
         locatedMarkersFiltered =
             List.filter
@@ -92,11 +92,11 @@ render config locatedMarkers transform =
                     ++ ")"
                 )
             ]
-            (List.map (renderMarker config transform) locatedMarkersFiltered)
+            (List.map (renderMarker config renderState) locatedMarkersFiltered)
 
 
-renderMarker : Config marker msg -> Transform -> ( Location, marker ) -> Svg msg
-renderMarker (Config config) transform ( location, marker ) =
+renderMarker : Config marker msg -> Layer.RenderState -> ( Location, marker ) -> Svg msg
+renderMarker (Config config) { transform } ( location, marker ) =
     let
         markerPoint =
             Transform.locationToPoint transform location

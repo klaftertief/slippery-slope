@@ -53,14 +53,14 @@ layer config =
     Layer.withRender Layer.overlay (render config)
 
 
-render : Config -> Transform -> Svg msg
-render (Config config) transform =
+render : Config -> Layer.RenderState -> Svg msg
+render (Config config) ({ transform } as renderState) =
     let
         centerPoint =
-            Transform.locationToPoint transform transform.center
+            renderState.centerPoint
 
         { southWest, northEast } =
-            Transform.locationBounds transform
+            renderState.locationBounds
 
         lons =
             List.range (floor southWest.lon) (ceiling northEast.lon)

@@ -23,6 +23,9 @@ import Svg.Attributes
 view : Config msg -> State -> List (Layer msg) -> Html msg
 view (Config config) ((State { transform }) as state) layers =
     let
+        renderState =
+            Layer.transformToRenderState transform
+
         -- TODO: onlye get attributions from currentlyc visible layers, whater that means or it's implemented
         layerAttributions =
             List.map Layer.getAttribution layers
@@ -73,7 +76,7 @@ view (Config config) ((State { transform }) as state) layers =
                 ]
                 [ Svg.g [ Svg.Attributes.class "esm__layers" ]
                     (List.concatMap
-                        (viewPane (Config config) state layers)
+                        (viewPane (Config config) renderState layers)
                         Layer.panes
                     )
                 , Svg.g [ Svg.Attributes.class "esm__controls" ]
@@ -84,11 +87,11 @@ view (Config config) ((State { transform }) as state) layers =
             ]
 
 
-viewPane : Config msg -> State -> List (Layer msg) -> Layer.Pane -> List (Svg msg)
-viewPane (Config config) ((State { transform }) as state) layers pane =
+viewPane : Config msg -> Layer.RenderState -> List (Layer msg) -> Layer.Pane -> List (Svg msg)
+viewPane (Config config) renderState layers pane =
     layers
         |> List.filter (Layer.getPane >> (==) pane)
-        |> List.map (\layer -> Layer.render layer transform)
+        |> List.map (\layer -> Layer.render layer renderState)
 
 
 clientPosition : Decoder Point

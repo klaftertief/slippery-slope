@@ -33,9 +33,7 @@ import SlippyMap.Geo.Transform as Transform exposing (Transform)
 
 
 {-|
-TODO: Do not have full Transfrom as the State?
-Have a function `toTransform : Config msg -> State -> Transform`.
-TODO: Add type alias for internal record
+TODO: Maybe just have the most basic state here, e.g. the Transform, and move Drag and Focus to the interactive module?
 -}
 type State
     = State

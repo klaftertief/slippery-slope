@@ -54,23 +54,19 @@ layer config boundedOverlays =
     Layer.withRender Layer.overlay (render config boundedOverlays)
 
 
-render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Transform -> Svg msg
-render config boundedOverlays transform =
-    let
-        centerPoint =
-            Transform.centerPoint transform
-    in
-        Svg.g
-            [ Svg.Attributes.transform
-                (""
-                    ++ "translate("
-                    ++ toString (round (transform.width / 2 - centerPoint.x))
-                    ++ " "
-                    ++ toString (round (transform.height / 2 - centerPoint.y))
-                    ++ ")"
-                )
-            ]
-            (List.map (renderOverlay config transform) boundedOverlays)
+render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Layer.RenderState -> Svg msg
+render config boundedOverlays { transform, centerPoint } =
+    Svg.g
+        [ Svg.Attributes.transform
+            (""
+                ++ "translate("
+                ++ toString (round (transform.width / 2 - centerPoint.x))
+                ++ " "
+                ++ toString (round (transform.height / 2 - centerPoint.y))
+                ++ ")"
+            )
+        ]
+        (List.map (renderOverlay config transform) boundedOverlays)
 
 
 renderOverlay : Config overlay msg -> Transform -> ( Location.Bounds, overlay ) -> Svg msg

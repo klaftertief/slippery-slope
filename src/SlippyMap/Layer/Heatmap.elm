@@ -75,14 +75,14 @@ layer config dataLocations =
     Layer.withRender Layer.overlay (render config dataLocations)
 
 
-render : Config data -> List ( Location, data ) -> Transform -> Svg msg
-render (Config config) dataLocations transform =
+render : Config data -> List ( Location, data ) -> Layer.RenderState -> Svg msg
+render (Config config) dataLocations ({ transform } as renderState) =
     let
         centerPoint =
-            Transform.centerPoint transform
+            renderState.centerPoint
 
         bounds =
-            Transform.locationBounds transform
+            renderState.locationBounds
 
         dataLocationsFiltered =
             List.filter

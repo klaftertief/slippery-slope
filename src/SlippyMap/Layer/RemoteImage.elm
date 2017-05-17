@@ -17,7 +17,6 @@ import RemoteData exposing (WebData)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -83,8 +82,8 @@ layer ((Config { fromTile }) as config) =
     TileLayer.layer fromTile (tile config) (TileLayer.config config)
 
 
-tile : Config -> Transform -> WebData Tile -> Svg msg
-tile (Config config) transform tileResponse =
+tile : Config -> Layer.RenderState -> WebData Tile -> Svg msg
+tile (Config config) { transform } tileResponse =
     case tileResponse of
         RemoteData.NotAsked ->
             Svg.text_ [] [ Svg.text "Not Asked" ]

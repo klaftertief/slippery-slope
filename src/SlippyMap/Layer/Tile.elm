@@ -59,26 +59,25 @@ withAttribution attribution (Config configInternal) =
 
 {-| TODO: should the function params live in a/the config?
 -}
-layer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Config config -> Layer msg
+layer : (Tile -> a) -> (Layer.RenderState -> a -> Svg msg) -> Config config -> Layer msg
 layer fromTile renderTile (Config configInternal) =
     Layer.withRender configInternal.layerConfig (render fromTile renderTile)
 
 
-render : (Tile -> a) -> (Transform -> a -> Svg msg) -> Transform -> Svg msg
-render fromTile renderTile transform =
+render : (Tile -> a) -> (Layer.RenderState -> a -> Svg msg) -> Layer.RenderState -> Svg msg
+render fromTile renderTile renderState =
     let
         tileTransform =
-            Transform.tileTransform transform
+            renderState.tileTransform
 
         scale =
-            Transform.tileScale transform
+            renderState.tileScale
 
         centerPoint =
-            Transform.centerPoint tileTransform
+            renderState.tileTransformCenterPoint
 
         tiles =
-            Transform.tileBounds transform
-                |> Tile.cover
+            renderState.tileCover
     in
         Svg.Keyed.node "g"
             [ Svg.Attributes.transform
@@ -107,13 +106,13 @@ render fromTile renderTile transform =
                 )
             ]
             (List.map
-                (tile (fromTile >> renderTile tileTransform) tileTransform)
+                (tile (fromTile >> renderTile renderState) renderState)
                 tiles
             )
 
 
-tile : (Tile -> Svg msg) -> Transform -> Tile -> ( String, Svg msg )
-tile render transform ({ z, x, y } as tile) =
+tile : (Tile -> Svg msg) -> Layer.RenderState -> Tile -> ( String, Svg msg )
+tile render renderState ({ z, x, y } as tile) =
     let
         key =
             toString z
@@ -129,7 +128,7 @@ tile render transform ({ z, x, y } as tile) =
             }
 
         point =
-            Transform.coordinateToPoint transform tileCoordinate
+            Transform.coordinateToPoint renderState.tileTransform tileCoordinate
     in
         ( key
         , Svg.g

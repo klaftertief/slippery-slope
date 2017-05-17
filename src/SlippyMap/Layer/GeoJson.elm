@@ -55,11 +55,11 @@ layer config geoJson =
     Layer.withRender Layer.overlay (render config geoJson)
 
 
-render : Config msg -> GeoJson -> Transform -> Svg msg
-render (Config internalConfig) geoJson transform =
+render : Config msg -> GeoJson -> Layer.RenderState -> Svg msg
+render (Config internalConfig) geoJson ({ transform } as renderstate) =
     let
         centerPoint =
-            Transform.centerPoint transform
+            renderstate.centerPoint
 
         project ( lon, lat, _ ) =
             Transform.locationToPoint transform

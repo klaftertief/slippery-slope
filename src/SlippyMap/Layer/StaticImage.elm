@@ -15,7 +15,6 @@ import Regex
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -80,8 +79,8 @@ layer tileLayerConfig =
         tileLayerConfig
 
 
-tile : Config -> Transform -> Tile -> Svg msg
-tile (Config config) transform ({ z, x, y } as tile) =
+tile : Config -> Layer.RenderState -> Tile -> Svg msg
+tile (Config config) { transform } ({ z, x, y } as tile) =
     Svg.image
         [ Svg.Attributes.width (toString transform.tileSize)
         , Svg.Attributes.height (toString transform.tileSize)

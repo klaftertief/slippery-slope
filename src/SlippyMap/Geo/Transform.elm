@@ -6,6 +6,7 @@ module SlippyMap.Geo.Transform
         , coordinateToPoint
         , pointToCoordinate
         , centerPoint
+        , bounds
         , locationBounds
         , tileBounds
         , tileTransform
@@ -15,7 +16,7 @@ module SlippyMap.Geo.Transform
         )
 
 {-| Transform
-@docs Transform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform
+@docs Transform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, bounds, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform
 -}
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
