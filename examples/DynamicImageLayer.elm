@@ -10,6 +10,7 @@ import SlippyMap.Interactive as Map
 import SlippyMap.Layer.GeoJson as GeoJsonLayer
 import SlippyMap.Layer.Grid as Grid
 import SlippyMap.Layer.Heatmap as Heatmap
+import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Layer.Overlay as Overlay
 import SlippyMap.Layer.StaticImage as StaticImage
@@ -50,51 +51,84 @@ view model =
     Html.div [ Html.Attributes.style [ ( "padding", "50px" ) ] ]
         [ Map.view mapConfig
             model.mapState
-            [ StaticImage.layer
-                (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
-                    |> StaticImage.withAttribution "© OpenStreetMap contributors"
-                )
+            [ imageLayer
 
-            --, Grid.layer Grid.defaultConfig
-            , Overlay.layer Overlay.defaultConfig
-                [ ( { southWest = { lon = -74.22655, lat = 40.712216 }
-                    , northEast = { lon = -74.12544, lat = 40.773941 }
-                    }
-                  , "http://www.lib.utexas.edu/maps/historical/newark_nj_1922.jpg"
-                  )
-                ]
-            , GeoJsonLayer.layer GeoJsonLayer.defaultConfig
-                (Maybe.withDefault myGeoJson Data.World.geoJson)
+            --, graticuleLayer
+            -- , overlayLayer
+            , geoJsonLayer
 
-            --, GeoJsonLayer.layer GeoJsonLayer.defaultConfig
-            --    myGeoJson
-            --, Heatmap.layer Heatmap.defaultConfig
-            --    (List.map
-            --        (\{ location, value } ->
-            --            ( location
-            --            , Maybe.withDefault 10 value
-            --                |> (\v ->
-            --                        (if isNaN v then
-            --                            5
-            --                         else
-            --                            clamp 15 25 (v / 10)
-            --                        )
-            --                            / 25
-            --                   )
-            --              --, 15
-            --            )
-            --        )
-            --        Data.locationData
-            --    )
-            , Layer.Debug.layer
-            , Marker.simpleLayer Marker.defaultConfig
-                [ { lon = 6, lat = 50 }
-                , { lon = 7, lat = 51 }
-                , { lon = 8, lat = 52 }
-                ]
+            --, heatmapLayer
+            , debugLayer
+            , markerLayer
             ]
         , Html.div []
             [ Html.text (toString model.mapState) ]
+        ]
+
+
+imageLayer : Layer msg
+imageLayer =
+    StaticImage.layer
+        (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
+            |> StaticImage.withAttribution "© OpenStreetMap contributors"
+        )
+
+
+graticuleLayer : Layer msg
+graticuleLayer =
+    Grid.layer Grid.defaultConfig
+
+
+overlayLayer : Layer msg
+overlayLayer =
+    Overlay.layer Overlay.defaultConfig
+        [ ( { southWest = { lon = -74.22655, lat = 40.712216 }
+            , northEast = { lon = -74.12544, lat = 40.773941 }
+            }
+          , "http://www.lib.utexas.edu/maps/historical/newark_nj_1922.jpg"
+          )
+        ]
+
+
+geoJsonLayer : Layer msg
+geoJsonLayer =
+    GeoJsonLayer.layer GeoJsonLayer.defaultConfig
+        (Maybe.withDefault myGeoJson Data.World.geoJson)
+
+
+heatmapLayer : Layer msg
+heatmapLayer =
+    Heatmap.layer Heatmap.defaultConfig
+        (List.map
+            (\{ location, value } ->
+                ( location
+                , Maybe.withDefault 10 value
+                    |> (\v ->
+                            (if isNaN v then
+                                5
+                             else
+                                clamp 15 25 (v / 10)
+                            )
+                                / 25
+                       )
+                  --, 15
+                )
+            )
+            Data.locationData
+        )
+
+
+debugLayer : Layer msg
+debugLayer =
+    Layer.Debug.layer
+
+
+markerLayer : Layer msg
+markerLayer =
+    Marker.simpleLayer Marker.defaultConfig
+        [ { lon = 6, lat = 50 }
+        , { lon = 7, lat = 51 }
+        , { lon = 8, lat = 52 }
         ]
 
 
