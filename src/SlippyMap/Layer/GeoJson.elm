@@ -56,14 +56,13 @@ layer config geoJson =
 
 
 render : Config msg -> GeoJson -> Layer.RenderState -> Svg msg
-render (Config internalConfig) geoJson ({ transform } as renderstate) =
+render (Config internalConfig) geoJson ({ locationToContainerPoint } as renderstate) =
     let
         centerPoint =
             renderstate.centerPoint
 
         project ( lon, lat, _ ) =
-            Transform.locationToPoint transform
-                { lon = lon, lat = lat }
+            locationToContainerPoint { lon = lon, lat = lat }
 
         renderConfig =
             Render.Config
@@ -71,14 +70,5 @@ render (Config internalConfig) geoJson ({ transform } as renderstate) =
                 , style = internalConfig.style
                 }
     in
-        Svg.g
-            [ Svg.Attributes.transform
-                (""
-                    ++ "translate("
-                    ++ toString (round (transform.width / 2 - centerPoint.x))
-                    ++ " "
-                    ++ toString (round (transform.height / 2 - centerPoint.y))
-                    ++ ")"
-                )
-            ]
+        Svg.g []
             [ Render.renderGeoJson renderConfig geoJson ]

@@ -1,7 +1,8 @@
 {
   "root": "../src",
   "tests": [
-    "Geo.Mercator",
-    "Geo.Transform"
+    "SlippyMap.Geo.Mercator",
+    "SlippyMap.Geo.Point",
+    "SlippyMap.Geo.Transform"
   ]
 }

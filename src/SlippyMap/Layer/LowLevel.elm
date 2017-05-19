@@ -118,10 +118,28 @@ withRender (Config configInternal) render =
         }
 
 
-{-| TODO: add `project...` fields for projections between different coordinate systems
+{-| Derived map state for unified layer implementations.
+
+- `center`: Geographical center of the map view
+- `zoom`: Zoom level of the map view
+- `bounds`: Geographical bounds visible in the current map view
+- `size`: Size of the map container (in pixels)
+
+TODO: add `project...` fields for projections between different coordinate systems
 -}
 type alias RenderState =
-    { transform : Transform
+    { center : Location
+    , zoom : Float
+    , bounds : Location.Bounds
+    , size : Point
+    , pixelBounds : Point.Bounds
+
+    --
+    , locationToContainerPoint : Location -> Point
+    , containerPointToLocation : Point -> Location
+
+    --
+    , transform : Transform
     , tileTransform : Transform
     , centerPoint : Point
     , tileTransformCenterPoint : Point
@@ -139,10 +157,37 @@ transformToRenderState transform =
     let
         tileTransform =
             Transform.tileTransform transform
+
+        size =
+            { x = transform.width, y = transform.height }
+
+        halfSize =
+            Point.divideBy 2 size
+
+        centerPoint =
+            Transform.centerPoint transform
+
+        topLeftPoint =
+            Point.subtract halfSize centerPoint
     in
-        { transform = transform
+        { center = transform.center
+        , zoom = transform.zoom
+        , bounds = Transform.locationBounds transform
+        , size = size
+        , pixelBounds = Transform.pixelBounds transform
+
+        --
+        , locationToContainerPoint =
+            Transform.locationToPoint transform
+                >> Point.subtract topLeftPoint
+        , containerPointToLocation =
+            Point.subtract centerPoint
+                >> Transform.pointToLocation transform
+
+        --
+        , transform = transform
         , tileTransform = tileTransform
-        , centerPoint = Transform.centerPoint transform
+        , centerPoint = centerPoint
         , tileTransformCenterPoint = Transform.centerPoint tileTransform
         , tileScale = Transform.tileScale transform
         , locationBounds = Transform.locationBounds transform
@@ -187,7 +232,8 @@ isMarkerLayer (Layer { config }) =
     config.pane == MarkerPane
 
 
-{-| -}
+{-| TODO: Layers should have general attributes like class name. Inject here.
+-}
 render : Layer msg -> Render msg
 render (Layer { render }) =
     render

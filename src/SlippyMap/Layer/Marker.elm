@@ -82,24 +82,15 @@ render config locatedMarkers ({ transform } as renderState) =
                 )
                 locatedMarkers
     in
-        Svg.g
-            [ Svg.Attributes.transform
-                (""
-                    ++ "translate("
-                    ++ toString (round (transform.width / 2 - centerPoint.x))
-                    ++ " "
-                    ++ toString (round (transform.height / 2 - centerPoint.y))
-                    ++ ")"
-                )
-            ]
+        Svg.g []
             (List.map (renderMarker config renderState) locatedMarkersFiltered)
 
 
 renderMarker : Config marker msg -> Layer.RenderState -> ( Location, marker ) -> Svg msg
-renderMarker (Config config) { transform } ( location, marker ) =
+renderMarker (Config config) { locationToContainerPoint } ( location, marker ) =
     let
         markerPoint =
-            Transform.locationToPoint transform location
+            locationToContainerPoint location
     in
         Svg.g
             [ Svg.Attributes.transform

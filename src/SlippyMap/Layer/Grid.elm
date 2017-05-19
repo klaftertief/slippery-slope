@@ -54,11 +54,8 @@ layer config =
 
 
 render : Config -> Layer.RenderState -> Svg msg
-render (Config config) ({ transform } as renderState) =
+render (Config config) renderState =
     let
-        centerPoint =
-            renderState.centerPoint
-
         { southWest, northEast } =
             renderState.locationBounds
 
@@ -67,9 +64,9 @@ render (Config config) ({ transform } as renderState) =
                 |> List.map toFloat
                 |> List.map
                     (\lon ->
-                        ( Transform.locationToPoint transform
+                        ( renderState.locationToContainerPoint
                             { lon = lon, lat = southWest.lat }
-                        , Transform.locationToPoint transform
+                        , renderState.locationToContainerPoint
                             { lon = lon, lat = northEast.lat }
                         )
                     )
@@ -79,27 +76,17 @@ render (Config config) ({ transform } as renderState) =
                 |> List.map toFloat
                 |> List.map
                     (\lat ->
-                        ( Transform.locationToPoint transform
+                        ( renderState.locationToContainerPoint
                             { lon = southWest.lon, lat = lat }
-                        , Transform.locationToPoint transform
+                        , renderState.locationToContainerPoint
                             { lon = northEast.lon, lat = lat }
                         )
                     )
     in
         Svg.g []
-            [ Svg.g
-                [ Svg.Attributes.transform
-                    ("translate("
-                        ++ toString (-centerPoint.x + transform.width / 2 |> floor)
-                        ++ " "
-                        ++ toString (-centerPoint.y + transform.height / 2 |> floor)
-                        ++ ")"
-                    )
-                ]
-                (List.map (line config.majorTickColor) lons
-                    ++ List.map (line config.majorTickColor) lats
-                )
-            ]
+            (List.map (line config.majorTickColor) lons
+                ++ List.map (line config.majorTickColor) lats
+            )
 
 
 line : Color -> ( Point, Point ) -> Svg msg

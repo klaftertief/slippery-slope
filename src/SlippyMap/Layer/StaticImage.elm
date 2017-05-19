@@ -42,7 +42,7 @@ config urlTemplate subDomains =
         toUrl : Tile -> String
         toUrl { z, x, y } =
             urlTemplate
-                |> replace "{z}" (toString z)
+                |> replace "{z}" (toString (max 0 z))
                 |> replace "{x}" (toString (x % (2 ^ z)))
                 |> replace "{y}" (toString (y % (2 ^ z)))
                 |> replace "{s}"

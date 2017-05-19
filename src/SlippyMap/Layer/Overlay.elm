@@ -55,30 +55,24 @@ layer config boundedOverlays =
 
 
 render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Layer.RenderState -> Svg msg
-render config boundedOverlays { transform, centerPoint } =
-    Svg.g
-        [ Svg.Attributes.transform
-            (""
-                ++ "translate("
-                ++ toString (round (transform.width / 2 - centerPoint.x))
-                ++ " "
-                ++ toString (round (transform.height / 2 - centerPoint.y))
-                ++ ")"
-            )
-        ]
-        (List.map (renderOverlay config transform) boundedOverlays)
+render config boundedOverlays renderState =
+    Svg.g []
+        (List.map (renderOverlay config renderState) boundedOverlays)
 
 
-renderOverlay : Config overlay msg -> Transform -> ( Location.Bounds, overlay ) -> Svg msg
-renderOverlay (Config config) transform ( bounds, overlay ) =
+renderOverlay : Config overlay msg -> Layer.RenderState -> ( Location.Bounds, overlay ) -> Svg msg
+renderOverlay (Config config) { locationToContainerPoint } ( bounds, overlay ) =
     let
         southWestPoint =
-            Transform.locationToPoint transform
-                bounds.southWest
+            locationToContainerPoint bounds.southWest
 
         northEastPoint =
-            Transform.locationToPoint transform
-                bounds.northEast
+            locationToContainerPoint bounds.northEast
+
+        overlaySize =
+            ( northEastPoint.x - southWestPoint.x
+            , southWestPoint.y - northEastPoint.y
+            )
     in
         Svg.g
             [ Svg.Attributes.transform
@@ -90,8 +84,6 @@ renderOverlay (Config config) transform ( bounds, overlay ) =
                 )
             ]
             [ config.renderOverlay
-                ( northEastPoint.x - southWestPoint.x
-                , southWestPoint.y - northEastPoint.y
-                )
+                overlaySize
                 overlay
             ]

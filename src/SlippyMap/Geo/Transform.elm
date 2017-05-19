@@ -7,6 +7,7 @@ module SlippyMap.Geo.Transform
         , pointToCoordinate
         , centerPoint
         , bounds
+        , pixelBounds
         , locationBounds
         , tileBounds
         , tileTransform
@@ -16,7 +17,7 @@ module SlippyMap.Geo.Transform
         )
 
 {-| Transform
-@docs Transform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, bounds, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform
+@docs Transform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, bounds, pixelBounds, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform
 -}
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
@@ -50,12 +51,6 @@ pointToLocation transform point =
 
 
 {-| Converts given location in WGS84 Datum to a Coordinate.
-
-    >>> locationToCoordinate testTransform { lon = 6.96, lat = 50.94 }
-    { column = 8508.757333333333
-    , row = 5489.3311249
-    , zoom = 14
-    }
 -}
 locationToCoordinate : Transform -> Location -> Coordinate
 locationToCoordinate transform location =
@@ -250,6 +245,28 @@ locationBounds transform =
     in
         { southWest = southWest
         , northEast = northEast
+        }
+
+
+{-| -}
+pixelBounds : Transform -> Point.Bounds
+pixelBounds transform =
+    let
+        center =
+            centerPoint transform
+
+        topLeft =
+            { x = center.x - transform.width / 2
+            , y = center.y + transform.height / 2
+            }
+
+        bottomRight =
+            { x = center.x + transform.width / 2
+            , y = center.y - transform.height / 2
+            }
+    in
+        { topLeft = topLeft
+        , bottomRight = bottomRight
         }
 
 

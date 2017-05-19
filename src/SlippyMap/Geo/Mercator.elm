@@ -47,12 +47,6 @@ lonToX =
 
 
 {-| Converts given latitude in WGS84 Datum to radians from Spherical Mercator EPSG:900913.
-
-    >>> latToY 85.05112877980659
-    pi
-
-    >>> latToY -85.05112877980659
-    -pi
 -}
 latToY : Float -> Float
 latToY lat =

@@ -27,7 +27,7 @@ import Svg.Attributes
 -}
 type Config data
     = Config
-        { heatmap : Transform -> Heatmap.Config ( Location, data )
+        { heatmap : Layer.RenderState -> Heatmap.Config ( Location, data )
         }
 
 
@@ -39,20 +39,20 @@ defaultConfig =
         }
 
 
-defaultHeatmapConfig : Transform -> Heatmap.Config ( Location, Float )
-defaultHeatmapConfig transform =
+defaultHeatmapConfig : Layer.RenderState -> Heatmap.Config ( Location, Float )
+defaultHeatmapConfig renderState =
     Heatmap.config
         { toPoint =
             (\( location, value ) ->
                 let
                     { x, y } =
-                        Transform.locationToPoint transform location
+                        renderState.locationToContainerPoint location
                 in
                     { x = x, y = y, weight = value }
             )
         , gradient = defaultGradient
         }
-        |> Heatmap.withRadius (transform.zoom * 2)
+        |> Heatmap.withRadius (renderState.zoom * 2)
 
 
 defaultGradient : Gradient
@@ -76,11 +76,8 @@ layer config dataLocations =
 
 
 render : Config data -> List ( Location, data ) -> Layer.RenderState -> Svg msg
-render (Config config) dataLocations ({ transform } as renderState) =
+render (Config config) dataLocations renderState =
     let
-        centerPoint =
-            renderState.centerPoint
-
         bounds =
             renderState.locationBounds
 
@@ -91,16 +88,7 @@ render (Config config) dataLocations ({ transform } as renderState) =
                 )
                 dataLocations
     in
-        Svg.g
-            [ Svg.Attributes.transform
-                (""
-                    ++ "translate("
-                    ++ toString (round (transform.width / 2 - centerPoint.x))
-                    ++ " "
-                    ++ toString (round (transform.height / 2 - centerPoint.y))
-                    ++ ")"
-                )
-            ]
-            [ Heatmap.view (config.heatmap transform)
+        Svg.g []
+            [ Heatmap.view (config.heatmap renderState)
                 dataLocationsFiltered
             ]
