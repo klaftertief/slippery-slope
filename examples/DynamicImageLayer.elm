@@ -52,12 +52,13 @@ view model =
         [ Map.view mapConfig
             model.mapState
             [ imageLayer
-            , graticuleLayer
+
+            --, graticuleLayer
             , overlayLayer
 
             --, geoJsonLayer
             --, heatmapLayer
-            , debugLayer
+            --, debugLayer
             , markerLayer
             ]
         , Html.div []

@@ -132,11 +132,13 @@ type alias RenderState =
     , zoom : Float
     , bounds : Location.Bounds
     , size : Point
+    , halfSize : Point
     , pixelBounds : Point.Bounds
 
     --
     , locationToContainerPoint : Location -> Point
     , containerPointToLocation : Point -> Location
+    , coordinateToContainerPoint : Coordinate -> Point
 
     --
     , transform : Transform
@@ -174,6 +176,7 @@ transformToRenderState transform =
         , zoom = transform.zoom
         , bounds = Transform.locationBounds transform
         , size = size
+        , halfSize = halfSize
         , pixelBounds = Transform.pixelBounds transform
 
         --
@@ -181,8 +184,11 @@ transformToRenderState transform =
             Transform.locationToPoint transform
                 >> Point.subtract topLeftPoint
         , containerPointToLocation =
-            Point.subtract centerPoint
+            Point.subtract topLeftPoint
                 >> Transform.pointToLocation transform
+        , coordinateToContainerPoint =
+            Transform.coordinateToPoint transform
+                >> Point.subtract topLeftPoint
 
         --
         , transform = transform

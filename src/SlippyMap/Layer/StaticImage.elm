@@ -80,11 +80,16 @@ layer tileLayerConfig =
 
 
 tile : Config -> Layer.RenderState -> Tile -> Svg msg
-tile (Config config) { transform } ({ z, x, y } as tile) =
+tile (Config config) renderState ({ z, x, y } as tile) =
     Svg.image
-        [ Svg.Attributes.width (toString transform.tileSize)
-        , Svg.Attributes.height (toString transform.tileSize)
+        [ Svg.Attributes.width (toString renderState.transform.tileSize)
+        , Svg.Attributes.height (toString renderState.transform.tileSize)
         , Svg.Attributes.xlinkHref (config.toUrl tile)
+        , Svg.Attributes.transform
+            ("scale("
+                ++ toString renderState.tileScale
+                ++ ")"
+            )
         ]
         []
 

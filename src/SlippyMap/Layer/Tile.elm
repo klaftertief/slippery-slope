@@ -67,44 +67,17 @@ layer fromTile renderTile (Config configInternal) =
 render : (Tile -> a) -> (Layer.RenderState -> a -> Svg msg) -> Layer.RenderState -> Svg msg
 render fromTile renderTile renderState =
     let
-        tileTransform =
-            renderState.tileTransform
-
         scale =
             renderState.tileScale
 
         centerPoint =
-            renderState.tileTransformCenterPoint
+            renderState.halfSize
 
         tiles =
             renderState.tileCover
     in
         Svg.Keyed.node "g"
-            [ Svg.Attributes.transform
-                (""
-                    ++ "translate("
-                    ++ toString (round centerPoint.x)
-                    ++ " "
-                    ++ toString (round centerPoint.y)
-                    ++ ")"
-                    ++ " "
-                    ++ "scale("
-                    ++ toString scale
-                    ++ ")"
-                    ++ " "
-                    ++ "translate("
-                    ++ toString (round -centerPoint.x)
-                    ++ " "
-                    ++ toString (round -centerPoint.y)
-                    ++ ")"
-                    ++ " "
-                    ++ "translate("
-                    ++ toString (round ((tileTransform.width / 2 - centerPoint.x) / scale))
-                    ++ " "
-                    ++ toString (round ((tileTransform.height / 2 - centerPoint.y) / scale))
-                    ++ ")"
-                )
-            ]
+            []
             (List.map
                 (tile (fromTile >> renderTile renderState) renderState)
                 tiles
@@ -128,7 +101,7 @@ tile render renderState ({ z, x, y } as tile) =
             }
 
         point =
-            Transform.coordinateToPoint renderState.tileTransform tileCoordinate
+            renderState.coordinateToContainerPoint tileCoordinate
     in
         ( key
         , Svg.g

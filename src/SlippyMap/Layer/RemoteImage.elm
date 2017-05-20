@@ -83,7 +83,7 @@ layer ((Config { fromTile }) as config) =
 
 
 tile : Config -> Layer.RenderState -> WebData Tile -> Svg msg
-tile (Config config) { transform } tileResponse =
+tile (Config config) renderState tileResponse =
     case tileResponse of
         RemoteData.NotAsked ->
             Svg.text_ [] [ Svg.text "Not Asked" ]
@@ -96,9 +96,14 @@ tile (Config config) { transform } tileResponse =
 
         RemoteData.Success tile ->
             Svg.image
-                [ Svg.Attributes.width (toString transform.tileSize)
-                , Svg.Attributes.height (toString transform.tileSize)
+                [ Svg.Attributes.width (toString renderState.transform.tileSize)
+                , Svg.Attributes.height (toString renderState.transform.tileSize)
                 , Svg.Attributes.xlinkHref (config.toUrl tile)
+                , Svg.Attributes.transform
+                    ("scale("
+                        ++ toString renderState.tileScale
+                        ++ ")"
+                    )
                 ]
                 []
 
