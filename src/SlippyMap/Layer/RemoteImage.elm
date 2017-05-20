@@ -1,15 +1,16 @@
 module SlippyMap.Layer.RemoteImage
     exposing
         ( Config
-        , withUrl
+        , config
         , withTile
+        , withAttribution
         , toUrl
         , layer
         )
 
 {-| A layer to display remote image tiles.
 
-@docs Config, layer, toUrl, withTile, withUrl
+@docs Config, layer, toUrl, withTile, withAttribution, config
 -}
 
 import Regex
@@ -37,8 +38,8 @@ type Config
 
 {-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
 -}
-withUrl : String -> List String -> Config
-withUrl template subDomains =
+config : String -> List String -> TileLayer.Config Config
+config template subDomains =
     let
         toUrl : Tile -> String
         toUrl { z, x, y } =
@@ -53,23 +54,35 @@ withUrl template subDomains =
                         |> Maybe.withDefault ""
                     )
     in
-        Config
-            { toUrl = toUrl
-            , fromTile = always RemoteData.NotAsked
-            }
+        TileLayer.config <|
+            Config
+                { toUrl = toUrl
+                , fromTile = always RemoteData.NotAsked
+                }
 
 
 {-| -}
-withTile : (Tile -> WebData Tile) -> Config -> Config
-withTile fromTile (Config config) =
-    Config
-        { config | fromTile = fromTile }
+withTile : (Tile -> WebData Tile) -> TileLayer.Config Config -> TileLayer.Config Config
+withTile fromTile tileLayerConfig =
+    TileLayer.getLayerConfig tileLayerConfig
+        |> (\(Config config) ->
+                TileLayer.config <|
+                    Config
+                        { config | fromTile = fromTile }
+           )
 
 
 {-| -}
-toUrl : Config -> Tile -> String
-toUrl (Config { toUrl }) =
-    toUrl
+withAttribution : String -> TileLayer.Config Config -> TileLayer.Config Config
+withAttribution =
+    TileLayer.withAttribution
+
+
+{-| -}
+toUrl : TileLayer.Config Config -> Tile -> String
+toUrl tileLayerConfig =
+    TileLayer.getLayerConfig tileLayerConfig
+        |> (\(Config { toUrl }) -> toUrl)
 
 
 
@@ -77,9 +90,15 @@ toUrl (Config { toUrl }) =
 
 
 {-| -}
-layer : Config -> Layer msg
-layer ((Config { fromTile }) as config) =
-    TileLayer.layer fromTile (tile config) (TileLayer.config config)
+layer : TileLayer.Config Config -> Layer msg
+layer tileLayerConfig =
+    let
+        ((Config { fromTile }) as config) =
+            TileLayer.getLayerConfig tileLayerConfig
+    in
+        TileLayer.layer fromTile
+            (tile config)
+            tileLayerConfig
 
 
 tile : Config -> Layer.RenderState -> WebData Tile -> Svg msg

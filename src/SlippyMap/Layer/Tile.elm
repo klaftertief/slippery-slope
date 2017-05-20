@@ -13,7 +13,6 @@ module SlippyMap.Layer.Tile
 -}
 
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
 import Svg.Attributes

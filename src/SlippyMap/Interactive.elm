@@ -4,6 +4,7 @@ module SlippyMap.Interactive
         , config
         , State
         , center
+        , renderState
         , Msg
         , update
         , view
@@ -11,7 +12,7 @@ module SlippyMap.Interactive
         )
 
 {-|
-@docs Config, config, State, center, Msg, update, view, subscriptions
+@docs Config, config, State, center, renderState, Msg, update, view, subscriptions
 -}
 
 import Html exposing (Html)
@@ -56,6 +57,12 @@ center initialCenter initialZoom =
         |> State.setCenter initialCenter
         |> State.setZoom initialZoom
         |> State
+
+
+{-| -}
+renderState : State -> Layer.RenderState
+renderState (State (State.State { transform })) =
+    Layer.transformToRenderState transform
 
 
 

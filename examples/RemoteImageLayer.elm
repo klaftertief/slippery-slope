@@ -5,11 +5,10 @@ import Html exposing (Html)
 import Html.Attributes
 import Http
 import RemoteData exposing (WebData)
+import SlippyMap.Interactive as Map
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer.RemoteImage as RemoteImage
-import SlippyMap.Layer.LowLevel as Layer
-import SlippyMap.Map.LowLevel as Map
-import SlippyMap.Map.Static as StaticMap
+import SlippyMap.Layer.Tile as TileLayer
 
 
 type alias Model =
@@ -32,7 +31,7 @@ init =
     let
         initialModel =
             Model
-                (StaticMap.center { lon = 7, lat = 51 } 8)
+                (Map.center { lon = 7, lat = 51 } 8)
                 Dict.empty
 
         tilesToLoad =
@@ -68,7 +67,8 @@ newTilesToLoad : Model -> List Tile
 newTilesToLoad model =
     let
         tiles =
-            Map.getTileCover model.mapState
+            Map.renderState model.mapState
+                |> .tileCover
 
         tilesToLoad =
             Dict.diff
@@ -88,7 +88,7 @@ newTilesToLoad model =
         tilesToLoad
 
 
-getTile : RemoteImage.Config -> Tile -> Cmd Msg
+getTile : TileLayer.Config RemoteImage.Config -> Tile -> Cmd Msg
 getTile config ({ z, x, y } as tile) =
     let
         comparable =
@@ -112,12 +112,16 @@ getTile config ({ z, x, y } as tile) =
 
 mapConfig : Map.Config Msg
 mapConfig =
-    Map.dynamicConfig MapMsg
+    Map.config MapMsg
 
 
-layerConfig : TileCache -> RemoteImage.Config
+
+--layerConfig : TileCache -> TileLayer.Config RemoteImage.Config
+
+
 layerConfig tileCache =
-    RemoteImage.withUrl "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    RemoteImage.config
+        "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         [ "a", "b", "c" ]
         |> RemoteImage.withTile
             (\tile ->
@@ -129,10 +133,9 @@ layerConfig tileCache =
 view : Model -> Html Msg
 view model =
     Html.div [ Html.Attributes.style [ ( "padding", "50px" ) ] ]
-        [ StaticMap.view mapConfig
+        [ Map.view mapConfig
             model.mapState
             [ RemoteImage.layer (layerConfig model.tiles)
-                (Layer.withAttribution "© OpenStreetMap contributors")
             ]
         , Html.div []
             [ Html.text (toString model.mapState) ]
