@@ -42,7 +42,7 @@ update msg ((State { transform, drag }) as state) =
             State.zoomInAround point state
 
         ZoomByAround delta point ->
-            State.zoomToAround delta point state
+            State.zoomByAround delta point state
 
         DragMsg dragMsg ->
             updateDrag dragMsg state

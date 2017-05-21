@@ -16,7 +16,7 @@ module SlippyMap.Map.State
         , setZoom
         , zoomIn
         , zoomOut
-        , zoomToAround
+        , zoomByAround
         , zoomInAround
         )
 
@@ -129,11 +129,11 @@ zoomOut ((State { transform }) as state) =
 
 zoomInAround : Point -> State -> State
 zoomInAround =
-    zoomToAround 1
+    zoomByAround 1
 
 
-zoomToAround : Float -> Point -> State -> State
-zoomToAround delta point ((State { transform }) as state) =
+zoomByAround : Float -> Point -> State -> State
+zoomByAround delta point ((State { transform }) as state) =
     setTransform
         (Transform.zoomToAround transform
             (transform.zoom + delta)

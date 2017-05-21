@@ -49,6 +49,7 @@ type Pane
     = TilePane
     | OverlayPane
     | MarkerPane
+    | ControlPane
 
 
 {-| -}
@@ -57,6 +58,7 @@ panes =
     [ TilePane
     , OverlayPane
     , MarkerPane
+    , ControlPane
     ]
 
 

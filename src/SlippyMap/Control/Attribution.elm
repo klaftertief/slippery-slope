@@ -1,4 +1,4 @@
-module SlippyMap.Control.Attribution exposing (..)
+module SlippyMap.Control.Attribution exposing (control)
 
 {-| Attributions for a map.
 -}
@@ -7,8 +7,8 @@ import Svg exposing (Svg)
 import Svg.Attributes
 
 
-attribution : Maybe String -> List String -> Svg msg
-attribution prefix attributions =
+control : Maybe String -> List String -> Svg msg
+control prefix attributions =
     let
         prefixText =
             prefix

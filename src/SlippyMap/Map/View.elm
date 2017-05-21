@@ -10,6 +10,7 @@ import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import Mouse exposing (Position)
 import SlippyMap.Control.Attribution as Attribution
+import SlippyMap.Control.Zoom as Zoom
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config exposing (Config(..))
@@ -74,14 +75,21 @@ view (Config config) ((State { transform }) as state) layers =
                 , Svg.Attributes.height (toString transform.height)
                 , Svg.Attributes.width (toString transform.width)
                 ]
-                [ Svg.g [ Svg.Attributes.class "esm__layers" ]
+                [ Svg.g
+                    [ Svg.Attributes.class "esm__layers" ]
                     (List.concatMap
                         (viewPane (Config config) renderState layers)
                         Layer.panes
                     )
                 , Svg.g [ Svg.Attributes.class "esm__controls" ]
-                    [ Attribution.attribution config.attributionPrefix
+                    [ Attribution.control config.attributionPrefix
                         layerAttributions
+                    , case config.toMsg of
+                        Just toMsg ->
+                            Svg.map toMsg <| Zoom.control renderState
+
+                        Nothing ->
+                            Svg.text ""
                     ]
                 ]
             ]
