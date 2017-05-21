@@ -25,12 +25,11 @@ import Svg.Attributes
 {-| Configuration for the layer.
 -}
 type Config
-    = Config ConfigInternal
+    = Config TileLayer.Config ConfigInternal
 
 
 type alias ConfigInternal =
     { toUrl : Tile -> String
-    , tileLayerConfig : TileLayer.Config
     }
 
 
@@ -53,22 +52,16 @@ config urlTemplate subDomains =
                     )
     in
         Config
-            { toUrl = toUrl
-            , tileLayerConfig =
-                TileLayer.config
-            }
+            TileLayer.config
+            { toUrl = toUrl }
 
 
 {-| -}
 withAttribution : String -> Config -> Config
-withAttribution attribution (Config configInternal) =
+withAttribution attribution (Config tileLayerConfig configInternal) =
     Config
-        { configInternal
-            | tileLayerConfig =
-                TileLayer.withAttribution
-                    attribution
-                    configInternal.tileLayerConfig
-        }
+        (TileLayer.withAttribution attribution tileLayerConfig)
+        configInternal
 
 
 
@@ -78,18 +71,18 @@ withAttribution attribution (Config configInternal) =
 {-|
 -}
 layer : Config -> Layer msg
-layer ((Config { tileLayerConfig }) as config) =
+layer ((Config tileLayerConfig _) as config) =
     TileLayer.layer identity
         (tile config)
         tileLayerConfig
 
 
 tile : Config -> Layer.RenderState -> Tile -> Svg msg
-tile (Config config) renderState ({ z, x, y } as tile) =
+tile (Config _ configInternal) renderState ({ z, x, y } as tile) =
     Svg.image
         [ Svg.Attributes.width (toString renderState.transform.tileSize)
         , Svg.Attributes.height (toString renderState.transform.tileSize)
-        , Svg.Attributes.xlinkHref (config.toUrl tile)
+        , Svg.Attributes.xlinkHref (configInternal.toUrl tile)
         , Svg.Attributes.transform
             ("scale("
                 ++ toString renderState.tileScale

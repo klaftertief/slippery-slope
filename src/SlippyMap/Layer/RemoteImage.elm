@@ -30,11 +30,13 @@ import Svg.Attributes
 TODO: add type alias for internal config
 -}
 type Config
-    = Config
-        { toUrl : Tile -> String
-        , fromTile : Tile -> WebData Tile
-        , tileLayerConfig : TileLayer.Config
-        }
+    = Config TileLayer.Config ConfigInternal
+
+
+type alias ConfigInternal =
+    { toUrl : Tile -> String
+    , fromTile : Tile -> WebData Tile
+    }
 
 
 {-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
@@ -56,35 +58,31 @@ config template subDomains =
                     )
     in
         Config
+            TileLayer.config
             { toUrl = toUrl
             , fromTile = always RemoteData.NotAsked
-            , tileLayerConfig =
-                TileLayer.config
             }
 
 
 {-| -}
 withTile : (Tile -> WebData Tile) -> Config -> Config
-withTile fromTile (Config configInternal) =
+withTile fromTile (Config tileLayerConfig configInternal) =
     Config
+        tileLayerConfig
         { configInternal | fromTile = fromTile }
 
 
 {-| -}
 withAttribution : String -> Config -> Config
-withAttribution attribution (Config configInternal) =
+withAttribution attribution (Config tileLayerConfig configInternal) =
     Config
-        { configInternal
-            | tileLayerConfig =
-                TileLayer.withAttribution
-                    attribution
-                    configInternal.tileLayerConfig
-        }
+        (TileLayer.withAttribution attribution tileLayerConfig)
+        configInternal
 
 
 {-| -}
 toUrl : Config -> Tile -> String
-toUrl (Config { toUrl }) =
+toUrl (Config _ { toUrl }) =
     toUrl
 
 
@@ -94,14 +92,14 @@ toUrl (Config { toUrl }) =
 
 {-| -}
 layer : Config -> Layer msg
-layer ((Config configInternal) as config) =
+layer ((Config tileLayerConfig configInternal) as config) =
     TileLayer.layer configInternal.fromTile
         (tile config)
-        configInternal.tileLayerConfig
+        tileLayerConfig
 
 
 tile : Config -> Layer.RenderState -> WebData Tile -> Svg msg
-tile (Config config) renderState tileResponse =
+tile (Config _ configInternal) renderState tileResponse =
     case tileResponse of
         RemoteData.NotAsked ->
             Svg.text_ [] [ Svg.text "Not Asked" ]
@@ -116,7 +114,7 @@ tile (Config config) renderState tileResponse =
             Svg.image
                 [ Svg.Attributes.width (toString renderState.transform.tileSize)
                 , Svg.Attributes.height (toString renderState.transform.tileSize)
-                , Svg.Attributes.xlinkHref (config.toUrl tile)
+                , Svg.Attributes.xlinkHref (configInternal.toUrl tile)
                 , Svg.Attributes.transform
                     ("scale("
                         ++ toString renderState.tileScale
