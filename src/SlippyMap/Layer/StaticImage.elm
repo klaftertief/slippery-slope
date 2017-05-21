@@ -30,13 +30,13 @@ type Config
 
 type alias ConfigInternal =
     { toUrl : Tile -> String
-    , attribution : Maybe String
+    , tileLayerConfig : TileLayer.Config
     }
 
 
 {-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
 -}
-config : String -> List String -> TileLayer.Config Config
+config : String -> List String -> Config
 config urlTemplate subDomains =
     let
         toUrl : Tile -> String
@@ -52,18 +52,23 @@ config urlTemplate subDomains =
                         |> Maybe.withDefault ""
                     )
     in
-        TileLayer.config
-            (Config
-                { toUrl = toUrl
-                , attribution = Nothing
-                }
-            )
+        Config
+            { toUrl = toUrl
+            , tileLayerConfig =
+                TileLayer.config
+            }
 
 
 {-| -}
-withAttribution : String -> TileLayer.Config Config -> TileLayer.Config Config
-withAttribution =
-    TileLayer.withAttribution
+withAttribution : String -> Config -> Config
+withAttribution attribution (Config configInternal) =
+    Config
+        { configInternal
+            | tileLayerConfig =
+                TileLayer.withAttribution
+                    attribution
+                    configInternal.tileLayerConfig
+        }
 
 
 
@@ -72,10 +77,10 @@ withAttribution =
 
 {-|
 -}
-layer : TileLayer.Config Config -> Layer msg
-layer tileLayerConfig =
+layer : Config -> Layer msg
+layer ((Config { tileLayerConfig }) as config) =
     TileLayer.layer identity
-        (tile <| TileLayer.getLayerConfig tileLayerConfig)
+        (tile config)
         tileLayerConfig
 
 

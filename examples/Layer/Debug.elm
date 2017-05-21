@@ -20,7 +20,7 @@ import Svg.Attributes
 {-| -}
 layer : Layer msg
 layer =
-    TileLayer.layer identity tile (TileLayer.config ())
+    TileLayer.layer identity tile TileLayer.config
 
 
 {-| TODO: think about how to make it not always depend on Transform.

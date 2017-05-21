@@ -33,12 +33,13 @@ type Config
     = Config
         { toUrl : Tile -> String
         , fromTile : Tile -> WebData Tile
+        , tileLayerConfig : TileLayer.Config
         }
 
 
 {-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
 -}
-config : String -> List String -> TileLayer.Config Config
+config : String -> List String -> Config
 config template subDomains =
     let
         toUrl : Tile -> String
@@ -54,35 +55,37 @@ config template subDomains =
                         |> Maybe.withDefault ""
                     )
     in
-        TileLayer.config <|
-            Config
-                { toUrl = toUrl
-                , fromTile = always RemoteData.NotAsked
-                }
+        Config
+            { toUrl = toUrl
+            , fromTile = always RemoteData.NotAsked
+            , tileLayerConfig =
+                TileLayer.config
+            }
 
 
 {-| -}
-withTile : (Tile -> WebData Tile) -> TileLayer.Config Config -> TileLayer.Config Config
-withTile fromTile tileLayerConfig =
-    TileLayer.getLayerConfig tileLayerConfig
-        |> (\(Config config) ->
-                TileLayer.config <|
-                    Config
-                        { config | fromTile = fromTile }
-           )
+withTile : (Tile -> WebData Tile) -> Config -> Config
+withTile fromTile (Config configInternal) =
+    Config
+        { configInternal | fromTile = fromTile }
 
 
 {-| -}
-withAttribution : String -> TileLayer.Config Config -> TileLayer.Config Config
-withAttribution =
-    TileLayer.withAttribution
+withAttribution : String -> Config -> Config
+withAttribution attribution (Config configInternal) =
+    Config
+        { configInternal
+            | tileLayerConfig =
+                TileLayer.withAttribution
+                    attribution
+                    configInternal.tileLayerConfig
+        }
 
 
 {-| -}
-toUrl : TileLayer.Config Config -> Tile -> String
-toUrl tileLayerConfig =
-    TileLayer.getLayerConfig tileLayerConfig
-        |> (\(Config { toUrl }) -> toUrl)
+toUrl : Config -> Tile -> String
+toUrl (Config { toUrl }) =
+    toUrl
 
 
 
@@ -90,15 +93,11 @@ toUrl tileLayerConfig =
 
 
 {-| -}
-layer : TileLayer.Config Config -> Layer msg
-layer tileLayerConfig =
-    let
-        ((Config { fromTile }) as config) =
-            TileLayer.getLayerConfig tileLayerConfig
-    in
-        TileLayer.layer fromTile
-            (tile config)
-            tileLayerConfig
+layer : Config -> Layer msg
+layer ((Config configInternal) as config) =
+    TileLayer.layer configInternal.fromTile
+        (tile config)
+        configInternal.tileLayerConfig
 
 
 tile : Config -> Layer.RenderState -> WebData Tile -> Svg msg

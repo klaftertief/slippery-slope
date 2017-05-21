@@ -8,7 +8,6 @@ import RemoteData exposing (WebData)
 import SlippyMap.Interactive as Map
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer.RemoteImage as RemoteImage
-import SlippyMap.Layer.Tile as TileLayer
 
 
 type alias Model =
@@ -88,7 +87,7 @@ newTilesToLoad model =
         tilesToLoad
 
 
-getTile : TileLayer.Config RemoteImage.Config -> Tile -> Cmd Msg
+getTile : RemoteImage.Config -> Tile -> Cmd Msg
 getTile config ({ z, x, y } as tile) =
     let
         comparable =
@@ -115,10 +114,7 @@ mapConfig =
     Map.config MapMsg
 
 
-
---layerConfig : TileCache -> TileLayer.Config RemoteImage.Config
-
-
+layerConfig : TileCache -> RemoteImage.Config
 layerConfig tileCache =
     RemoteImage.config
         "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
