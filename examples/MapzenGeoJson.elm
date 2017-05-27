@@ -6,7 +6,6 @@ import Html exposing (Html)
 import Html.Attributes
 import Http
 import Json.Decode as Json
-import Layer.Debug
 import RemoteData exposing (WebData)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
@@ -53,7 +52,7 @@ init =
     let
         initialModel =
             Model
-                (Map.center { lon = 7, lat = 51 } 8)
+                (Map.center { lon = -5, lat = 53 } 5)
                 Dict.empty
 
         tilesToLoad =
@@ -153,13 +152,12 @@ layerConfig tileCache =
                 let
                     features =
                         Json.decodeValue vectorTileDecoder value
+                            --|> Result.map ((List.filterMap isInteresting) >> toFeatures)
                             |> Result.map toFeatures
-                            |> Result.toMaybe
-                            |> Maybe.withDefault []
+                            |> Result.withDefault []
                 in
                     Svg.g []
                         (features
-                            --|> List.filterMap isInteresting
                             |> List.filter
                                 (\{ properties } ->
                                     case properties of
@@ -198,6 +196,7 @@ layerConfig tileCache =
                                 )
                         )
             )
+        |> JsonTileLayer.withAttribution "Mapzen"
 
 
 view : Model -> Html Msg
@@ -206,9 +205,7 @@ view model =
         [ Html.node "style" [] [ Html.text layerStyles ]
         , Map.view mapConfig
             model.mapState
-            [ JsonTileLayer.layer (layerConfig model.tiles)
-            , Layer.Debug.layer
-            ]
+            [ JsonTileLayer.layer (layerConfig model.tiles) ]
         , Html.div []
             [ Html.text (toString model.mapState) ]
         ]
@@ -277,10 +274,10 @@ renderFeature project { properties, geometry } =
         children
 
 
-isInteresting : ( String, GeoJson ) -> Maybe GeoJson
+isInteresting : ( String, GeoJson ) -> Maybe ( String, GeoJson )
 isInteresting ( groupName, geojson ) =
-    if groupName == "water" then
-        Just geojson
+    if groupName == "earth" || groupName == "water" then
+        Just ( groupName, geojson )
     else
         Nothing
 
@@ -376,6 +373,7 @@ layerStyles =
   stroke-linecap: round;
 }
 
+.tile .earth { fill: #cccccc; stroke: none; }
 .tile .water-layer, .tile .river, .tile .stream, .tile .canal { fill: none; stroke: #9DD9D2; stroke-width: 1.5px; }
 .tile .water, .tile .ocean { fill: #9DD9D2; }
 .tile .riverbank { fill: #9DD9D2; }

@@ -90,9 +90,9 @@ renderGeoJsonPoint (Config internalConfig) attributes position =
 
 renderGeoJsonLineString : Config msg -> List (Svg.Attribute msg) -> List GeoJson.Position -> List (Svg msg)
 renderGeoJsonLineString config attributes positionList =
-    [ Svg.polyline
+    [ Svg.path
         (attributes
-            ++ [ points config positionList
+            ++ [ pathPoints config positionList
                     |> Svg.Attributes.points
                ]
         )
@@ -104,9 +104,11 @@ renderGeoJsonPolygon : Config msg -> List (Svg.Attribute msg) -> List (List GeoJ
 renderGeoJsonPolygon config attributes positionListList =
     let
         pathDefinition =
-            positionListList
+            (positionListList
                 |> List.map (pathPoints config)
                 |> String.join " "
+            )
+                ++ "Z"
     in
         [ Svg.path
             (attributes
