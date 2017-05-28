@@ -22,7 +22,7 @@ import Svg.Attributes
 
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
-view (Config config) ((State { transform }) as state) layers =
+view (Config config) ((State { transform, drag }) as state) layers =
     let
         renderState =
             Layer.transformToRenderState transform
@@ -42,6 +42,15 @@ view (Config config) ((State { transform }) as state) layers =
                             (Decode.map ZoomInAround clientPosition)
                         , Html.Events.on "mousedown"
                             (Decode.map (DragStart >> DragMsg) Mouse.position)
+                        , Html.Events.onWithOptions "touchstart"
+                            { preventDefault = True
+                            , stopPropagation = True
+                            }
+                            (Decode.map (DragStart >> DragMsg) Mouse.position)
+                        , Html.Events.on "touchmove"
+                            (Decode.map (DragAt >> DragMsg) Mouse.position)
+                        , Html.Events.on "touchend"
+                            (Decode.map (DragEnd >> DragMsg) Mouse.position)
                         , Html.Events.onWithOptions "wheel"
                             { preventDefault = True
                             , stopPropagation = True
@@ -67,13 +76,32 @@ view (Config config) ((State { transform }) as state) layers =
                 , ( "height", toString transform.height ++ "px" )
                 , ( "background", "#eee" )
                 ]
+             , Html.Attributes.classList
+                [ ( "dragging", drag /= Nothing ) ]
              ]
                 ++ handlers
             )
-            [ Svg.svg
+            [ Html.div
+                ([ Html.Attributes.style
+                    [ ( "position"
+                      , if drag /= Nothing then
+                            "fixed"
+                        else
+                            "absolute"
+                      )
+                    , ( "left", "0" )
+                    , ( "top", "0" )
+                    , ( "right", "0" )
+                    , ( "bottom", "0" )
+                    ]
+                 ]
+                )
+                []
+            , Svg.svg
                 [ Svg.Attributes.class "esm__map"
                 , Svg.Attributes.height (toString transform.height)
                 , Svg.Attributes.width (toString transform.width)
+                , Svg.Attributes.style "position: absolute;"
                 ]
                 [ Svg.g
                     [ Svg.Attributes.class "esm__layers" ]
@@ -81,16 +109,33 @@ view (Config config) ((State { transform }) as state) layers =
                         (viewPane (Config config) renderState layers)
                         Layer.panes
                     )
-                , Svg.g [ Svg.Attributes.class "esm__controls" ]
-                    [ Attribution.control config.attributionPrefix
-                        layerAttributions
-                    , case config.toMsg of
-                        Just toMsg ->
-                            Svg.map toMsg <| Zoom.control renderState
 
-                        Nothing ->
-                            Svg.text ""
+                -- This is needed at the moment as a touch event target for panning. The touchmove getz lost when it originates in a tile that gets removed during panning.
+                ]
+            , Html.div
+                [ Html.Attributes.style
+                    [ ( "position", "absolute" )
+                    , ( "left", "0" )
+                    , ( "top", "0" )
+                    , ( "right", "0" )
+                    , ( "bottom", "0" )
                     ]
+                ]
+                []
+            , Svg.svg
+                [ Svg.Attributes.class "esm__controls"
+                , Svg.Attributes.height (toString transform.height)
+                , Svg.Attributes.width (toString transform.width)
+                , Svg.Attributes.style "position: absolute;"
+                ]
+                [ Attribution.control config.attributionPrefix
+                    layerAttributions
+                , case config.toMsg of
+                    Just toMsg ->
+                        Svg.map toMsg <| Zoom.control renderState
+
+                    Nothing ->
+                        Svg.text ""
                 ]
             ]
 
