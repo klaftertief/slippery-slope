@@ -1,43 +1,18 @@
-module SlippyMap.Map.Update exposing (Msg(..), DragMsg(..), PinchMsg(..), update)
+module SlippyMap.Map.Update exposing (update)
 
 {-|
 @docs Msg, update
 -}
 
-import Keyboard exposing (KeyCode)
-import Mouse exposing (Position)
-import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
+import SlippyMap.Map.Config as Config exposing (Config(..))
+import SlippyMap.Map.Msg as Msg exposing (Msg(..), DragMsg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (State(..), Interaction(..), Drag, Pinch, Focus)
 
 
 {-| -}
-type Msg
-    = ZoomIn
-    | ZoomOut
-    | ZoomInAround Point
-    | ZoomByAround Float Point
-    | DragMsg DragMsg
-    | PinchMsg PinchMsg
-    | SetFocus Focus
-    | KeyboardNavigation KeyCode
-
-
-type DragMsg
-    = DragStart Position
-    | DragAt Position
-    | DragEnd Position
-
-
-type PinchMsg
-    = PinchStart ( Position, Position )
-    | PinchAt ( Position, Position )
-    | PinchEnd ( Position, Position )
-
-
-{-| -}
-update : Msg -> State -> State
-update msg ((State { transform }) as state) =
+update : Config msg -> Msg -> State -> State
+update (Config config) msg ((State { transform }) as state) =
     case msg of
         ZoomIn ->
             State.zoomIn state

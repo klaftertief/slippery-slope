@@ -8,7 +8,7 @@ import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.State as State exposing (State(..), Interaction(..), Drag, Focus(..))
-import SlippyMap.Map.Update as Update exposing (Msg(..), DragMsg(..))
+import SlippyMap.Map.Msg as Msg exposing (Msg(..), DragMsg(..))
 
 
 {-| -}

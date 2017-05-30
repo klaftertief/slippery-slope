@@ -9,12 +9,10 @@ module SlippyMap.Map.Config
 @docs Config, staticConfig, dynamicConfig
 -}
 
-import SlippyMap.Map.Update as Update exposing (Msg)
+import SlippyMap.Map.Msg as Msg exposing (Msg)
 
 
 {-| Configuration for the map.
-
-TODO: add ConfigInternal alias
 -}
 type Config msg
     = Config
@@ -30,7 +28,7 @@ type Config msg
 staticConfig : Config msg
 staticConfig =
     Config
-        { attributionPrefix = Just "ESM"
+        { attributionPrefix = Just "Elm"
         , minZoom = 0
         , maxZoom = 22
         , toMsg = Nothing
@@ -41,7 +39,7 @@ staticConfig =
 dynamicConfig : (Msg -> msg) -> Config msg
 dynamicConfig toMsg =
     Config
-        { attributionPrefix = Just "ESMd"
+        { attributionPrefix = Just "Elm"
         , minZoom = 0
         , maxZoom = 22
         , toMsg = Just toMsg

@@ -14,8 +14,8 @@ import SlippyMap.Control.Zoom as Zoom
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config exposing (Config(..))
+import SlippyMap.Map.Msg as Msg exposing (Msg(..), DragMsg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (State(..), Focus(..))
-import SlippyMap.Map.Update as Update exposing (Msg(..), DragMsg(..), PinchMsg(..))
 import Svg exposing (Svg)
 import Svg.Attributes
 

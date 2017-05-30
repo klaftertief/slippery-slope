@@ -46,7 +46,7 @@ update msg model =
         MapMsg mapMsg ->
             let
                 newModel =
-                    { model | mapState = Map.update mapMsg model.mapState }
+                    { model | mapState = Map.update mapConfig mapMsg model.mapState }
 
                 tilesToLoad =
                     newTilesToLoad newModel

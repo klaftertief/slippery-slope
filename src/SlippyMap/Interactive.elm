@@ -19,6 +19,7 @@ import Html exposing (Html)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config
+import SlippyMap.Map.Msg as Msg
 import SlippyMap.Map.State as State
 import SlippyMap.Map.Subscriptions as Subscriptions
 import SlippyMap.Map.Update as Update
@@ -71,14 +72,14 @@ renderState (State (State.State { transform })) =
 
 {-| -}
 type Msg
-    = Msg Update.Msg
+    = Msg Msg.Msg
 
 
 {-| -}
-update : Msg -> State -> State
-update (Msg msg) (State state) =
+update : Config msg -> Msg -> State -> State
+update (Config config) (Msg msg) (State state) =
     State <|
-        Update.update msg state
+        Update.update config msg state
 
 
 

@@ -36,7 +36,7 @@ update msg model =
         MapMsg mapMsg ->
             let
                 newMapState =
-                    Map.update mapMsg model.mapState
+                    Map.update mapConfig mapMsg model.mapState
             in
                 Model newMapState ! []
 
