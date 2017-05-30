@@ -1,7 +1,7 @@
-module SlippyMap.Geo.Point exposing (Point, Bounds, add, subtract, multiplyBy, divideBy)
+module SlippyMap.Geo.Point exposing (Point, Bounds, add, subtract, multiplyBy, divideBy, distance)
 
 {-|
-@docs Point, Bounds, add, subtract, multiplyBy, divideBy
+@docs Point, Bounds, add, subtract, multiplyBy, divideBy, distance
 -}
 
 
@@ -63,3 +63,11 @@ divideBy k p =
     { x = p.x / k
     , y = p.y / k
     }
+
+
+{-| -}
+distance : Point -> Point -> Float
+distance q p =
+    subtract q p
+        |> (\{ x, y } -> x ^ 2 + y ^ 2)
+        |> sqrt
