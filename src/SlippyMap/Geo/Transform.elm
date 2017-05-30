@@ -14,10 +14,12 @@ module SlippyMap.Geo.Transform
         , tileScale
         , zoomToAround
         , moveTo
+        , zoomScale
+        , scaleZoom
         )
 
 {-| Transform
-@docs Transform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, bounds, pixelBounds, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform
+@docs Transform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, bounds, pixelBounds, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform, zoomScale, scaleZoom
 -}
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
@@ -152,9 +154,16 @@ tileZoom =
     .zoom >> floor >> toFloat
 
 
+{-| -}
 zoomScale : Float -> Float
 zoomScale zoom =
     2 ^ zoom
+
+
+{-| -}
+scaleZoom : Float -> Float
+scaleZoom scale =
+    (logBase e) scale / logBase e 2
 
 
 

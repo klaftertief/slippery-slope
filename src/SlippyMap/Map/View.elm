@@ -15,24 +15,24 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.State as State exposing (State(..), Focus(..))
-import SlippyMap.Map.Update as Update exposing (Msg(..), DragMsg(..))
+import SlippyMap.Map.Update as Update exposing (Msg(..), DragMsg(..), PinchMsg(..))
 import Svg exposing (Svg)
 import Svg.Attributes
 
 
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
-view (Config config) ((State { transform, drag }) as state) layers =
+view (Config config) ((State { transform, drag, pinch }) as state) layers =
     let
         renderState =
             Layer.transformToRenderState transform
 
-        -- TODO: onlye get attributions from currentlyc visible layers, whater that means or it's implemented
+        -- TODO: onlye get attributions from currentlyc visible layers, whatever that means or how it's implemented
         layerAttributions =
             List.map Layer.getAttribution layers
                 |> List.filterMap identity
 
-        -- TODO: Somehow inject event attributes, only for dynamic maps
+        -- TODO: make list depend on config
         handlers =
             case config.toMsg of
                 Just toMsg ->
@@ -46,11 +46,13 @@ view (Config config) ((State { transform, drag }) as state) layers =
                             { preventDefault = True
                             , stopPropagation = True
                             }
-                            (Decode.map (DragStart >> DragMsg) Mouse.position)
+                            (Decode.map touchesStartMsg touchesDecoder)
                         , Html.Events.on "touchmove"
-                            (Decode.map (DragAt >> DragMsg) Mouse.position)
+                            (Decode.map touchesMoveMsg touchesDecoder)
                         , Html.Events.on "touchend"
-                            (Decode.map (DragEnd >> DragMsg) Mouse.position)
+                            (Decode.map touchesEndMsg (Decode.succeed (Tap (Position 0 0))))
+                        , Html.Events.on "touchcancel"
+                            (Decode.map touchesEndMsg (Decode.succeed (Tap (Position 0 0))))
                         , Html.Events.onWithOptions "wheel"
                             { preventDefault = True
                             , stopPropagation = True
@@ -84,7 +86,7 @@ view (Config config) ((State { transform, drag }) as state) layers =
             [ Html.div
                 ([ Html.Attributes.style
                     [ ( "position"
-                      , if drag /= Nothing then
+                      , if drag /= Nothing || pinch /= Nothing then
                             "fixed"
                         else
                             "absolute"
@@ -109,9 +111,9 @@ view (Config config) ((State { transform, drag }) as state) layers =
                         (viewPane (Config config) renderState layers)
                         Layer.panes
                     )
-
-                -- This is needed at the moment as a touch event target for panning. The touchmove getz lost when it originates in a tile that gets removed during panning.
                 ]
+
+            -- This is needed at the moment as a touch event target for panning. The touchmove getz lost when it originates in a tile that gets removed during panning.
             , Html.div
                 [ Html.Attributes.style
                     [ ( "position", "absolute" )
@@ -152,3 +154,65 @@ clientPosition =
     Decode.map2 Point
         (Decode.field "offsetX" Decode.float)
         (Decode.field "offsetY" Decode.float)
+
+
+type Touches
+    = Tap Position
+    | Pinch ( Position, Position )
+
+
+touchesStartMsg : Touches -> Msg
+touchesStartMsg touches =
+    case Debug.log "start touches" touches of
+        Tap position ->
+            DragStart position |> DragMsg
+
+        Pinch positions ->
+            PinchStart positions |> PinchMsg
+
+
+touchesMoveMsg : Touches -> Msg
+touchesMoveMsg touches =
+    case Debug.log "move touches" touches of
+        Tap position ->
+            DragAt position |> DragMsg
+
+        Pinch positions ->
+            PinchAt positions |> PinchMsg
+
+
+touchesEndMsg : Touches -> Msg
+touchesEndMsg touches =
+    case Debug.log "end touches" touches of
+        Tap position ->
+            DragEnd position |> DragMsg
+
+        Pinch positions ->
+            PinchEnd positions |> PinchMsg
+
+
+touchesDecoder : Decoder Touches
+touchesDecoder =
+    Decode.oneOf
+        [ Decode.map Pinch pinchDecoder
+        , Decode.map Tap tapDecoder
+        ]
+
+
+tapDecoder : Decoder Position
+tapDecoder =
+    tapDecoderAt 0
+
+
+pinchDecoder : Decoder ( Position, Position )
+pinchDecoder =
+    Decode.map2 (,)
+        (tapDecoderAt 0)
+        (tapDecoderAt 1)
+
+
+tapDecoderAt : Int -> Decoder Position
+tapDecoderAt index =
+    Decode.map2 Position
+        (Decode.at [ "targetTouches", toString index, "clientX" ] Decode.int)
+        (Decode.at [ "targetTouches", toString index, "clientY" ] Decode.int)

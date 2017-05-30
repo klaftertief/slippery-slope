@@ -1,4 +1,4 @@
-module SlippyMap.Map.Update exposing (Msg(..), DragMsg(..), update)
+module SlippyMap.Map.Update exposing (Msg(..), DragMsg(..), PinchMsg(..), update)
 
 {-|
 @docs Msg, update
@@ -8,7 +8,7 @@ import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
-import SlippyMap.Map.State as State exposing (State(..), Drag, Focus)
+import SlippyMap.Map.State as State exposing (State(..), Drag, Pinch, Focus)
 
 
 {-| -}
@@ -18,6 +18,7 @@ type Msg
     | ZoomInAround Point
     | ZoomByAround Float Point
     | DragMsg DragMsg
+    | PinchMsg PinchMsg
     | SetFocus Focus
     | KeyboardNavigation KeyCode
 
@@ -26,6 +27,12 @@ type DragMsg
     = DragStart Position
     | DragAt Position
     | DragEnd Position
+
+
+type PinchMsg
+    = PinchStart ( Position, Position )
+    | PinchAt ( Position, Position )
+    | PinchEnd ( Position, Position )
 
 
 {-| -}
@@ -46,6 +53,9 @@ update msg ((State { transform, drag }) as state) =
 
         DragMsg dragMsg ->
             updateDrag dragMsg state
+
+        PinchMsg pinchMsg ->
+            updatePinch pinchMsg state
 
         SetFocus focus ->
             State.setFocus focus state
@@ -91,6 +101,8 @@ updateDrag dragMsg ((State { drag }) as state) =
         case dragMsg of
             DragStart xy ->
                 State.setDrag (Just (Drag xy xy)) state
+                    --|> Debug.log "drag Start"
+                    |> State.setPinch Nothing
 
             DragAt xy ->
                 State.setDrag
@@ -99,6 +111,39 @@ updateDrag dragMsg ((State { drag }) as state) =
                         drag
                     )
                     state
+                    --|> Debug.log "drag at"
+                    |> State.setPinch Nothing
 
             DragEnd _ ->
                 State.setDrag Nothing state
+                    --|> Debug.log "drag end"
+                    |> State.setPinch Nothing
+
+
+updatePinch : PinchMsg -> State -> State
+updatePinch pinchMsg ((State { pinch, drag }) as state) =
+    State.withPinchTransform <|
+        case pinchMsg of
+            PinchStart touches ->
+                State.setPinch (Just (Pinch touches touches)) state
+                    |> State.setDrag Nothing
+
+            PinchAt touches ->
+                let
+                    newPinch =
+                        case ( pinch, drag ) of
+                            ( Nothing, Nothing ) ->
+                                Just (Pinch touches touches)
+
+                            ( Nothing, Just { current } ) ->
+                                Just (Pinch ( current, current ) touches)
+
+                            ( Just { current }, _ ) ->
+                                Just (Pinch current touches)
+                in
+                    State.setPinch newPinch state
+                        |> State.setDrag Nothing
+
+            PinchEnd _ ->
+                State.setPinch Nothing state
+                    |> State.setDrag Nothing

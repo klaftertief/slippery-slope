@@ -2,15 +2,18 @@ module SlippyMap.Map.State
     exposing
         ( State(..)
         , Drag
+        , Pinch
         , Focus(..)
         , defaultState
         , center
         , getTransform
         , withDragTransform
+        , withPinchTransform
         , getCoordinateBounds
         , getTileCover
         , setTransform
         , setDrag
+        , setPinch
         , setFocus
         , setCenter
         , setZoom
@@ -39,6 +42,7 @@ type State
     = State
         { transform : Transform
         , drag : Maybe Drag
+        , pinch : Maybe Pinch
         , focus : Focus
         }
 
@@ -46,6 +50,12 @@ type State
 type alias Drag =
     { last : Position
     , current : Position
+    }
+
+
+type alias Pinch =
+    { last : ( Position, Position )
+    , current : ( Position, Position )
     }
 
 
@@ -59,6 +69,7 @@ defaultState =
     State
         { transform = defaultTransform
         , drag = Nothing
+        , pinch = Nothing
         , focus = HasNoFocus
         }
 
@@ -73,6 +84,12 @@ setDrag : Maybe Drag -> State -> State
 setDrag newDrag (State state) =
     State
         { state | drag = newDrag }
+
+
+setPinch : Maybe Pinch -> State -> State
+setPinch newPinch (State state) =
+    State
+        { state | pinch = newPinch }
 
 
 setFocus : Focus -> State -> State
@@ -105,6 +122,67 @@ withDragTransform ((State { transform, drag }) as state) =
                     }
                 )
                 state
+
+
+withPinchTransform : State -> State
+withPinchTransform ((State { transform, pinch }) as state) =
+    case pinch of
+        Nothing ->
+            state
+
+        Just { last, current } ->
+            let
+                toPoint position =
+                    { x = toFloat position.x
+                    , y = toFloat position.y
+                    }
+
+                centerPoint ( pos1, pos2 ) =
+                    Point.add
+                        (toPoint pos1)
+                        (toPoint pos1)
+                        |> Point.divideBy 2
+
+                distance ( pos1, pos2 ) =
+                    Point.distance
+                        (toPoint pos1)
+                        (toPoint pos1)
+
+                lastCenter =
+                    centerPoint last
+
+                lastDistance =
+                    distance last
+
+                currentCenter =
+                    centerPoint current
+
+                currentDistance =
+                    distance current
+
+                newCenter =
+                    { x =
+                        (transform.width / 2)
+                            + lastCenter.x
+                            - currentCenter.x
+                    , y =
+                        (transform.height / 2)
+                            + lastCenter.y
+                            - currentCenter.y
+                    }
+
+                newZoom =
+                    Transform.scaleZoom
+                        (currentDistance - lastDistance)
+                        + transform.zoom
+                        |> Debug.log "newZoom"
+            in
+                state
+                    |> setTransform
+                        (Transform.moveTo transform
+                            newCenter
+                        )
+                    |> setZoom newZoom
 
 
 setCenter : Location -> State -> State
