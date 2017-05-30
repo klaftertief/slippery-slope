@@ -15,6 +15,7 @@ module SlippyMap.Map.State
         , setInteraction
         , setFocus
         , setCenter
+        , setSize
         , setZoom
         , zoomIn
         , zoomOut
@@ -189,6 +190,16 @@ moveTo newCenterPoint ((State { transform }) as state) =
 setCenter : Location -> State -> State
 setCenter newCenter ((State { transform }) as state) =
     setTransform { transform | center = newCenter } state
+
+
+setSize : ( Int, Int ) -> State -> State
+setSize ( width, height ) ((State { transform }) as state) =
+    setTransform
+        { transform
+            | width = toFloat width
+            , height = toFloat height
+        }
+        state
 
 
 setZoom : Float -> State -> State

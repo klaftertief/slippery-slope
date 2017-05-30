@@ -130,7 +130,8 @@ view (Config config) ((State { transform, interaction }) as state) layers =
                 , Svg.Attributes.width (toString transform.width)
                 , Svg.Attributes.style "position: absolute;"
                 ]
-                [ Attribution.control config.attributionPrefix
+                [ Attribution.control ( transform.width, transform.height )
+                    config.attributionPrefix
                     layerAttributions
                 , case config.toMsg of
                     Just toMsg ->

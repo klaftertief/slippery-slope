@@ -7,8 +7,8 @@ import Svg exposing (Svg)
 import Svg.Attributes
 
 
-control : Maybe String -> List String -> Svg msg
-control prefix attributions =
+control : ( Float, Float ) -> Maybe String -> List String -> Svg msg
+control ( width, height ) prefix attributions =
     let
         prefixText =
             prefix
@@ -17,8 +17,8 @@ control prefix attributions =
     in
         Svg.g [ Svg.Attributes.class "esm__atttribution" ]
             [ Svg.text_
-                [ Svg.Attributes.x "600"
-                , Svg.Attributes.y "400"
+                [ Svg.Attributes.x (toString width)
+                , Svg.Attributes.y (toString height)
                 , Svg.Attributes.dx "-4"
                 , Svg.Attributes.dy "-4"
                 , Svg.Attributes.textAnchor "end"

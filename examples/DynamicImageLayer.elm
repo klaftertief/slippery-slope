@@ -26,7 +26,10 @@ type Msg
 
 init : ( Model, Cmd Msg )
 init =
-    Model (Map.center { lon = 7, lat = 51 } 6)
+    Model
+        (Map.center { lon = 7, lat = 51 } 6
+            |> Map.resize ( 400, 600 )
+        )
         ! []
 
 
@@ -61,8 +64,9 @@ view model =
             --, debugLayer
             , markerLayer
             ]
-        , Html.div []
-            [ Html.text (toString model.mapState) ]
+
+        --, Html.div []
+        --    [ Html.text (toString model.mapState) ]
         ]
 
 
