@@ -30,7 +30,7 @@ staticConfig =
     Config
         { attributionPrefix = Just "Elm"
         , minZoom = 0
-        , maxZoom = 22
+        , maxZoom = 19
         , toMsg = Nothing
         }
 
@@ -41,6 +41,6 @@ dynamicConfig toMsg =
     Config
         { attributionPrefix = Just "Elm"
         , minZoom = 0
-        , maxZoom = 22
+        , maxZoom = 19
         , toMsg = Just toMsg
         }
