@@ -4,7 +4,6 @@ import Data
 import Data.World
 import GeoJson exposing (GeoJson)
 import Html exposing (Html)
-import Html.Attributes
 import Layer.Debug
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer.GeoJson as GeoJsonLayer
@@ -14,6 +13,7 @@ import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Layer.Overlay as Overlay
 import SlippyMap.Layer.StaticImage as StaticImage
+import Window
 
 
 type alias Model =
@@ -22,13 +22,14 @@ type alias Model =
 
 type Msg
     = MapMsg Map.Msg
+    | Resize Window.Size
 
 
-init : ( Model, Cmd Msg )
-init =
+init : Window.Size -> ( Model, Cmd Msg )
+init { width, height } =
     Model
         (Map.center { lon = 7, lat = 51 } 6
-            |> Map.resize ( 400, 600 )
+            |> Map.resize ( width, height )
         )
         ! []
 
@@ -43,6 +44,14 @@ update msg model =
             in
                 Model newMapState ! []
 
+        Resize { width, height } ->
+            { model
+                | mapState =
+                    Map.resize ( width, height )
+                        model.mapState
+            }
+                ! []
+
 
 mapConfig : Map.Config Msg
 mapConfig =
@@ -51,7 +60,7 @@ mapConfig =
 
 view : Model -> Html Msg
 view model =
-    Html.div [ Html.Attributes.style [ ( "padding", "50px" ) ] ]
+    Html.div []
         [ Map.view mapConfig
             model.mapState
             [ imageLayer
@@ -138,12 +147,15 @@ markerLayer =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Map.subscriptions mapConfig model.mapState
+    Sub.batch
+        [ Map.subscriptions mapConfig model.mapState
+        , Window.resizes Resize
+        ]
 
 
-main : Program Never Model Msg
+main : Program Window.Size Model Msg
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update
