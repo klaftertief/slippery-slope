@@ -8,7 +8,7 @@ import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
-import SlippyMap.Map.State as State exposing (State(..), Drag, Pinch, Focus)
+import SlippyMap.Map.State as State exposing (State(..), Interaction(..), Drag, Pinch, Focus)
 
 
 {-| -}
@@ -37,7 +37,7 @@ type PinchMsg
 
 {-| -}
 update : Msg -> State -> State
-update msg ((State { transform, drag }) as state) =
+update msg ((State { transform }) as state) =
     case msg of
         ZoomIn ->
             State.zoomIn state
@@ -96,54 +96,58 @@ update msg ((State { transform, drag }) as state) =
 
 
 updateDrag : DragMsg -> State -> State
-updateDrag dragMsg ((State { drag }) as state) =
-    State.withDragTransform <|
+updateDrag dragMsg ((State { interaction }) as state) =
+    State.withInteractionTransform <|
         case dragMsg of
             DragStart xy ->
-                State.setDrag (Just (Drag xy xy)) state
-                    --|> Debug.log "drag Start"
-                    |> State.setPinch Nothing
+                State.setInteraction
+                    (Just <| Dragging (Drag xy xy))
+                    state
 
             DragAt xy ->
-                State.setDrag
+                State.setInteraction
                     (Maybe.map
-                        (\{ current } -> Drag current xy)
-                        drag
+                        (\i ->
+                            case i of
+                                Dragging { current } ->
+                                    Dragging (Drag current xy)
+
+                                Pinching { current } ->
+                                    Dragging (Drag (Tuple.first current) xy)
+                        )
+                        interaction
                     )
                     state
-                    --|> Debug.log "drag at"
-                    |> State.setPinch Nothing
 
             DragEnd _ ->
-                State.setDrag Nothing state
-                    --|> Debug.log "drag end"
-                    |> State.setPinch Nothing
+                State.setInteraction Nothing state
+
+
+
+--|> Debug.log "drag end"
 
 
 updatePinch : PinchMsg -> State -> State
-updatePinch pinchMsg ((State { pinch, drag }) as state) =
-    State.withPinchTransform <|
+updatePinch pinchMsg ((State { interaction }) as state) =
+    State.withInteractionTransform <|
         case pinchMsg of
             PinchStart touches ->
-                State.setPinch (Just (Pinch touches touches)) state
-                    |> State.setDrag Nothing
+                State.setInteraction (Just <| Pinching (Pinch touches touches)) state
 
             PinchAt touches ->
                 let
-                    newPinch =
-                        case ( pinch, drag ) of
-                            ( Nothing, Nothing ) ->
-                                Just (Pinch touches touches)
+                    newInteraction =
+                        case interaction of
+                            Nothing ->
+                                Just <| Pinching (Pinch touches touches)
 
-                            ( Nothing, Just { current } ) ->
-                                Just (Pinch ( current, current ) touches)
+                            Just (Dragging { current }) ->
+                                Just <| Pinching (Pinch ( current, current ) touches)
 
-                            ( Just { current }, _ ) ->
-                                Just (Pinch current touches)
+                            Just (Pinching { current }) ->
+                                Just <| Pinching (Pinch current touches)
                 in
-                    State.setPinch newPinch state
-                        |> State.setDrag Nothing
+                    State.setInteraction newInteraction state
 
             PinchEnd _ ->
-                State.setPinch Nothing state
-                    |> State.setDrag Nothing
+                State.setInteraction Nothing state

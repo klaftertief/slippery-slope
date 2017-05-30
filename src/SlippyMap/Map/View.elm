@@ -22,7 +22,7 @@ import Svg.Attributes
 
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
-view (Config config) ((State { transform, drag, pinch }) as state) layers =
+view (Config config) ((State { transform, interaction }) as state) layers =
     let
         renderState =
             Layer.transformToRenderState transform
@@ -79,14 +79,14 @@ view (Config config) ((State { transform, drag, pinch }) as state) layers =
                 , ( "background", "#eee" )
                 ]
              , Html.Attributes.classList
-                [ ( "dragging", drag /= Nothing ) ]
+                [ ( "with-interaction", interaction /= Nothing ) ]
              ]
                 ++ handlers
             )
             [ Html.div
                 ([ Html.Attributes.style
                     [ ( "position"
-                      , if drag /= Nothing || pinch /= Nothing then
+                      , if interaction /= Nothing then
                             "fixed"
                         else
                             "absolute"
@@ -163,7 +163,7 @@ type Touches
 
 touchesStartMsg : Touches -> Msg
 touchesStartMsg touches =
-    case Debug.log "start touches" touches of
+    case touches of
         Tap position ->
             DragStart position |> DragMsg
 
@@ -173,7 +173,7 @@ touchesStartMsg touches =
 
 touchesMoveMsg : Touches -> Msg
 touchesMoveMsg touches =
-    case Debug.log "move touches" touches of
+    case touches of
         Tap position ->
             DragAt position |> DragMsg
 
@@ -183,7 +183,7 @@ touchesMoveMsg touches =
 
 touchesEndMsg : Touches -> Msg
 touchesEndMsg touches =
-    case Debug.log "end touches" touches of
+    case touches of
         Tap position ->
             DragEnd position |> DragMsg
 

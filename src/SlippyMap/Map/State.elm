@@ -1,19 +1,18 @@
 module SlippyMap.Map.State
     exposing
         ( State(..)
+        , Interaction(..)
         , Drag
         , Pinch
         , Focus(..)
         , defaultState
         , center
         , getTransform
-        , withDragTransform
-        , withPinchTransform
+        , withInteractionTransform
         , getCoordinateBounds
         , getTileCover
         , setTransform
-        , setDrag
-        , setPinch
+        , setInteraction
         , setFocus
         , setCenter
         , setZoom
@@ -41,10 +40,14 @@ TODO: Maybe just have the most basic state here, e.g. the Transform, and move Dr
 type State
     = State
         { transform : Transform
-        , drag : Maybe Drag
-        , pinch : Maybe Pinch
+        , interaction : Maybe Interaction
         , focus : Focus
         }
+
+
+type Interaction
+    = Dragging Drag
+    | Pinching Pinch
 
 
 type alias Drag =
@@ -68,8 +71,7 @@ defaultState : State
 defaultState =
     State
         { transform = defaultTransform
-        , drag = Nothing
-        , pinch = Nothing
+        , interaction = Nothing
         , focus = HasNoFocus
         }
 
@@ -80,16 +82,10 @@ setTransform newTransform (State state) =
         { state | transform = newTransform }
 
 
-setDrag : Maybe Drag -> State -> State
-setDrag newDrag (State state) =
+setInteraction : Maybe Interaction -> State -> State
+setInteraction newInteraction (State state) =
     State
-        { state | drag = newDrag }
-
-
-setPinch : Maybe Pinch -> State -> State
-setPinch newPinch (State state) =
-    State
-        { state | pinch = newPinch }
+        { state | interaction = newInteraction }
 
 
 setFocus : Focus -> State -> State
@@ -101,88 +97,93 @@ setFocus newFocus (State state) =
 defaultTransform : Transform
 defaultTransform =
     { tileSize = 256
-    , width = 600
-    , height = 400
+    , width = 800
+    , height = 1400
     , center = { lon = 0, lat = 0 }
     , zoom = 0
     }
 
 
-withDragTransform : State -> State
-withDragTransform ((State { transform, drag }) as state) =
-    case drag of
+withInteractionTransform : State -> State
+withInteractionTransform ((State { interaction }) as state) =
+    case interaction of
+        Just (Dragging drag) ->
+            withDragTransform drag state
+
+        Just (Pinching pinch) ->
+            withPinchTransform pinch state
+
         Nothing ->
             state
 
-        Just { last, current } ->
-            setTransform
-                (Transform.moveTo transform
-                    { x = transform.width / 2 + toFloat (last.x - current.x)
-                    , y = transform.height / 2 + toFloat (last.y - current.y)
-                    }
-                )
-                state
+
+withDragTransform : Drag -> State -> State
+withDragTransform { last, current } ((State { transform }) as state) =
+    setTransform
+        (Transform.moveTo transform
+            { x = transform.width / 2 + toFloat (last.x - current.x)
+            , y = transform.height / 2 + toFloat (last.y - current.y)
+            }
+        )
+        state
 
 
-withPinchTransform : State -> State
-withPinchTransform ((State { transform, pinch }) as state) =
-    case pinch of
-        Nothing ->
-            state
+withPinchTransform : Pinch -> State -> State
+withPinchTransform { last, current } ((State { transform }) as state) =
+    let
+        toPoint position =
+            { x = toFloat position.x
+            , y = toFloat position.y
+            }
 
-        Just { last, current } ->
-            let
-                toPoint position =
-                    { x = toFloat position.x
-                    , y = toFloat position.y
-                    }
+        centerPoint ( pos1, pos2 ) =
+            Point.add
+                (toPoint pos1)
+                (toPoint pos2)
+                |> Point.divideBy 2
 
-                centerPoint ( pos1, pos2 ) =
-                    Point.add
-                        (toPoint pos1)
-                        (toPoint pos1)
-                        |> Point.divideBy 2
+        distance ( pos1, pos2 ) =
+            Point.distance
+                (toPoint pos1)
+                (toPoint pos2)
 
-                distance ( pos1, pos2 ) =
-                    Point.distance
-                        (toPoint pos1)
-                        (toPoint pos1)
+        lastCenter =
+            centerPoint last
 
-                lastCenter =
-                    centerPoint last
+        lastDistance =
+            distance last
 
-                lastDistance =
-                    distance last
+        currentCenter =
+            centerPoint current
 
-                currentCenter =
-                    centerPoint current
+        currentDistance =
+            distance current
 
-                currentDistance =
-                    distance current
+        newCenterPoint =
+            { x =
+                (transform.width / 2)
+                    + lastCenter.x
+                    - currentCenter.x
+            , y =
+                (transform.height / 2)
+                    + lastCenter.y
+                    - currentCenter.y
+            }
 
-                newCenter =
-                    { x =
-                        (transform.width / 2)
-                            + lastCenter.x
-                            - currentCenter.x
-                    , y =
-                        (transform.height / 2)
-                            + lastCenter.y
-                            - currentCenter.y
-                    }
+        zoomDelta =
+            Transform.scaleZoom
+                (currentDistance / lastDistance)
+    in
+        state
+            |> moveTo newCenterPoint
+            |> zoomByAround zoomDelta currentCenter
 
-                newZoom =
-                    Transform.scaleZoom
-                        (currentDistance - lastDistance)
-                        + transform.zoom
-                        |> Debug.log "newZoom"
-            in
-                state
-                    |> setTransform
-                        (Transform.moveTo transform
-                            newCenter
-                        )
-                    |> setZoom newZoom
+
+moveTo : Point -> State -> State
+moveTo newCenterPoint ((State { transform }) as state) =
+    setTransform
+        (Transform.moveTo transform newCenterPoint)
+        state
 
 
 setCenter : Location -> State -> State
@@ -192,7 +193,10 @@ setCenter newCenter ((State { transform }) as state) =
 
 setZoom : Float -> State -> State
 setZoom newZoom ((State { transform }) as state) =
-    setTransform { transform | zoom = newZoom } state
+    if isNaN newZoom || isInfinite newZoom then
+        state
+    else
+        setTransform { transform | zoom = newZoom } state
 
 
 zoomIn : State -> State
@@ -212,12 +216,16 @@ zoomInAround =
 
 zoomByAround : Float -> Point -> State -> State
 zoomByAround delta point ((State { transform }) as state) =
-    setTransform
-        (Transform.zoomToAround transform
-            (transform.zoom + delta)
-            point
-        )
-        state
+    let
+        newZoom =
+            if isNaN delta || isInfinite delta then
+                transform.zoom
+            else
+                transform.zoom + delta
+    in
+        setTransform
+            (Transform.zoomToAround transform newZoom point)
+            state
 
 
 {-| -}

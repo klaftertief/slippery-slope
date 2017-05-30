@@ -7,22 +7,25 @@ module SlippyMap.Map.Subscriptions exposing (subscriptions)
 import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Map.Config as Config exposing (Config(..))
-import SlippyMap.Map.State as State exposing (State(..), Drag, Focus(..))
+import SlippyMap.Map.State as State exposing (State(..), Interaction(..), Drag, Focus(..))
 import SlippyMap.Map.Update as Update exposing (Msg(..), DragMsg(..))
 
 
 {-| -}
 subscriptions : Config msg -> State -> Sub msg
-subscriptions (Config config) ((State { drag, focus }) as state) =
+subscriptions (Config config) ((State { interaction, focus }) as state) =
     case config.toMsg of
         Just toMsg ->
             let
                 dragSubscriptions =
-                    case drag of
+                    case interaction of
                         Nothing ->
                             []
 
-                        Just _ ->
+                        Just (Pinching _) ->
+                            []
+
+                        Just (Dragging _) ->
                             [ Mouse.moves (DragAt >> DragMsg)
                             , Mouse.ups (DragEnd >> DragMsg)
                             ]
