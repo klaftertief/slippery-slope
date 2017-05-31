@@ -78,6 +78,16 @@ update msg model =
                             { lon = 175.4, lat = -37.9 }
                             11
                             model.mapState
+                    else if isVisible && layerName == "Marker" then
+                        Map.jumpTo
+                            { lon = 7, lat = 51 }
+                            6
+                            model.mapState
+                    else if isVisible && layerName == "GeoJson" then
+                        Map.jumpTo
+                            { lon = 0, lat = 0 }
+                            3
+                            model.mapState
                     else if isVisible && layerName == "Image Overlay" then
                         Map.jumpTo
                             { lon = -74.17, lat = 40.74 }

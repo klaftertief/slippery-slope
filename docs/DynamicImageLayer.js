@@ -15467,11 +15467,19 @@ var _user$project$DynamicImageLayer$update = F2(
 					_klaftertief$elm_slippy_map$SlippyMap_Interactive$jumpTo,
 					{lon: 175.4, lat: -37.9},
 					11,
+					model.mapState) : ((_p5 && _elm_lang$core$Native_Utils.eq(_p6, 'Marker')) ? A3(
+					_klaftertief$elm_slippy_map$SlippyMap_Interactive$jumpTo,
+					{lon: 7, lat: 51},
+					6,
+					model.mapState) : ((_p5 && _elm_lang$core$Native_Utils.eq(_p6, 'GeoJson')) ? A3(
+					_klaftertief$elm_slippy_map$SlippyMap_Interactive$jumpTo,
+					{lon: 0, lat: 0},
+					3,
 					model.mapState) : ((_p5 && _elm_lang$core$Native_Utils.eq(_p6, 'Image Overlay')) ? A3(
 					_klaftertief$elm_slippy_map$SlippyMap_Interactive$jumpTo,
 					{lon: -74.17, lat: 40.74},
 					12,
-					model.mapState) : model.mapState);
+					model.mapState) : model.mapState)));
 				var newVisibleLayerNames = _p5 ? A2(_elm_lang$core$Set$insert, _p6, model.visibleLayerNames) : A2(_elm_lang$core$Set$remove, _p6, model.visibleLayerNames);
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
