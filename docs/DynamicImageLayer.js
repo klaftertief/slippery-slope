@@ -13554,13 +13554,22 @@ var _klaftertief$elm_slippy_map$SlippyMap_Interactive$resize = F2(
 		return _klaftertief$elm_slippy_map$SlippyMap_Interactive$State(
 			A2(_klaftertief$elm_slippy_map$SlippyMap_Map_State$setSize, dimensions, _p11._0));
 	});
-var _klaftertief$elm_slippy_map$SlippyMap_Interactive$update = F3(
-	function (_p14, _p13, _p12) {
-		var _p15 = _p14;
-		var _p16 = _p13;
-		var _p17 = _p12;
+var _klaftertief$elm_slippy_map$SlippyMap_Interactive$jumpTo = F3(
+	function (center, zoom, _p12) {
+		var _p13 = _p12;
 		return _klaftertief$elm_slippy_map$SlippyMap_Interactive$State(
-			A3(_klaftertief$elm_slippy_map$SlippyMap_Map_Update$update, _p15._0, _p16._0, _p17._0));
+			A2(
+				_klaftertief$elm_slippy_map$SlippyMap_Map_State$setZoom,
+				zoom,
+				A2(_klaftertief$elm_slippy_map$SlippyMap_Map_State$setCenter, center, _p13._0)));
+	});
+var _klaftertief$elm_slippy_map$SlippyMap_Interactive$update = F3(
+	function (_p16, _p15, _p14) {
+		var _p17 = _p16;
+		var _p18 = _p15;
+		var _p19 = _p14;
+		return _klaftertief$elm_slippy_map$SlippyMap_Interactive$State(
+			A3(_klaftertief$elm_slippy_map$SlippyMap_Map_Update$update, _p17._0, _p18._0, _p19._0));
 	});
 var _klaftertief$elm_slippy_map$SlippyMap_Interactive$Msg = function (a) {
 	return {ctor: 'Msg', _0: a};
@@ -13568,9 +13577,9 @@ var _klaftertief$elm_slippy_map$SlippyMap_Interactive$Msg = function (a) {
 var _klaftertief$elm_slippy_map$SlippyMap_Interactive$config = function (toMsg) {
 	return _klaftertief$elm_slippy_map$SlippyMap_Interactive$Config(
 		_klaftertief$elm_slippy_map$SlippyMap_Map_Config$dynamicConfig(
-			function (_p18) {
+			function (_p20) {
 				return toMsg(
-					_klaftertief$elm_slippy_map$SlippyMap_Interactive$Msg(_p18));
+					_klaftertief$elm_slippy_map$SlippyMap_Interactive$Msg(_p20));
 			}));
 };
 
@@ -15452,13 +15461,23 @@ var _user$project$DynamicImageLayer$update = F2(
 						}),
 					{ctor: '[]'});
 			default:
-				var _p5 = _p4._0;
-				var newVisibleLayerNames = _p4._1 ? A2(_elm_lang$core$Set$insert, _p5, model.visibleLayerNames) : A2(_elm_lang$core$Set$remove, _p5, model.visibleLayerNames);
+				var _p6 = _p4._0;
+				var _p5 = _p4._1;
+				var newMapState = (_p5 && _elm_lang$core$Native_Utils.eq(_p6, 'Heatmap')) ? A3(
+					_klaftertief$elm_slippy_map$SlippyMap_Interactive$jumpTo,
+					{lon: 175.4, lat: -37.9},
+					11,
+					model.mapState) : ((_p5 && _elm_lang$core$Native_Utils.eq(_p6, 'Image Overlay')) ? A3(
+					_klaftertief$elm_slippy_map$SlippyMap_Interactive$jumpTo,
+					{lon: -74.17, lat: 40.74},
+					12,
+					model.mapState) : model.mapState);
+				var newVisibleLayerNames = _p5 ? A2(_elm_lang$core$Set$insert, _p6, model.visibleLayerNames) : A2(_elm_lang$core$Set$remove, _p6, model.visibleLayerNames);
 				return A2(
 					_elm_lang$core$Platform_Cmd_ops['!'],
 					_elm_lang$core$Native_Utils.update(
 						model,
-						{visibleLayerNames: newVisibleLayerNames}),
+						{visibleLayerNames: newVisibleLayerNames, mapState: newMapState}),
 					{ctor: '[]'});
 		}
 	});

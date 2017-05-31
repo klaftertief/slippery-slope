@@ -71,8 +71,26 @@ update msg model =
                     else
                         Set.remove layerName
                             model.visibleLayerNames
+
+                newMapState =
+                    if isVisible && layerName == "Heatmap" then
+                        Map.jumpTo
+                            { lon = 175.4, lat = -37.9 }
+                            11
+                            model.mapState
+                    else if isVisible && layerName == "Image Overlay" then
+                        Map.jumpTo
+                            { lon = -74.17, lat = 40.74 }
+                            12
+                            model.mapState
+                    else
+                        model.mapState
             in
-                { model | visibleLayerNames = newVisibleLayerNames } ! []
+                { model
+                    | visibleLayerNames = newVisibleLayerNames
+                    , mapState = newMapState
+                }
+                    ! []
 
 
 mapConfig : Map.Config Msg
