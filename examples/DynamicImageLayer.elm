@@ -2,9 +2,13 @@ module DynamicImageLayer exposing (..)
 
 import Data
 import Data.World
+import Dict exposing (Dict)
 import GeoJson exposing (GeoJson)
 import Html exposing (Html)
+import Html.Attributes
+import Html.Events
 import Layer.Debug
+import Set exposing (Set)
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer.GeoJson as GeoJsonLayer
 import SlippyMap.Layer.Grid as Grid
@@ -17,20 +21,24 @@ import Window
 
 
 type alias Model =
-    { mapState : Map.State }
+    { mapState : Map.State
+    , visibleLayerNames : Set String
+    }
 
 
 type Msg
     = MapMsg Map.Msg
     | Resize Window.Size
+    | SetLayerVisibility String Bool
 
 
 init : Window.Size -> ( Model, Cmd Msg )
 init { width, height } =
-    Model
-        (Map.center { lon = 7, lat = 51 } 6
+    { mapState =
+        Map.center { lon = 7, lat = 51 } 6
             |> Map.resize ( width, height )
-        )
+    , visibleLayerNames = Set.empty
+    }
         ! []
 
 
@@ -38,11 +46,13 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         MapMsg mapMsg ->
-            let
-                newMapState =
-                    Map.update mapConfig mapMsg model.mapState
-            in
-                Model newMapState ! []
+            { model
+                | mapState =
+                    Map.update mapConfig
+                        mapMsg
+                        model.mapState
+            }
+                ! []
 
         Resize { width, height } ->
             { model
@@ -51,6 +61,18 @@ update msg model =
                         model.mapState
             }
                 ! []
+
+        SetLayerVisibility layerName isVisible ->
+            let
+                newVisibleLayerNames =
+                    if isVisible then
+                        Set.insert layerName
+                            model.visibleLayerNames
+                    else
+                        Set.remove layerName
+                            model.visibleLayerNames
+            in
+                { model | visibleLayerNames = newVisibleLayerNames } ! []
 
 
 mapConfig : Map.Config Msg
@@ -63,23 +85,80 @@ view model =
     Html.div []
         [ Map.view mapConfig
             model.mapState
-            [ imageLayer
-
-            --, graticuleLayer
-            , overlayLayer
-
-            --, geoJsonLayer
-            --, heatmapLayer
-            --, debugLayer
-            , markerLayer
+            (imageLayer :: visibleLayers model.visibleLayerNames)
+        , Html.div
+            [ Html.Attributes.style
+                [ ( "position", "absolute" )
+                , ( "right", "8px" )
+                , ( "top", "8px" )
+                , ( "font-family", "sans-serif" )
+                ]
             ]
-
-        --, Html.div []
-        --    [ Html.text (toString model.mapState) ]
+            [ layerToggleControl model.visibleLayerNames ]
         ]
 
 
-imageLayer : Layer msg
+layerToggleControl : Set String -> Html Msg
+layerToggleControl visibleLayerNames =
+    Html.ul
+        [ Html.Attributes.style
+            [ ( "list-style", "none" )
+            , ( "margin", "0" )
+            , ( "padding", "8px" )
+            , ( "background", "#fff" )
+            , ( "border", "1px solid #aaa" )
+            ]
+        ]
+        (List.map
+            (layerToggle visibleLayerNames)
+            (Dict.keys toggableLayers)
+        )
+
+
+layerToggle : Set String -> String -> Html Msg
+layerToggle visibleLayerNames layerName =
+    let
+        isVisible =
+            Set.member layerName visibleLayerNames
+    in
+        Html.li []
+            [ Html.label []
+                [ Html.input
+                    [ Html.Attributes.type_ "checkbox"
+                    , Html.Attributes.checked isVisible
+                    , Html.Events.onCheck
+                        (SetLayerVisibility layerName)
+                    ]
+                    []
+                , Html.span
+                    [ Html.Attributes.style
+                        [ ( "margin-left", "4px" ) ]
+                    ]
+                    [ Html.text layerName ]
+                ]
+            ]
+
+
+visibleLayers : Set String -> List (Layer Msg)
+visibleLayers layerNames =
+    layerNames
+        |> Set.toList
+        |> List.filterMap
+            (flip Dict.get toggableLayers)
+
+
+toggableLayers : Dict String (Layer Msg)
+toggableLayers =
+    Dict.fromList
+        [ ( "Marker", markerLayer )
+        , ( "Image Overlay", overlayLayer )
+        , ( "GeoJson", geoJsonLayer )
+        , ( "Heatmap", heatmapLayer )
+        , ( "Debug", debugLayer )
+        ]
+
+
+imageLayer : Layer Msg
 imageLayer =
     StaticImage.layer
         (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
@@ -87,12 +166,12 @@ imageLayer =
         )
 
 
-graticuleLayer : Layer msg
+graticuleLayer : Layer Msg
 graticuleLayer =
     Grid.layer Grid.defaultConfig
 
 
-overlayLayer : Layer msg
+overlayLayer : Layer Msg
 overlayLayer =
     Overlay.layer Overlay.defaultConfig
         [ ( { southWest = { lon = -74.22655, lat = 40.712216 }
@@ -103,13 +182,13 @@ overlayLayer =
         ]
 
 
-geoJsonLayer : Layer msg
+geoJsonLayer : Layer Msg
 geoJsonLayer =
     GeoJsonLayer.layer GeoJsonLayer.defaultConfig
         (Maybe.withDefault myGeoJson Data.World.geoJson)
 
 
-heatmapLayer : Layer msg
+heatmapLayer : Layer Msg
 heatmapLayer =
     Heatmap.layer Heatmap.defaultConfig
         (List.map
@@ -131,12 +210,12 @@ heatmapLayer =
         )
 
 
-debugLayer : Layer msg
+debugLayer : Layer Msg
 debugLayer =
     Layer.Debug.layer
 
 
-markerLayer : Layer msg
+markerLayer : Layer Msg
 markerLayer =
     Marker.simpleLayer Marker.defaultConfig
         [ { lon = 6, lat = 50 }

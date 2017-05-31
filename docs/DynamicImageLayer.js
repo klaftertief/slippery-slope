@@ -15278,22 +15278,146 @@ var _user$project$DynamicImageLayer$imageLayer = _klaftertief$elm_slippy_map$Sli
 					}
 				}
 			})));
-var _user$project$DynamicImageLayer$Model = function (a) {
-	return {mapState: a};
+var _user$project$DynamicImageLayer$toggableLayers = _elm_lang$core$Dict$fromList(
+	{
+		ctor: '::',
+		_0: {ctor: '_Tuple2', _0: 'Marker', _1: _user$project$DynamicImageLayer$markerLayer},
+		_1: {
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: 'Image Overlay', _1: _user$project$DynamicImageLayer$overlayLayer},
+			_1: {
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 'GeoJson', _1: _user$project$DynamicImageLayer$geoJsonLayer},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'Heatmap', _1: _user$project$DynamicImageLayer$heatmapLayer},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'Debug', _1: _user$project$DynamicImageLayer$debugLayer},
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		}
+	});
+var _user$project$DynamicImageLayer$visibleLayers = function (layerNames) {
+	return A2(
+		_elm_lang$core$List$filterMap,
+		A2(_elm_lang$core$Basics$flip, _elm_lang$core$Dict$get, _user$project$DynamicImageLayer$toggableLayers),
+		_elm_lang$core$Set$toList(layerNames));
 };
 var _user$project$DynamicImageLayer$init = function (_p2) {
 	var _p3 = _p2;
 	return A2(
 		_elm_lang$core$Platform_Cmd_ops['!'],
-		_user$project$DynamicImageLayer$Model(
-			A2(
+		{
+			mapState: A2(
 				_klaftertief$elm_slippy_map$SlippyMap_Interactive$resize,
 				{ctor: '_Tuple2', _0: _p3.width, _1: _p3.height},
 				A2(
 					_klaftertief$elm_slippy_map$SlippyMap_Interactive$center,
 					{lon: 7, lat: 51},
-					6))),
+					6)),
+			visibleLayerNames: _elm_lang$core$Set$empty
+		},
 		{ctor: '[]'});
+};
+var _user$project$DynamicImageLayer$Model = F2(
+	function (a, b) {
+		return {mapState: a, visibleLayerNames: b};
+	});
+var _user$project$DynamicImageLayer$SetLayerVisibility = F2(
+	function (a, b) {
+		return {ctor: 'SetLayerVisibility', _0: a, _1: b};
+	});
+var _user$project$DynamicImageLayer$layerToggle = F2(
+	function (visibleLayerNames, layerName) {
+		var isVisible = A2(_elm_lang$core$Set$member, layerName, visibleLayerNames);
+		return A2(
+			_elm_lang$html$Html$li,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$label,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$input,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$type_('checkbox'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$checked(isVisible),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onCheck(
+											_user$project$DynamicImageLayer$SetLayerVisibility(layerName)),
+										_1: {ctor: '[]'}
+									}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$span,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$style(
+										{
+											ctor: '::',
+											_0: {ctor: '_Tuple2', _0: 'margin-left', _1: '4px'},
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(layerName),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}),
+				_1: {ctor: '[]'}
+			});
+	});
+var _user$project$DynamicImageLayer$layerToggleControl = function (visibleLayerNames) {
+	return A2(
+		_elm_lang$html$Html$ul,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$style(
+				{
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'list-style', _1: 'none'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'margin', _1: '0'},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'padding', _1: '8px'},
+							_1: {
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'background', _1: '#fff'},
+								_1: {
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'border', _1: '1px solid #aaa'},
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}),
+			_1: {ctor: '[]'}
+		},
+		A2(
+			_elm_lang$core$List$map,
+			_user$project$DynamicImageLayer$layerToggle(visibleLayerNames),
+			_elm_lang$core$Dict$keys(_user$project$DynamicImageLayer$toggableLayers)));
 };
 var _user$project$DynamicImageLayer$Resize = function (a) {
 	return {ctor: 'Resize', _0: a};
@@ -15305,24 +15429,37 @@ var _user$project$DynamicImageLayer$mapConfig = _klaftertief$elm_slippy_map$Slip
 var _user$project$DynamicImageLayer$update = F2(
 	function (msg, model) {
 		var _p4 = msg;
-		if (_p4.ctor === 'MapMsg') {
-			var newMapState = A3(_klaftertief$elm_slippy_map$SlippyMap_Interactive$update, _user$project$DynamicImageLayer$mapConfig, _p4._0, model.mapState);
-			return A2(
-				_elm_lang$core$Platform_Cmd_ops['!'],
-				_user$project$DynamicImageLayer$Model(newMapState),
-				{ctor: '[]'});
-		} else {
-			return A2(
-				_elm_lang$core$Platform_Cmd_ops['!'],
-				_elm_lang$core$Native_Utils.update(
-					model,
-					{
-						mapState: A2(
-							_klaftertief$elm_slippy_map$SlippyMap_Interactive$resize,
-							{ctor: '_Tuple2', _0: _p4._0.width, _1: _p4._0.height},
-							model.mapState)
-					}),
-				{ctor: '[]'});
+		switch (_p4.ctor) {
+			case 'MapMsg':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							mapState: A3(_klaftertief$elm_slippy_map$SlippyMap_Interactive$update, _user$project$DynamicImageLayer$mapConfig, _p4._0, model.mapState)
+						}),
+					{ctor: '[]'});
+			case 'Resize':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							mapState: A2(
+								_klaftertief$elm_slippy_map$SlippyMap_Interactive$resize,
+								{ctor: '_Tuple2', _0: _p4._0.width, _1: _p4._0.height},
+								model.mapState)
+						}),
+					{ctor: '[]'});
+			default:
+				var _p5 = _p4._0;
+				var newVisibleLayerNames = _p4._1 ? A2(_elm_lang$core$Set$insert, _p5, model.visibleLayerNames) : A2(_elm_lang$core$Set$remove, _p5, model.visibleLayerNames);
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{visibleLayerNames: newVisibleLayerNames}),
+					{ctor: '[]'});
 		}
 	});
 var _user$project$DynamicImageLayer$view = function (model) {
@@ -15338,17 +15475,41 @@ var _user$project$DynamicImageLayer$view = function (model) {
 				{
 					ctor: '::',
 					_0: _user$project$DynamicImageLayer$imageLayer,
-					_1: {
-						ctor: '::',
-						_0: _user$project$DynamicImageLayer$overlayLayer,
-						_1: {
-							ctor: '::',
-							_0: _user$project$DynamicImageLayer$markerLayer,
-							_1: {ctor: '[]'}
-						}
-					}
+					_1: _user$project$DynamicImageLayer$visibleLayers(model.visibleLayerNames)
 				}),
-			_1: {ctor: '[]'}
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$style(
+							{
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'position', _1: 'absolute'},
+								_1: {
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'right', _1: '8px'},
+									_1: {
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'top', _1: '8px'},
+										_1: {
+											ctor: '::',
+											_0: {ctor: '_Tuple2', _0: 'font-family', _1: 'sans-serif'},
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							}),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: _user$project$DynamicImageLayer$layerToggleControl(model.visibleLayerNames),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}
 		});
 };
 var _user$project$DynamicImageLayer$subscriptions = function (model) {
