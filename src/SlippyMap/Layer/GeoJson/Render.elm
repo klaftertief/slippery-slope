@@ -1,5 +1,9 @@
 module SlippyMap.Layer.GeoJson.Render exposing (..)
 
+{-| GeoJson renderer.
+@docs Config, pathPoints, points, renderGeoJson, renderGeoJsonFeatureObject, renderGeoJsonGeometry, renderGeoJsonLineString, renderGeoJsonObject, renderGeoJsonPoint, renderGeoJsonPolygon
+-}
+
 import GeoJson exposing (GeoJson)
 import Json.Encode as Json
 import SlippyMap.Geo.Point as Point exposing (Point)
@@ -16,12 +20,14 @@ type Config msg
         }
 
 
+{-| -}
 renderGeoJson : Config msg -> GeoJson -> Svg msg
 renderGeoJson config ( geoJsonObject, _ ) =
     Svg.g []
         (renderGeoJsonObject config geoJsonObject)
 
 
+{-| -}
 renderGeoJsonObject : Config msg -> GeoJson.GeoJsonObject -> List (Svg msg)
 renderGeoJsonObject config geoJsonObject =
     case geoJsonObject of
@@ -40,6 +46,7 @@ renderGeoJsonObject config geoJsonObject =
             List.concatMap (renderGeoJsonFeatureObject config) featureCollection
 
 
+{-| -}
 renderGeoJsonFeatureObject : Config msg -> GeoJson.FeatureObject -> List (Svg msg)
 renderGeoJsonFeatureObject ((Config { style }) as config) featureObject =
     Maybe.map (renderGeoJsonGeometry config (style featureObject))
@@ -47,6 +54,7 @@ renderGeoJsonFeatureObject ((Config { style }) as config) featureObject =
         |> Maybe.withDefault []
 
 
+{-| -}
 renderGeoJsonGeometry : Config msg -> List (Svg.Attribute msg) -> GeoJson.Geometry -> List (Svg msg)
 renderGeoJsonGeometry config attributes geometry =
     case geometry of
@@ -72,6 +80,7 @@ renderGeoJsonGeometry config attributes geometry =
             List.concatMap (renderGeoJsonGeometry config attributes) geometryList
 
 
+{-| -}
 renderGeoJsonPoint : Config msg -> List (Svg.Attribute msg) -> GeoJson.Position -> List (Svg msg)
 renderGeoJsonPoint (Config internalConfig) attributes position =
     let
@@ -88,6 +97,7 @@ renderGeoJsonPoint (Config internalConfig) attributes position =
         ]
 
 
+{-| -}
 renderGeoJsonLineString : Config msg -> List (Svg.Attribute msg) -> List GeoJson.Position -> List (Svg msg)
 renderGeoJsonLineString config attributes positionList =
     [ Svg.path
@@ -100,6 +110,7 @@ renderGeoJsonLineString config attributes positionList =
     ]
 
 
+{-| -}
 renderGeoJsonPolygon : Config msg -> List (Svg.Attribute msg) -> List (List GeoJson.Position) -> List (Svg msg)
 renderGeoJsonPolygon config attributes positionListList =
     let
@@ -118,6 +129,7 @@ renderGeoJsonPolygon config attributes positionListList =
         ]
 
 
+{-| -}
 pathPoints : Config msg -> List GeoJson.Position -> String
 pathPoints (Config internalConfig) positionList =
     positionList
@@ -130,6 +142,7 @@ pathPoints (Config internalConfig) positionList =
         |> (\ll -> "M" ++ ll)
 
 
+{-| -}
 points : Config msg -> List GeoJson.Position -> String
 points (Config internalConfig) positionList =
     List.foldl

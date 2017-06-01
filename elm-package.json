@@ -14,6 +14,7 @@
         "SlippyMap.Geo.Point",
         "SlippyMap.Geo.Tile",
         "SlippyMap.Geo.Transform",
+        "SlippyMap.Layer.Circle",
         "SlippyMap.Layer.GeoJson",
         "SlippyMap.Layer.GeoJson.Render",
         "SlippyMap.Layer.Grid",
