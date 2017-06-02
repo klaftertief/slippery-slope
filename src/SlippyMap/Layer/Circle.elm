@@ -11,8 +11,8 @@ module SlippyMap.Layer.Circle
 -}
 
 import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Mercator as Mercator
 import SlippyMap.Geo.Transform as Transform
-import SlippyMap.Layer.GeoJson.Render as Render
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -57,31 +57,25 @@ layer config location =
 
 
 render : Config msg -> Location -> Layer.RenderState -> Svg msg
-render (Config internalConfig) { lon, lat } ({ locationToContainerPoint } as renderState) =
+render (Config internalConfig) location ({ locationToContainerPoint } as renderState) =
     let
         -- TODO: convert meters to pixels at given location
-        radius =
+        radiusX =
             (internalConfig.radius / 100000)
                 * (Transform.zoomScale renderState.zoom)
 
-        style =
-            [ Svg.Attributes.r (toString radius) ]
-                ++ internalConfig.style
+        radiusY =
+            radiusX * (max 1 <| Mercator.latToY location.lat)
 
-        point =
-            ( lon, lat, 0 )
-
-        project ( lon, lat, _ ) =
-            locationToContainerPoint { lon = lon, lat = lat }
-
-        renderConfig =
-            Render.Config
-                { project = project
-                , style = always style
-                }
+        { x, y } =
+            locationToContainerPoint location
     in
-        Svg.g []
-            (Render.renderGeoJsonPoint renderConfig
-                style
-                point
+        Svg.ellipse
+            (internalConfig.style
+                ++ [ Svg.Attributes.cx (toString x)
+                   , Svg.Attributes.cy (toString y)
+                   , Svg.Attributes.rx (toString radiusX)
+                   , Svg.Attributes.ry (toString radiusY)
+                   ]
             )
+            []

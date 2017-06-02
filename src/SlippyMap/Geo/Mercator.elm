@@ -1,5 +1,9 @@
 module SlippyMap.Geo.Mercator exposing (..)
 
+{-| Mercator
+@docs degreesToRadians, latToY, lonToX, project, radiansToDegrees, unproject, xToLon, yToLat
+-}
+
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 

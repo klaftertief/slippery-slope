@@ -11,6 +11,7 @@
         "SlippyMap.Interactive",
         "SlippyMap.Geo.Coordinate",
         "SlippyMap.Geo.Location",
+        "SlippyMap.Geo.Mercator",
         "SlippyMap.Geo.Point",
         "SlippyMap.Geo.Tile",
         "SlippyMap.Geo.Transform",
