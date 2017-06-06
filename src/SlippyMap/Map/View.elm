@@ -113,32 +113,27 @@ view (Config config) ((State { transform, interaction }) as state) layers =
                     )
                 ]
 
-            -- This is needed at the moment as a touch event target for panning. The touchmove getz lost when it originates in a tile that gets removed during panning.
+            -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
+            --, Html.div
+            --    [ Html.Attributes.style
+            --        [ ( "position", "absolute" )
+            --        , ( "left", "0" )
+            --        , ( "top", "0" )
+            --        , ( "right", "0" )
+            --        , ( "bottom", "0" )
+            --        ]
+            --    ]
+            --    []
             , Html.div
-                [ Html.Attributes.style
-                    [ ( "position", "absolute" )
-                    , ( "left", "0" )
-                    , ( "top", "0" )
-                    , ( "right", "0" )
-                    , ( "bottom", "0" )
-                    ]
-                ]
-                []
-            , Svg.svg
-                [ Svg.Attributes.class "esm__controls"
-                , Svg.Attributes.height (toString transform.height)
-                , Svg.Attributes.width (toString transform.width)
-                , Svg.Attributes.style "position: absolute;"
-                ]
-                [ Attribution.control ( transform.width, transform.height )
-                    config.attributionPrefix
+                [ Html.Attributes.class "esm__controls" ]
+                [ Attribution.control config.attributionPrefix
                     layerAttributions
                 , case config.toMsg of
                     Just toMsg ->
-                        Svg.map toMsg <| Zoom.control renderState
+                        Html.map toMsg <| Zoom.control renderState
 
                     Nothing ->
-                        Svg.text ""
+                        Html.text ""
                 ]
             ]
 

@@ -1,6 +1,7 @@
 module SlippyMap.Layer.Marker
     exposing
         ( Config
+        , config
         , defaultConfig
         , simpleLayer
         , layer
@@ -8,12 +9,11 @@ module SlippyMap.Layer.Marker
 
 {-| A layer to display markers.
 
-@docs Config, defaultConfig, layer, simpleLayer
+@docs Config, config, defaultConfig, layer, simpleLayer
 -}
 
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -28,11 +28,17 @@ type Config marker msg
 
 
 {-| -}
+config : (marker -> Svg msg) -> Config marker msg
+config renderMarker =
+    Config
+        { renderMarker = renderMarker
+        }
+
+
+{-| -}
 defaultConfig : Config () msg
 defaultConfig =
-    Config
-        { renderMarker = always circleMarker
-        }
+    config (always circleMarker)
 
 
 circleMarker : Svg msg

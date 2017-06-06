@@ -10,6 +10,7 @@ import Html.Events
 import Layer.Debug
 import Set exposing (Set)
 import SlippyMap.Interactive as Map
+import SlippyMap.Layer.Circle as Circle
 import SlippyMap.Layer.GeoJson as GeoJsonLayer
 import SlippyMap.Layer.Grid as Grid
 import SlippyMap.Layer.Heatmap as Heatmap
@@ -17,6 +18,9 @@ import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Layer.Overlay as Overlay
 import SlippyMap.Layer.StaticImage as StaticImage
+import Svg exposing (Svg)
+import Svg.Attributes
+import Svg.Events
 import Window
 
 
@@ -179,10 +183,15 @@ toggableLayers : Dict String (Layer Msg)
 toggableLayers =
     Dict.fromList
         [ ( "Marker", markerLayer )
+        , ( "Marker custom", customMarkerLayer )
         , ( "Image Overlay", overlayLayer )
         , ( "GeoJson", geoJsonLayer )
         , ( "Heatmap", heatmapLayer )
         , ( "Debug", debugLayer )
+        , ( "Circle", circleLayer )
+        , ( "Circle II", circleLayer2 )
+        , ( "Circle III", circleLayer3 )
+        , ( "Graticules", graticuleLayer )
         ]
 
 
@@ -250,6 +259,46 @@ markerLayer =
         , { lon = 7, lat = 51 }
         , { lon = 8, lat = 52 }
         ]
+
+
+customMarkerLayer : Layer Msg
+customMarkerLayer =
+    Marker.layer
+        (Marker.config (always customMarker))
+        [ ( { lon = 5, lat = 50 }, () )
+        , ( { lon = 6, lat = 52 }, () )
+        , ( { lon = 7, lat = 49 }, () )
+        ]
+
+
+customMarker : Svg Msg
+customMarker =
+    Svg.circle
+        [ Svg.Attributes.r "12"
+        , Svg.Attributes.fill "#ff3388"
+        , Svg.Attributes.stroke "white"
+        , Svg.Attributes.strokeWidth "3"
+        , Svg.Events.onClick (SetLayerVisibility "Marker custom" False)
+        ]
+        []
+
+
+circleLayer : Layer Msg
+circleLayer =
+    Circle.layer (Circle.config 500)
+        { lon = 6.714768, lat = 50.916492 }
+
+
+circleLayer2 : Layer Msg
+circleLayer2 =
+    Circle.layer (Circle.config 500)
+        { lon = 6.714768, lat = 0 }
+
+
+circleLayer3 : Layer Msg
+circleLayer3 =
+    Circle.layer (Circle.config 500)
+        { lon = 6.714768, lat = 75 }
 
 
 subscriptions : Model -> Sub Msg

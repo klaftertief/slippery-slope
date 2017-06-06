@@ -3,27 +3,24 @@ module SlippyMap.Control.Attribution exposing (control)
 {-| Attributions for a map.
 -}
 
-import Svg exposing (Svg)
-import Svg.Attributes
+import Html exposing (Html)
+import Html.Attributes
 
 
-control : ( Float, Float ) -> Maybe String -> List String -> Svg msg
-control ( width, height ) prefix attributions =
+control : Maybe String -> List String -> Html msg
+control prefix attributions =
     let
         prefixText =
             prefix
                 |> Maybe.map (\p -> p ++ " | ")
                 |> Maybe.withDefault ""
     in
-        Svg.g [ Svg.Attributes.class "esm__atttribution" ]
-            [ Svg.text_
-                [ Svg.Attributes.x (toString width)
-                , Svg.Attributes.y (toString height)
-                , Svg.Attributes.dx "-4"
-                , Svg.Attributes.dy "-4"
-                , Svg.Attributes.textAnchor "end"
-                , Svg.Attributes.fontFamily "sans-serif"
-                , Svg.Attributes.fontSize "12px"
+        Html.div
+            [ Html.Attributes.class "esm__attribution"
+            , Html.Attributes.style
+                [ ( "position", "absolute" )
+                , ( "bottom", "0" )
+                , ( "right", "0" )
                 ]
-                [ Svg.text (prefixText ++ String.join ", " attributions) ]
             ]
+            [ Html.text (prefixText ++ String.join ", " attributions) ]
