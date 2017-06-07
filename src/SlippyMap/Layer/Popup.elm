@@ -7,7 +7,7 @@ module SlippyMap.Layer.Popup
 
 {-| A layer to display popups.
 
-@docs Config, config, defaultConfig, layer, simpleLayer
+@docs Config, config, layer
 -}
 
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
@@ -35,13 +35,23 @@ config =
 
 simplePopup : String -> Svg msg
 simplePopup content =
-    Svg.circle
-        [ Svg.Attributes.r "8"
-        , Svg.Attributes.fill "#3388ff"
-        , Svg.Attributes.stroke "white"
-        , Svg.Attributes.strokeWidth "3"
+    Svg.g
+        [ Svg.Attributes.transform "translate(-60 -45)" ]
+        [ Svg.rect
+            [ Svg.Attributes.width "120"
+            , Svg.Attributes.height "30"
+            , Svg.Attributes.rx "5"
+            , Svg.Attributes.ry "5"
+            , Svg.Attributes.fill "#fff"
+            ]
+            []
+        , Svg.text_
+            [ Svg.Attributes.x "60"
+            , Svg.Attributes.y "20"
+            , Svg.Attributes.textAnchor "middle"
+            ]
+            [ Svg.text content ]
         ]
-        []
 
 
 
