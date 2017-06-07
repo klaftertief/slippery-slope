@@ -3,6 +3,7 @@ module SlippyMap.Layer.LowLevel
         ( Config
         , Pane(..)
         , marker
+        , popup
         , overlay
         , tile
         , withAttribution
@@ -21,7 +22,7 @@ module SlippyMap.Layer.LowLevel
 
 {-| LowLevel Layer
 
-@docs Config, Pane, marker, overlay, tile, withAttribution, Layer, RenderState, transformToRenderState, withRender, getAttribution, getPane, panes, isTileLayer, isOverlayLayer, isMarkerLayer, render
+@docs Config, Pane, marker, popup, overlay, tile, withAttribution, Layer, RenderState, transformToRenderState, withRender, getAttribution, getPane, panes, isTileLayer, isOverlayLayer, isMarkerLayer, render
 -}
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
@@ -49,6 +50,7 @@ type Pane
     = TilePane
     | OverlayPane
     | MarkerPane
+    | PopupPane
     | ControlPane
 
 
@@ -58,6 +60,7 @@ panes =
     [ TilePane
     , OverlayPane
     , MarkerPane
+    , PopupPane
     , ControlPane
     ]
 
@@ -86,6 +89,15 @@ marker =
     Config
         { attribution = Nothing
         , pane = MarkerPane
+        }
+
+
+{-| -}
+popup : Config
+popup =
+    Config
+        { attribution = Nothing
+        , pane = PopupPane
         }
 
 
