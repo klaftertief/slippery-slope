@@ -17,6 +17,7 @@ import SlippyMap.Layer.Heatmap as Heatmap
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Layer.Overlay as Overlay
+import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImage
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -117,7 +118,8 @@ view model =
     Html.div []
         [ Map.view mapConfig
             model.mapState
-            (imageLayer :: visibleLayers model.visibleLayerNames)
+            --(imageLayer :: visibleLayers model.visibleLayerNames)
+            (debugLayer :: visibleLayers model.visibleLayerNames)
         , Html.div
             [ Html.Attributes.style
                 [ ( "position", "absolute" )
@@ -184,13 +186,16 @@ toggableLayers =
     Dict.fromList
         [ ( "Marker", markerLayer )
         , ( "Marker custom", customMarkerLayer )
-        , ( "Image Overlay", overlayLayer )
+
+        --, ( "Image Overlay", overlayLayer )
         , ( "GeoJson", geoJsonLayer )
         , ( "Heatmap", heatmapLayer )
-        , ( "Debug", debugLayer )
-        , ( "Circle", circleLayer )
-        , ( "Circle II", circleLayer2 )
-        , ( "Circle III", circleLayer3 )
+        , ( "Popup", popupLayer )
+
+        --, ( "Debug", debugLayer )
+        --, ( "Circle", circleLayer )
+        --, ( "Circle II", circleLayer2 )
+        --, ( "Circle III", circleLayer3 )
         , ( "Graticules", graticuleLayer )
         ]
 
@@ -214,7 +219,8 @@ overlayLayer =
         [ ( { southWest = { lon = -74.22655, lat = 40.712216 }
             , northEast = { lon = -74.12544, lat = 40.773941 }
             }
-          , "http://www.lib.utexas.edu/maps/historical/newark_nj_1922.jpg"
+            --, "http://www.lib.utexas.edu/maps/historical/newark_nj_1922.jpg"
+          , "/slide.svg"
           )
         ]
 
@@ -261,24 +267,30 @@ markerLayer =
         ]
 
 
+popupLayer : Layer Msg
+popupLayer =
+    Popup.layer Popup.config
+        [ ( { lon = 5, lat = 50 }, "I'm a popup" ) ]
+
+
 customMarkerLayer : Layer Msg
 customMarkerLayer =
     Marker.layer
-        (Marker.config (always customMarker))
-        [ ( { lon = 5, lat = 50 }, () )
-        , ( { lon = 6, lat = 52 }, () )
-        , ( { lon = 7, lat = 49 }, () )
+        (Marker.config coloredMarker)
+        [ ( { lon = 5, lat = 50 }, "#ff3388" )
+        , ( { lon = 6, lat = 52 }, "#33ff88" )
+        , ( { lon = 7, lat = 49 }, "#3388ff" )
         ]
 
 
-customMarker : Svg Msg
-customMarker =
+coloredMarker : String -> Svg Msg
+coloredMarker color =
     Svg.circle
         [ Svg.Attributes.r "12"
-        , Svg.Attributes.fill "#ff3388"
+        , Svg.Attributes.fill color
         , Svg.Attributes.stroke "white"
         , Svg.Attributes.strokeWidth "3"
-        , Svg.Events.onClick (SetLayerVisibility "Marker custom" False)
+        , Svg.Events.onClick (SetLayerVisibility "Popup" True)
         ]
         []
 
