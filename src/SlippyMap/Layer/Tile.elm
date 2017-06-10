@@ -66,13 +66,27 @@ render fromTile renderTile renderState =
 
         tiles =
             renderState.tileCover
+
+        transform =
+            renderState.transform
+
+        renderState1 =
+            Layer.transformToRenderState { transform | zoom = transform.zoom - 1, tileSize = transform.tileSize * 2 }
+
+        tilesZoomActual =
+            List.map
+                (tile (fromTile >> renderTile renderState) renderState)
+                tiles
+
+        tilesZoomMinusOne =
+            List.map
+                (tile (fromTile >> renderTile renderState1) renderState1)
+                renderState1.tileCover
     in
         Svg.Keyed.node "g"
             []
-            (List.map
-                (tile (fromTile >> renderTile renderState) renderState)
-                tiles
-            )
+            --(tilesZoomMinusOne ++ tilesZoomActual)
+            tilesZoomActual
 
 
 tile : (Tile -> Svg msg) -> Layer.RenderState -> Tile -> ( String, Svg msg )
