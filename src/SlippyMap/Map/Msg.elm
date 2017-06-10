@@ -9,6 +9,7 @@ import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.State as State exposing (Focus)
+import Time exposing (Time)
 
 
 {-| -}
@@ -21,6 +22,7 @@ type Msg
     | PinchMsg PinchMsg
     | SetFocus Focus
     | KeyboardNavigation KeyCode
+    | Step Time
 
 
 {-| -}

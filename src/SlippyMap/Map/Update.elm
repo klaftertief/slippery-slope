@@ -16,7 +16,10 @@ update config msg ((State { transform }) as state) =
     safeState config state <|
         case msg of
             ZoomIn ->
-                State.zoomIn state
+                --State.zoomIn state
+                State.setTarget 100
+                    { transform | zoom = transform.zoom + 1 }
+                    state
 
             ZoomOut ->
                 State.zoomOut state
@@ -69,6 +72,9 @@ update config msg ((State { transform }) as state) =
                             }
                         )
                         state
+
+            Step duration ->
+                State.stepTarget duration state
 
 
 updateDrag : DragMsg -> State -> State

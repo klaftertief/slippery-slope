@@ -21,6 +21,9 @@ module SlippyMap.Map.State
         , zoomOut
         , zoomByAround
         , zoomInAround
+        , setTarget
+        , resetTarget
+        , stepTarget
         )
 
 {-|
@@ -33,6 +36,7 @@ import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
+import Time exposing (Time)
 
 
 {-|
@@ -41,9 +45,16 @@ TODO: Maybe just have the most basic state here, e.g. the Transform, and move Dr
 type State
     = State
         { transform : Transform
+        , target : Maybe Target
         , interaction : Maybe Interaction
         , focus : Focus
         }
+
+
+type alias Target =
+    { transform : Transform
+    , duration : Time
+    }
 
 
 type Interaction
@@ -72,6 +83,7 @@ defaultState : State
 defaultState =
     State
         { transform = defaultTransform
+        , target = Nothing
         , interaction = Nothing
         , focus = HasNoFocus
         }
@@ -81,6 +93,59 @@ setTransform : Transform -> State -> State
 setTransform newTransform (State state) =
     State
         { state | transform = newTransform }
+
+
+setTarget : Time -> Transform -> State -> State
+setTarget targetDuration targetTransform (State state) =
+    State
+        { state
+            | target =
+                Just
+                    { transform = targetTransform
+                    , duration = targetDuration
+                    }
+        }
+
+
+stepTarget : Time -> State -> State
+stepTarget duration (State state) =
+    case state.target of
+        Just target ->
+            let
+                currentTransform =
+                    state.transform
+
+                targetTransform =
+                    target.transform
+
+                progress =
+                    clamp 0 1 (duration / target.duration)
+
+                newTargetDuration =
+                    max 0 (target.duration - duration)
+
+                newTransform =
+                    Transform.progress progress
+                        currentTransform
+                        targetTransform
+            in
+                if progress >= 1 then
+                    State state
+                        |> setTransform newTransform
+                        |> resetTarget
+                else
+                    State state
+                        |> setTransform newTransform
+                        |> setTarget newTargetDuration targetTransform
+
+        Nothing ->
+            State state
+
+
+resetTarget : State -> State
+resetTarget (State state) =
+    State
+        { state | target = Nothing }
 
 
 setInteraction : Maybe Interaction -> State -> State

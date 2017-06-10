@@ -16,10 +16,11 @@ module SlippyMap.Geo.Transform
         , moveTo
         , zoomScale
         , scaleZoom
+        , progress
         )
 
 {-| Transform
-@docs Transform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, bounds, pixelBounds, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform, zoomScale, scaleZoom
+@docs Transform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, bounds, pixelBounds, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform, zoomScale, scaleZoom, progress
 -}
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
@@ -333,4 +334,18 @@ zoomToAround transform newZoom around =
         { transform
             | zoom = newZoom
             , center = newCenter
+        }
+
+
+{-| -}
+progress : Float -> Transform -> Transform -> Transform
+progress ratio currentTransform targetTransform =
+    let
+        newZoom =
+            currentTransform.zoom
+                + (targetTransform.zoom - currentTransform.zoom)
+                * ratio
+    in
+        { currentTransform
+            | zoom = newZoom
         }

@@ -4,6 +4,7 @@ module SlippyMap.Map.Subscriptions exposing (subscriptions)
 @docs subscriptions
 -}
 
+import AnimationFrame
 import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Map.Config as Config exposing (Config(..))
@@ -13,7 +14,7 @@ import SlippyMap.Map.Msg as Msg exposing (Msg(..), DragMsg(..))
 
 {-| -}
 subscriptions : Config msg -> State -> Sub msg
-subscriptions (Config config) ((State { interaction, focus }) as state) =
+subscriptions (Config config) ((State { interaction, focus, target }) as state) =
     case config.toMsg of
         Just toMsg ->
             let
@@ -37,8 +38,19 @@ subscriptions (Config config) ((State { interaction, focus }) as state) =
 
                         HasNoFocus ->
                             []
+
+                stepSubscriptions =
+                    case target of
+                        Nothing ->
+                            []
+
+                        Just _ ->
+                            [ AnimationFrame.diffs Step ]
             in
-                (dragSubscriptions ++ keyboardNavigationSubscriptions)
+                (dragSubscriptions
+                    ++ keyboardNavigationSubscriptions
+                    ++ stepSubscriptions
+                )
                     |> List.map (Sub.map toMsg)
                     |> Sub.batch
 

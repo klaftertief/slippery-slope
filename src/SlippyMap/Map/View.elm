@@ -27,9 +27,10 @@ view (Config config) ((State { transform, interaction }) as state) layers =
         renderState =
             Layer.transformToRenderState transform
 
-        -- TODO: onlye get attributions from currentlyc visible layers, whatever that means or how it's implemented
+        -- TODO: only get attributions from currently visible layers, whatever that means or how it's implemented
         layerAttributions =
-            List.map Layer.getAttribution layers
+            layers
+                |> List.map Layer.getAttribution
                 |> List.filterMap identity
 
         -- TODO: make list depend on config
