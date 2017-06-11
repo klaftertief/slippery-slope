@@ -84,9 +84,8 @@ update msg model =
                             11
                             model.mapState
                     else if isVisible && layerName == "Marker" then
-                        Map.jumpTo
+                        Map.panTo mapConfig
                             { lon = 7, lat = 51 }
-                            6
                             model.mapState
                     else if isVisible && layerName == "GeoJson" then
                         Map.jumpTo

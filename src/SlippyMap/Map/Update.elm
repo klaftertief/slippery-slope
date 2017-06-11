@@ -22,7 +22,10 @@ update config msg ((State { transform }) as state) =
                     state
 
             ZoomOut ->
-                State.zoomOut state
+                --State.zoomOut state
+                State.setTarget 100
+                    { transform | zoom = transform.zoom - 1 }
+                    state
 
             ZoomInAround point ->
                 State.zoomInAround point state
@@ -75,6 +78,11 @@ update config msg ((State { transform }) as state) =
 
             Step duration ->
                 State.stepTarget duration state
+
+            PanTo duration center ->
+                State.setTarget duration
+                    { transform | center = center }
+                    state
 
 
 updateDrag : DragMsg -> State -> State

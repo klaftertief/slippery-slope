@@ -162,12 +162,7 @@ setFocus newFocus (State state) =
 
 defaultTransform : Transform
 defaultTransform =
-    { tileSize = 256
-    , width = 600
-    , height = 400
-    , center = { lon = 0, lat = 0 }
-    , zoom = 0
-    }
+    Transform.defaultTransform
 
 
 withInteractionTransform : State -> State

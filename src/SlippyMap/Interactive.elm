@@ -6,6 +6,7 @@ module SlippyMap.Interactive
         , center
         , resize
         , jumpTo
+        , panTo
         , renderState
         , Msg
         , update
@@ -14,7 +15,7 @@ module SlippyMap.Interactive
         )
 
 {-|
-@docs Config, config, State, center, resize, jumpTo, renderState, Msg, update, view, subscriptions
+@docs Config, config, State, center, resize, jumpTo, panTo, renderState, Msg, update, view, subscriptions
 -}
 
 import Html exposing (Html)
@@ -77,6 +78,12 @@ jumpTo center zoom (State state) =
         |> State.setCenter center
         |> State.setZoom zoom
         |> State
+
+
+{-| -}
+panTo : Config msg -> Location -> State -> State
+panTo config center state =
+    update config (Msg <| Msg.PanTo 1000 center) state
 
 
 {-| -}

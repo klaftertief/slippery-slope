@@ -1,6 +1,7 @@
 module SlippyMap.Geo.Transform
     exposing
         ( Transform
+        , defaultTransform
         , locationToPoint
         , pointToLocation
         , coordinateToPoint
@@ -20,7 +21,7 @@ module SlippyMap.Geo.Transform
         )
 
 {-| Transform
-@docs Transform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, bounds, pixelBounds, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform, zoomScale, scaleZoom, progress
+@docs Transform, defaultTransform, locationToPoint, pointToLocation, coordinateToPoint, pointToCoordinate, bounds, pixelBounds, locationBounds, tileBounds, zoomToAround, moveTo, centerPoint, tileScale, tileTransform, zoomScale, scaleZoom, progress
 -}
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
@@ -36,6 +37,17 @@ type alias Transform =
     , height : Float
     , center : Location
     , zoom : Float
+    }
+
+
+{-| -}
+defaultTransform : Transform
+defaultTransform =
+    { tileSize = 256
+    , width = 600
+    , height = 400
+    , center = { lon = 0, lat = 0 }
+    , zoom = 0
     }
 
 
@@ -344,8 +356,23 @@ progress ratio currentTransform targetTransform =
         newZoom =
             currentTransform.zoom
                 + (targetTransform.zoom - currentTransform.zoom)
-                * ratio
+                * (ratio ^ 0.8)
+
+        newCenter =
+            if currentTransform.center == targetTransform.center then
+                targetTransform.center
+            else
+                { lon =
+                    currentTransform.center.lon
+                        + (targetTransform.center.lon - currentTransform.center.lon)
+                        * (ratio ^ 0.8)
+                , lat =
+                    currentTransform.center.lat
+                        + (targetTransform.center.lat - currentTransform.center.lat)
+                        * (ratio ^ 0.8)
+                }
     in
         { currentTransform
             | zoom = newZoom
+            , center = newCenter
         }

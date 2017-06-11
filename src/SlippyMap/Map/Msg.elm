@@ -7,6 +7,7 @@ module SlippyMap.Map.Msg
 
 import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
+import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.State as State exposing (Focus)
 import Time exposing (Time)
@@ -23,6 +24,7 @@ type Msg
     | SetFocus Focus
     | KeyboardNavigation KeyCode
     | Step Time
+    | PanTo Time Location
 
 
 {-| -}
