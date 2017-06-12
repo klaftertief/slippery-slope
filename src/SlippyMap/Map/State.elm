@@ -252,8 +252,8 @@ setCenter newCenter ((State { transform }) as state) =
     setTransform { transform | center = newCenter } state
 
 
-setSize : ( Int, Int ) -> State -> State
-setSize ( width, height ) ((State { transform }) as state) =
+setSize : { width : Int, height : Int } -> State -> State
+setSize { width, height } ((State { transform }) as state) =
     setTransform
         { transform
             | width = toFloat width

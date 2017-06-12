@@ -29,6 +29,6 @@ center location zoom =
 
 {-| Show a map, no interactions.
 -}
-view : State -> List (Layer msg) -> Html msg
-view (State state) =
-    View.view Config.staticConfig state
+view : { width : Int, height : Int } -> State -> List (Layer msg) -> Html msg
+view dimensions (State state) =
+    View.view (Config.staticConfig dimensions) state

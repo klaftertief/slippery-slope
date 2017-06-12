@@ -28,6 +28,7 @@ import Window
 type alias Model =
     { mapState : Map.State
     , visibleLayerNames : Set String
+    , size : Window.Size
     }
 
 
@@ -38,11 +39,13 @@ type Msg
 
 
 init : Window.Size -> ( Model, Cmd Msg )
-init { width, height } =
+init size =
     { mapState =
-        Map.center { lon = 7, lat = 51 } 6
-            |> Map.resize ( width, height )
+        Map.center (mapConfig size)
+            { lon = 7, lat = 51 }
+            6
     , visibleLayerNames = Set.empty
+    , size = size
     }
         ! []
 
@@ -53,19 +56,14 @@ update msg model =
         MapMsg mapMsg ->
             { model
                 | mapState =
-                    Map.update mapConfig
+                    Map.update (mapConfig model.size)
                         mapMsg
                         model.mapState
             }
                 ! []
 
-        Resize { width, height } ->
-            { model
-                | mapState =
-                    Map.resize ( width, height )
-                        model.mapState
-            }
-                ! []
+        Resize size ->
+            { model | size = size } ! []
 
         SetLayerVisibility layerName isVisible ->
             let
@@ -84,7 +82,7 @@ update msg model =
                             11
                             model.mapState
                     else if isVisible && layerName == "Marker" then
-                        Map.panTo mapConfig
+                        Map.panTo (mapConfig model.size)
                             { lon = 7, lat = 51 }
                             model.mapState
                     else if isVisible && layerName == "GeoJson" then
@@ -107,18 +105,19 @@ update msg model =
                     ! []
 
 
-mapConfig : Map.Config Msg
-mapConfig =
-    Map.config MapMsg
+mapConfig : Window.Size -> Map.Config Msg
+mapConfig size =
+    Map.config size MapMsg
 
 
 view : Model -> Html Msg
 view model =
     Html.div []
-        [ Map.view mapConfig
+        [ Map.view (mapConfig model.size)
             model.mapState
-            --(imageLayer :: visibleLayers model.visibleLayerNames)
-            (debugLayer :: visibleLayers model.visibleLayerNames)
+            (imageLayer :: visibleLayers model.visibleLayerNames)
+
+        --(debugLayer :: visibleLayers model.visibleLayerNames)
         , Html.div
             [ Html.Attributes.style
                 [ ( "position", "absolute" )
@@ -315,7 +314,7 @@ circleLayer3 =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Map.subscriptions mapConfig model.mapState
+        [ Map.subscriptions (mapConfig model.size) model.mapState
         , Window.resizes Resize
         ]
 

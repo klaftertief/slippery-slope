@@ -4,7 +4,6 @@ module SlippyMap.Interactive
         , config
         , State
         , center
-        , resize
         , jumpTo
         , panTo
         , renderState
@@ -15,7 +14,7 @@ module SlippyMap.Interactive
         )
 
 {-|
-@docs Config, config, State, center, resize, jumpTo, panTo, renderState, Msg, update, view, subscriptions
+@docs Config, config, State, center, jumpTo, panTo, renderState, Msg, update, view, subscriptions
 -}
 
 import Html exposing (Html)
@@ -39,10 +38,10 @@ type Config msg
 
 
 {-| -}
-config : (Msg -> msg) -> Config msg
-config toMsg =
+config : { width : Int, height : Int } -> (Msg -> msg) -> Config msg
+config dimensions toMsg =
     Config <|
-        Config.dynamicConfig (Msg >> toMsg)
+        Config.dynamicConfig dimensions (Msg >> toMsg)
 
 
 
@@ -55,19 +54,12 @@ type State
 
 
 {-| -}
-center : Location -> Float -> State
-center initialCenter initialZoom =
+center : Config msg -> Location -> Float -> State
+center (Config config) initialCenter initialZoom =
     State.defaultState
+        |> State.setSize (Config.size config)
         |> State.setCenter initialCenter
         |> State.setZoom initialZoom
-        |> State
-
-
-{-| -}
-resize : ( Int, Int ) -> State -> State
-resize dimensions (State state) =
-    state
-        |> State.setSize dimensions
         |> State
 
 

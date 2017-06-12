@@ -12,77 +12,78 @@ import SlippyMap.Map.State as State exposing (State(..), Interaction(..), Drag, 
 
 {-| -}
 update : Config msg -> Msg -> State -> State
-update config msg ((State { transform }) as state) =
+update ((Config { dimensions }) as config) msg ((State { transform }) as state) =
     safeState config state <|
-        case msg of
-            ZoomIn ->
-                --State.zoomIn state
-                State.setTarget 100
-                    { transform | zoom = transform.zoom + 1 }
-                    state
-
-            ZoomOut ->
-                --State.zoomOut state
-                State.setTarget 100
-                    { transform | zoom = transform.zoom - 1 }
-                    state
-
-            ZoomInAround point ->
-                State.zoomInAround point state
-
-            ZoomByAround delta point ->
-                State.zoomByAround delta point state
-
-            DragMsg dragMsg ->
-                updateDrag dragMsg state
-
-            PinchMsg pinchMsg ->
-                updatePinch pinchMsg state
-
-            SetFocus focus ->
-                State.setFocus focus state
-
-            KeyboardNavigation keyCode ->
-                let
-                    offset =
-                        50
-
-                    moveBy =
-                        case keyCode of
-                            -- Left
-                            37 ->
-                                { x = -offset, y = 0 }
-
-                            -- Up
-                            38 ->
-                                { x = 0, y = -offset }
-
-                            -- Right
-                            39 ->
-                                { x = offset, y = 0 }
-
-                            -- Down
-                            40 ->
-                                { x = 0, y = offset }
-
-                            _ ->
-                                { x = 0, y = 0 }
-                in
-                    State.setTransform
-                        (Transform.moveTo transform
-                            { x = transform.width / 2 + moveBy.x
-                            , y = transform.height / 2 + moveBy.y
-                            }
-                        )
+        State.setSize dimensions <|
+            case msg of
+                ZoomIn ->
+                    --State.zoomIn state
+                    State.setTarget 100
+                        { transform | zoom = transform.zoom + 1 }
                         state
 
-            Step duration ->
-                State.stepTarget duration state
+                ZoomOut ->
+                    --State.zoomOut state
+                    State.setTarget 100
+                        { transform | zoom = transform.zoom - 1 }
+                        state
 
-            PanTo duration center ->
-                State.setTarget duration
-                    { transform | center = center }
-                    state
+                ZoomInAround point ->
+                    State.zoomInAround point state
+
+                ZoomByAround delta point ->
+                    State.zoomByAround delta point state
+
+                DragMsg dragMsg ->
+                    updateDrag dragMsg state
+
+                PinchMsg pinchMsg ->
+                    updatePinch pinchMsg state
+
+                SetFocus focus ->
+                    State.setFocus focus state
+
+                KeyboardNavigation keyCode ->
+                    let
+                        offset =
+                            50
+
+                        moveBy =
+                            case keyCode of
+                                -- Left
+                                37 ->
+                                    { x = -offset, y = 0 }
+
+                                -- Up
+                                38 ->
+                                    { x = 0, y = -offset }
+
+                                -- Right
+                                39 ->
+                                    { x = offset, y = 0 }
+
+                                -- Down
+                                40 ->
+                                    { x = 0, y = offset }
+
+                                _ ->
+                                    { x = 0, y = 0 }
+                    in
+                        State.setTransform
+                            (Transform.moveTo transform
+                                { x = transform.width / 2 + moveBy.x
+                                , y = transform.height / 2 + moveBy.y
+                                }
+                            )
+                            state
+
+                Step duration ->
+                    State.stepTarget duration state
+
+                PanTo duration center ->
+                    State.setTarget duration
+                        { transform | center = center }
+                        state
 
 
 updateDrag : DragMsg -> State -> State
