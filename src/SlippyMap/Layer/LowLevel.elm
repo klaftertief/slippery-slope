@@ -1,28 +1,29 @@
 module SlippyMap.Layer.LowLevel
     exposing
         ( Config
-        , Pane(..)
-        , marker
-        , popup
-        , overlay
-        , tile
-        , withAttribution
         , Layer
+        , Pane(..)
         , RenderState
-        , transformToRenderState
-        , withRender
         , getAttribution
         , getPane
-        , panes
-        , isTileLayer
-        , isOverlayLayer
         , isMarkerLayer
+        , isOverlayLayer
+        , isTileLayer
+        , marker
+        , overlay
+        , panes
+        , popup
         , render
+        , tile
+        , transformToRenderState
+        , withAttribution
+        , withRender
         )
 
 {-| LowLevel Layer
 
 @docs Config, Pane, marker, popup, overlay, tile, withAttribution, Layer, RenderState, transformToRenderState, withRender, getAttribution, getPane, panes, isTileLayer, isOverlayLayer, isMarkerLayer, render
+
 -}
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
@@ -102,6 +103,13 @@ popup =
 
 
 {-| -}
+type LayerType
+    = NotToggable
+    | BaseLayer String
+    | OverlayLayer String
+
+
+{-| -}
 withAttribution : String -> Config -> Config
 withAttribution attribution (Config configInternal) =
     Config
@@ -110,8 +118,7 @@ withAttribution attribution (Config configInternal) =
         }
 
 
-{-|
-NOTE: It is important that the Layer depends only on `msg` so that different layers can be grouped together.
+{-| NOTE: It is important that the Layer depends only on `msg` so that different layers can be grouped together.
 -}
 type Layer msg
     = Layer (LayerInternal msg)
@@ -134,12 +141,15 @@ withRender (Config configInternal) render =
 
 {-| Derived map state for unified layer implementations.
 
-- `center`: Geographical center of the map view
-- `zoom`: Zoom level of the map view
-- `bounds`: Geographical bounds visible in the current map view
-- `size`: Size of the map container (in pixels)
+  - `center`: Geographical center of the map view
+  - `zoom`: Zoom level of the map view
+  - `bounds`: Geographical bounds visible in the current map view
+  - `size`: Size of the map container (in pixels)
+
+TODO: Support layers with different tile sizes
 
 TODO: add `project...` fields for projections between different coordinate systems
+
 -}
 type alias RenderState =
     { center : Location
@@ -186,35 +196,35 @@ transformToRenderState transform =
         topLeftPoint =
             Point.subtract halfSize centerPoint
     in
-        { center = transform.center
-        , zoom = transform.zoom
-        , bounds = Transform.locationBounds transform
-        , size = size
-        , halfSize = halfSize
-        , pixelBounds = Transform.pixelBounds transform
+    { center = transform.center
+    , zoom = transform.zoom
+    , bounds = Transform.locationBounds transform
+    , size = size
+    , halfSize = halfSize
+    , pixelBounds = Transform.pixelBounds transform
 
-        --
-        , locationToContainerPoint =
-            Transform.locationToPoint transform
-                >> Point.subtract topLeftPoint
-        , containerPointToLocation =
-            Point.subtract topLeftPoint
-                >> Transform.pointToLocation transform
-        , coordinateToContainerPoint =
-            Transform.coordinateToPoint transform
-                >> Point.subtract topLeftPoint
+    --
+    , locationToContainerPoint =
+        Transform.locationToPoint transform
+            >> Point.subtract topLeftPoint
+    , containerPointToLocation =
+        Point.subtract topLeftPoint
+            >> Transform.pointToLocation transform
+    , coordinateToContainerPoint =
+        Transform.coordinateToPoint transform
+            >> Point.subtract topLeftPoint
 
-        --
-        , transform = transform
-        , tileTransform = tileTransform
-        , centerPoint = centerPoint
-        , tileTransformCenterPoint = Transform.centerPoint tileTransform
-        , tileScale = Transform.tileScale transform
-        , locationBounds = Transform.locationBounds transform
-        , coordinateBounds = Transform.bounds transform
-        , coordinateTileBounds = Transform.tileBounds transform
-        , tileCover = Transform.tileBounds transform |> Tile.cover
-        }
+    --
+    , transform = transform
+    , tileTransform = tileTransform
+    , centerPoint = centerPoint
+    , tileTransformCenterPoint = Transform.centerPoint tileTransform
+    , tileScale = Transform.tileScale transform
+    , locationBounds = Transform.locationBounds transform
+    , coordinateBounds = Transform.bounds transform
+    , coordinateTileBounds = Transform.tileBounds transform
+    , tileCover = Transform.tileBounds transform |> Tile.cover
+    }
 
 
 {-| -}

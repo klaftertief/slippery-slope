@@ -1,13 +1,19 @@
 module SlippyMap.Map.Config
     exposing
         ( Config(Config)
-        , staticConfig
         , dynamicConfig
         , size
+        , staticConfig
         )
 
 {-|
+
 @docs Config, staticConfig, dynamicConfig, size
+
+TODO: Split types between for static and interactive configs
+TODO: Add field for client position decoder
+TODO: Add CRS field
+
 -}
 
 import SlippyMap.Map.Msg as Msg exposing (Msg)
