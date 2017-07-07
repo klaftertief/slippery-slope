@@ -98,11 +98,11 @@ update msg model =
                     else
                         model.mapState
             in
-                { model
-                    | visibleLayerNames = newVisibleLayerNames
-                    , mapState = newMapState
-                }
-                    ! []
+            { model
+                | visibleLayerNames = newVisibleLayerNames
+                , mapState = newMapState
+            }
+                ! []
 
 
 mapConfig : Window.Size -> Map.Config Msg
@@ -153,22 +153,22 @@ layerToggle visibleLayerNames layerName =
         isVisible =
             Set.member layerName visibleLayerNames
     in
-        Html.li []
-            [ Html.label []
-                [ Html.input
-                    [ Html.Attributes.type_ "checkbox"
-                    , Html.Attributes.checked isVisible
-                    , Html.Events.onCheck
-                        (SetLayerVisibility layerName)
-                    ]
-                    []
-                , Html.span
-                    [ Html.Attributes.style
-                        [ ( "margin-left", "4px" ) ]
-                    ]
-                    [ Html.text layerName ]
+    Html.li []
+        [ Html.label []
+            [ Html.input
+                [ Html.Attributes.type_ "checkbox"
+                , Html.Attributes.checked isVisible
+                , Html.Events.onCheck
+                    (SetLayerVisibility layerName)
                 ]
+                []
+            , Html.span
+                [ Html.Attributes.style
+                    [ ( "margin-left", "4px" ) ]
+                ]
+                [ Html.text layerName ]
             ]
+        ]
 
 
 visibleLayers : Set String -> List (Layer Msg)
@@ -184,14 +184,13 @@ toggableLayers =
     Dict.fromList
         [ ( "Marker", markerLayer )
         , ( "Marker custom", customMarkerLayer )
-
-        --, ( "Image Overlay", overlayLayer )
+        , ( "Image Overlay", overlayLayer )
         , ( "GeoJson", geoJsonLayer )
         , ( "Heatmap", heatmapLayer )
         , ( "Popup", popupLayer )
+        , ( "Debug", debugLayer )
+        , ( "Circle", circleLayer )
 
-        --, ( "Debug", debugLayer )
-        --, ( "Circle", circleLayer )
         --, ( "Circle II", circleLayer2 )
         --, ( "Circle III", circleLayer3 )
         , ( "Graticules", graticuleLayer )
@@ -296,7 +295,7 @@ coloredMarker color =
 circleLayer : Layer Msg
 circleLayer =
     Circle.layer (Circle.config 500)
-        { lon = 6.714768, lat = 50.916492 }
+        { lon = 6.714768, lat = 55.916492 }
 
 
 circleLayer2 : Layer Msg

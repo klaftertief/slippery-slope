@@ -1,23 +1,23 @@
 module SlippyMap.Geo.Transform
     exposing
         ( Transform
-        , defaultTransform
-        , locationToPoint
-        , pointToLocation
-        , coordinateToPoint
-        , pointToCoordinate
-        , centerPoint
         , bounds
-        , pixelBounds
+        , centerPoint
+        , coordinateToPoint
+        , defaultTransform
         , locationBounds
-        , tileBounds
-        , tileTransform
-        , tileScale
-        , zoomToAround
+        , locationToPoint
         , moveTo
-        , zoomScale
-        , scaleZoom
+        , pixelBounds
+        , pointToCoordinate
+        , pointToLocation
         , progress
+        , scaleZoom
+        , tileBounds
+        , tileScale
+        , tileTransform
+        , zoomScale
+        , zoomToAround
         )
 
 {-| Transform
@@ -26,8 +26,8 @@ module SlippyMap.Geo.Transform
 
 import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Mercator as Mercator
+import SlippyMap.Geo.Point as Point exposing (Point)
 
 
 {-| -}
@@ -87,10 +87,10 @@ pointToCoordinate transform { x, y } =
         scale =
             toFloat transform.tileSize
     in
-        { column = x / scale
-        , row = y / scale
-        , zoom = transform.zoom
-        }
+    { column = x / scale
+    , row = y / scale
+    , zoom = transform.zoom
+    }
 
 
 {-| -}
@@ -103,9 +103,9 @@ coordinateToPoint transform coordinate =
         scale =
             toFloat transform.tileSize
     in
-        { x = column * scale
-        , y = row * scale
-        }
+    { x = column * scale
+    , y = row * scale
+    }
 
 
 {-| Converts a EPSG:900913 point in radians to pyramid pixel coordinates for a given transform Transform.
@@ -131,9 +131,9 @@ coordinateToRelativePoint transform coordinate =
         scale =
             zoomScale zoom
     in
-        { x = column / scale
-        , y = row / scale
-        }
+    { x = column / scale
+    , y = row / scale
+    }
 
 
 relativePointToCoordinate : Transform -> Point -> Coordinate
@@ -142,10 +142,10 @@ relativePointToCoordinate { zoom } { x, y } =
         scale =
             zoomScale zoom
     in
-        { column = x * scale
-        , row = y * scale
-        , zoom = zoom
-        }
+    { column = x * scale
+    , row = y * scale
+    , zoom = zoom
+    }
 
 
 mercatorPointToRelativePoint : Point -> Point
@@ -176,7 +176,7 @@ zoomScale zoom =
 {-| -}
 scaleZoom : Float -> Float
 scaleZoom scale =
-    (logBase e) scale / logBase e 2
+    logBase e scale / logBase e 2
 
 
 
@@ -233,17 +233,17 @@ scaledBounds scale transform =
                 }
             )
     in
-        { topLeft = topLeftCoordinate
-        , topRight =
-            { topLeftCoordinate
-                | column = bottomRightCoordinate.column
-            }
-        , bottomRight = bottomRightCoordinate
-        , bottomLeft =
-            { topLeftCoordinate
-                | row = bottomRightCoordinate.row
-            }
+    { topLeft = topLeftCoordinate
+    , topRight =
+        { topLeftCoordinate
+            | column = bottomRightCoordinate.column
         }
+    , bottomRight = bottomRightCoordinate
+    , bottomLeft =
+        { topLeftCoordinate
+            | row = bottomRightCoordinate.row
+        }
+    }
 
 
 {-| -}
@@ -265,9 +265,9 @@ locationBounds transform =
                 , y = center.y - transform.height / 2
                 }
     in
-        { southWest = southWest
-        , northEast = northEast
-        }
+    { southWest = southWest
+    , northEast = northEast
+    }
 
 
 {-| -}
@@ -287,9 +287,9 @@ pixelBounds transform =
             , y = center.y - transform.height / 2
             }
     in
-        { topLeft = topLeft
-        , bottomRight = bottomRight
-        }
+    { topLeft = topLeft
+    , bottomRight = bottomRight
+    }
 
 
 
@@ -308,7 +308,7 @@ moveTo transform toPoint =
             , y = toPoint.y + currentCenterPoint.y - transform.height / 2
             }
     in
-        { transform | center = pointToLocation transform newCenterPoint }
+    { transform | center = pointToLocation transform newCenterPoint }
 
 
 {-| -}
@@ -343,10 +343,10 @@ zoomToAround transform newZoom around =
                 , y = currentCenterPoint.y + aroundPointDiff.y
                 }
     in
-        { transform
-            | zoom = newZoom
-            , center = newCenter
-        }
+    { transform
+        | zoom = newZoom
+        , center = newCenter
+    }
 
 
 {-| -}
@@ -372,7 +372,7 @@ progress ratio currentTransform targetTransform =
                         * (ratio ^ 0.8)
                 }
     in
-        { currentTransform
-            | zoom = newZoom
-            , center = newCenter
-        }
+    { currentTransform
+        | zoom = newZoom
+        , center = newCenter
+    }

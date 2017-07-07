@@ -1,7 +1,9 @@
 module SlippyMap.Map.View exposing (view)
 
 {-|
+
 @docs view
+
 -}
 
 import Html exposing (Html)
@@ -14,8 +16,8 @@ import SlippyMap.Control.Zoom as Zoom
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config exposing (Config(..))
-import SlippyMap.Map.Msg as Msg exposing (Msg(..), DragMsg(..), PinchMsg(..))
-import SlippyMap.Map.State as State exposing (State(..), Focus(..))
+import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
+import SlippyMap.Map.State as State exposing (Focus(..), State(..))
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -71,72 +73,71 @@ view (Config config) ((State { transform, interaction }) as state) layers =
                 Nothing ->
                     []
     in
-        Html.div
-            ([ Html.Attributes.tabindex 0
-             , Html.Attributes.style
-                [ ( "position", "relative" )
-                , ( "width", toString transform.width ++ "px" )
-                , ( "height", toString transform.height ++ "px" )
-                , ( "background", "#eee" )
-                ]
-             , Html.Attributes.classList
-                [ ( "with-interaction", interaction /= Nothing ) ]
-             ]
-                ++ handlers
-            )
-            [ Html.div
-                ([ Html.Attributes.style
-                    [ ( "position"
-                      , if interaction /= Nothing then
-                            "fixed"
-                        else
-                            "absolute"
-                      )
-                    , ( "left", "0" )
-                    , ( "top", "0" )
-                    , ( "right", "0" )
-                    , ( "bottom", "0" )
-                    ]
-                 ]
-                )
-                []
-            , Svg.svg
-                [ Svg.Attributes.class "esm__map"
-                , Svg.Attributes.height (toString transform.height)
-                , Svg.Attributes.width (toString transform.width)
-                , Svg.Attributes.style "position: absolute;"
-                ]
-                [ Svg.g
-                    [ Svg.Attributes.class "esm__layers" ]
-                    (List.concatMap
-                        (viewPane (Config config) renderState layers)
-                        Layer.panes
-                    )
-                ]
-
-            -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
-            --, Html.div
-            --    [ Html.Attributes.style
-            --        [ ( "position", "absolute" )
-            --        , ( "left", "0" )
-            --        , ( "top", "0" )
-            --        , ( "right", "0" )
-            --        , ( "bottom", "0" )
-            --        ]
-            --    ]
-            --    []
-            , Html.div
-                [ Html.Attributes.class "esm__controls" ]
-                [ Attribution.control config.attributionPrefix
-                    layerAttributions
-                , case config.toMsg of
-                    Just toMsg ->
-                        Html.map toMsg <| Zoom.control renderState
-
-                    Nothing ->
-                        Html.text ""
+    Html.div
+        ([ Html.Attributes.tabindex 0
+         , Html.Attributes.style
+            [ ( "position", "relative" )
+            , ( "width", toString transform.width ++ "px" )
+            , ( "height", toString transform.height ++ "px" )
+            , ( "background", "#eee" )
+            ]
+         , Html.Attributes.classList
+            [ ( "with-interaction", interaction /= Nothing ) ]
+         ]
+            ++ handlers
+        )
+        [ Html.div
+            [ Html.Attributes.style
+                [ ( "position"
+                  , if interaction /= Nothing then
+                        "fixed"
+                    else
+                        "absolute"
+                  )
+                , ( "left", "0" )
+                , ( "top", "0" )
+                , ( "right", "0" )
+                , ( "bottom", "0" )
                 ]
             ]
+            []
+        , Svg.svg
+            [ Svg.Attributes.class "esm__map"
+            , Svg.Attributes.height (toString transform.height)
+            , Svg.Attributes.width (toString transform.width)
+            , Svg.Attributes.style "position: absolute;"
+            ]
+            [ Svg.g
+                [ Svg.Attributes.class "esm__layers" ]
+                (List.concatMap
+                    (viewPane (Config config) renderState layers)
+                    Layer.panes
+                )
+            ]
+
+        -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
+        --, Html.div
+        --    [ Html.Attributes.style
+        --        [ ( "position", "absolute" )
+        --        , ( "left", "0" )
+        --        , ( "top", "0" )
+        --        , ( "right", "0" )
+        --        , ( "bottom", "0" )
+        --        ]
+        --    ]
+        --    []
+        , Html.div
+            [ Html.Attributes.class "esm__controls" ]
+            [ Attribution.control config.attributionPrefix
+                layerAttributions
+            , case config.toMsg of
+                Just toMsg ->
+                    Html.map toMsg <| Zoom.control renderState
+
+                Nothing ->
+                    Html.text ""
+            ]
+        ]
 
 
 viewPane : Config msg -> Layer.RenderState -> List (Layer msg) -> Layer.Pane -> List (Svg msg)

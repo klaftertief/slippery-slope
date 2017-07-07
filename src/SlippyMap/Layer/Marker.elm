@@ -3,17 +3,18 @@ module SlippyMap.Layer.Marker
         ( Config
         , config
         , defaultConfig
-        , simpleLayer
         , layer
+        , simpleLayer
         )
 
 {-| A layer to display markers.
 
 @docs Config, config, defaultConfig, layer, simpleLayer
+
 -}
 
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -63,7 +64,7 @@ simpleLayer config locations =
         locatedMarkers =
             List.map (\location -> ( location, () )) locations
     in
-        Layer.withRender Layer.marker (render config locatedMarkers)
+    Layer.withRender Layer.marker (render config locatedMarkers)
 
 
 {-| -}
@@ -88,8 +89,8 @@ render config locatedMarkers ({ transform } as renderState) =
                 )
                 locatedMarkers
     in
-        Svg.g []
-            (List.map (renderMarker config renderState) locatedMarkersFiltered)
+    Svg.g []
+        (List.map (renderMarker config renderState) locatedMarkersFiltered)
 
 
 renderMarker : Config marker msg -> Layer.RenderState -> ( Location, marker ) -> Svg msg
@@ -98,13 +99,13 @@ renderMarker (Config config) { locationToContainerPoint } ( location, marker ) =
         markerPoint =
             locationToContainerPoint location
     in
-        Svg.g
-            [ Svg.Attributes.transform
-                ("translate("
-                    ++ toString markerPoint.x
-                    ++ " "
-                    ++ toString markerPoint.y
-                    ++ ")"
-                )
-            ]
-            [ config.renderMarker marker ]
+    Svg.g
+        [ Svg.Attributes.transform
+            ("translate("
+                ++ toString markerPoint.x
+                ++ " "
+                ++ toString markerPoint.y
+                ++ ")"
+            )
+        ]
+        [ config.renderMarker marker ]

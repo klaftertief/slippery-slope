@@ -1,16 +1,17 @@
-module SlippyMap.Layer.JsonTile exposing (Config, layer, toUrl, withTile, withRender, withAttribution, config)
+module SlippyMap.Layer.JsonTile exposing (Config, config, layer, toUrl, withAttribution, withRender, withTile)
 
 {-| A layer to display generic JSON tiles.
 
 @docs Config, layer, toUrl, withTile, withRender, withAttribution, config
+
 -}
 
-import Regex
 import Json.Decode as Json
+import Regex
 import RemoteData exposing (WebData)
+import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
-import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import Svg exposing (Svg)
 
 
@@ -43,17 +44,17 @@ config template subDomains =
                 |> replace "{y}" (toString (y % (2 ^ z)))
                 |> replace "{s}"
                     ((abs (x + y) % (max 1 <| List.length subDomains))
-                        |> (flip List.drop) subDomains
+                        |> flip List.drop subDomains
                         |> List.head
                         |> Maybe.withDefault ""
                     )
     in
-        Config
-            TileLayer.config
-            { toUrl = toUrl
-            , fromTile = \tile -> ( tile, RemoteData.NotAsked )
-            , render = \_ _ -> (Svg.text "")
-            }
+    Config
+        TileLayer.config
+        { toUrl = toUrl
+        , fromTile = \tile -> ( tile, RemoteData.NotAsked )
+        , render = \_ _ -> Svg.text ""
+        }
 
 
 {-| -}

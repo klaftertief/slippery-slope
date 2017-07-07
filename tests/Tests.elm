@@ -1,9 +1,9 @@
 module Tests exposing (..)
 
-import Test exposing (..)
 import Expect
-import Fuzz exposing (list, int, tuple, string)
+import Fuzz exposing (int, list, string, tuple)
 import String
+import Test exposing (..)
 
 
 all : Test

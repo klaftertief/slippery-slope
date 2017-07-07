@@ -8,6 +8,7 @@ module SlippyMap.Layer.Circle
 {-| A layer to render a Circle at a given location.
 
 @docs Config, config, layer
+
 -}
 
 import SlippyMap.Geo.Location as Location exposing (Location)
@@ -61,8 +62,8 @@ render (Config internalConfig) location ({ locationToContainerPoint } as renderS
     let
         -- TODO: convert meters to pixels at given location
         radiusX =
-            (internalConfig.radius / 100000)
-                * (Transform.zoomScale renderState.zoom)
+            (internalConfig.radius / 1000)
+                * Transform.zoomScale renderState.zoom
 
         radiusY =
             radiusX * (max 1 <| Mercator.latToY location.lat)
@@ -70,12 +71,12 @@ render (Config internalConfig) location ({ locationToContainerPoint } as renderS
         { x, y } =
             locationToContainerPoint location
     in
-        Svg.ellipse
-            (internalConfig.style
-                ++ [ Svg.Attributes.cx (toString x)
-                   , Svg.Attributes.cy (toString y)
-                   , Svg.Attributes.rx (toString radiusX)
-                   , Svg.Attributes.ry (toString radiusY)
-                   ]
-            )
-            []
+    Svg.ellipse
+        (internalConfig.style
+            ++ [ Svg.Attributes.cx (toString x)
+               , Svg.Attributes.cy (toString y)
+               , Svg.Attributes.rx (toString radiusX)
+               , Svg.Attributes.ry (toString radiusY)
+               ]
+        )
+        []

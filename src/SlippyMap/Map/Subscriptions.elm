@@ -1,15 +1,17 @@
 module SlippyMap.Map.Subscriptions exposing (subscriptions)
 
 {-|
+
 @docs subscriptions
+
 -}
 
 import AnimationFrame
 import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Map.Config as Config exposing (Config(..))
-import SlippyMap.Map.State as State exposing (State(..), Interaction(..), Drag, Focus(..))
-import SlippyMap.Map.Msg as Msg exposing (Msg(..), DragMsg(..))
+import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..))
+import SlippyMap.Map.State as State exposing (Drag, Focus(..), Interaction(..), State(..))
 
 
 {-| -}
@@ -47,12 +49,12 @@ subscriptions (Config config) ((State { interaction, focus, target }) as state) 
                         Just _ ->
                             [ AnimationFrame.diffs Step ]
             in
-                (dragSubscriptions
-                    ++ keyboardNavigationSubscriptions
-                    ++ stepSubscriptions
-                )
-                    |> List.map (Sub.map toMsg)
-                    |> Sub.batch
+            (dragSubscriptions
+                ++ keyboardNavigationSubscriptions
+                ++ stepSubscriptions
+            )
+                |> List.map (Sub.map toMsg)
+                |> Sub.batch
 
         Nothing ->
             Sub.none

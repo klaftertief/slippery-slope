@@ -8,12 +8,13 @@ module SlippyMap.Layer.GeoJson
 {-| A layer to render GeoJson.
 
 @docs Config, defaultConfig, layer
+
 -}
 
 import GeoJson exposing (GeoJson)
+import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Layer.GeoJson.Render as Render
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -70,5 +71,5 @@ render (Config internalConfig) geoJson ({ locationToContainerPoint } as renderst
                 , style = internalConfig.style
                 }
     in
-        Svg.g []
-            [ Render.renderGeoJson renderConfig geoJson ]
+    Svg.g []
+        [ Render.renderGeoJson renderConfig geoJson ]

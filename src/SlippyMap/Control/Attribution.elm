@@ -15,12 +15,12 @@ control prefix attributions =
                 |> Maybe.map (\p -> p ++ " | ")
                 |> Maybe.withDefault ""
     in
-        Html.div
-            [ Html.Attributes.class "esm__attribution"
-            , Html.Attributes.style
-                [ ( "position", "absolute" )
-                , ( "bottom", "0" )
-                , ( "right", "0" )
-                ]
+    Html.div
+        [ Html.Attributes.class "esm__attribution"
+        , Html.Attributes.style
+            [ ( "position", "absolute" )
+            , ( "bottom", "0" )
+            , ( "right", "0" )
             ]
-            [ Html.text (prefixText ++ String.join ", " attributions) ]
+        ]
+        [ Html.text (prefixText ++ String.join ", " attributions) ]

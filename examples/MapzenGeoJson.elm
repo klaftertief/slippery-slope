@@ -10,8 +10,8 @@ import RemoteData exposing (WebData)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Interactive as Map
-import SlippyMap.Layer.JsonTile as JsonTileLayer
 import SlippyMap.Layer.GeoJson.Render as RenderGeoJson
+import SlippyMap.Layer.JsonTile as JsonTileLayer
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -58,8 +58,8 @@ init =
         tilesToLoad =
             newTilesToLoad initialModel
     in
-        initialModel
-            ! (List.map (getTile <| layerConfig initialModel.tiles) tilesToLoad)
+    initialModel
+        ! List.map (getTile <| layerConfig initialModel.tiles) tilesToLoad
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -73,8 +73,8 @@ update msg model =
                 tilesToLoad =
                     newTilesToLoad newModel
             in
-                newModel
-                    ! (List.map (getTile <| layerConfig model.tiles) tilesToLoad)
+            newModel
+                ! List.map (getTile <| layerConfig model.tiles) tilesToLoad
 
         TileResponse key data ->
             { model
@@ -106,7 +106,7 @@ newTilesToLoad model =
                 |> Dict.keys
                 |> List.map Tile.fromComparable
     in
-        tilesToLoad
+    tilesToLoad
 
 
 getTile : JsonTileLayer.Config Msg -> Tile -> Cmd Msg
@@ -118,17 +118,17 @@ getTile config ({ z, x, y } as tile) =
         url =
             JsonTileLayer.toUrl config tile
     in
-        Http.request
-            { method = "GET"
-            , headers = []
-            , url = url
-            , body = Http.emptyBody
-            , expect = Http.expectJson Json.value
-            , timeout = Nothing
-            , withCredentials = False
-            }
-            |> RemoteData.sendRequest
-            |> Cmd.map (TileResponse comparable)
+    Http.request
+        { method = "GET"
+        , headers = []
+        , url = url
+        , body = Http.emptyBody
+        , expect = Http.expectJson Json.value
+        , timeout = Nothing
+        , withCredentials = False
+        }
+        |> RemoteData.sendRequest
+        |> Cmd.map (TileResponse comparable)
 
 
 mapConfig : Map.Config Msg
@@ -156,45 +156,45 @@ layerConfig tileCache =
                             |> Result.map toFeatures
                             |> Result.withDefault []
                 in
-                    Svg.g []
-                        (features
-                            |> List.filter
-                                (\{ properties } ->
-                                    case properties of
-                                        Nothing ->
-                                            False
+                Svg.g []
+                    (features
+                        |> List.filter
+                            (\{ properties } ->
+                                case properties of
+                                    Nothing ->
+                                        False
 
-                                        Just props ->
-                                            not props.labelPlacement
-                                                && (props.minZoom < renderState.zoom)
-                                )
-                            |> List.sortBy
-                                (\{ properties } ->
-                                    case properties of
-                                        Nothing ->
-                                            0
+                                    Just props ->
+                                        not props.labelPlacement
+                                            && (props.minZoom < renderState.zoom)
+                            )
+                        |> List.sortBy
+                            (\{ properties } ->
+                                case properties of
+                                    Nothing ->
+                                        0
 
-                                        Just props ->
-                                            props.sortRank
-                                )
-                            |> List.concatMap
-                                (renderFeature
-                                    (\( lon, lat, _ ) ->
-                                        let
-                                            tileCoordinate =
-                                                { column = toFloat x
-                                                , row = toFloat y
-                                                , zoom = toFloat z
-                                                }
+                                    Just props ->
+                                        props.sortRank
+                            )
+                        |> List.concatMap
+                            (renderFeature
+                                (\( lon, lat, _ ) ->
+                                    let
+                                        tileCoordinate =
+                                            { column = toFloat x
+                                            , row = toFloat y
+                                            , zoom = toFloat z
+                                            }
 
-                                            tilePoint =
-                                                renderState.coordinateToContainerPoint tileCoordinate
-                                        in
-                                            renderState.locationToContainerPoint { lon = lon, lat = lat }
-                                                |> Point.subtract tilePoint
-                                    )
+                                        tilePoint =
+                                            renderState.coordinateToContainerPoint tileCoordinate
+                                    in
+                                    renderState.locationToContainerPoint { lon = lon, lat = lat }
+                                        |> Point.subtract tilePoint
                                 )
-                        )
+                            )
+                    )
             )
         |> JsonTileLayer.withAttribution "Mapzen"
 
@@ -271,7 +271,7 @@ renderFeature project { properties, geometry } =
                 GeoJson.GeometryCollection geometryList ->
                     List.concatMap (RenderGeoJson.renderGeoJsonGeometry geoJsonConfig attributes) geometryList
     in
-        children
+    children
 
 
 isInteresting : ( String, GeoJson ) -> Maybe ( String, GeoJson )

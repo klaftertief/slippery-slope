@@ -1,13 +1,15 @@
 module SlippyMap.Map.Update exposing (update)
 
 {-|
+
 @docs Msg, update
+
 -}
 
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Map.Config as Config exposing (Config(..))
-import SlippyMap.Map.Msg as Msg exposing (Msg(..), DragMsg(..), PinchMsg(..))
-import SlippyMap.Map.State as State exposing (State(..), Interaction(..), Drag, Pinch, Focus)
+import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
+import SlippyMap.Map.State as State exposing (Drag, Focus, Interaction(..), Pinch, State(..))
 
 
 {-| -}
@@ -69,13 +71,13 @@ update ((Config { dimensions }) as config) msg ((State { transform }) as state) 
                                 _ ->
                                     { x = 0, y = 0 }
                     in
-                        State.setTransform
-                            (Transform.moveTo transform
-                                { x = transform.width / 2 + moveBy.x
-                                , y = transform.height / 2 + moveBy.y
-                                }
-                            )
-                            state
+                    State.setTransform
+                        (Transform.moveTo transform
+                            { x = transform.width / 2 + moveBy.x
+                            , y = transform.height / 2 + moveBy.y
+                            }
+                        )
+                        state
 
                 Step duration ->
                     State.stepTarget duration state
@@ -134,7 +136,7 @@ updatePinch pinchMsg ((State { interaction }) as state) =
                             Just (Pinching { current }) ->
                                 Just <| Pinching (Pinch current touches)
                 in
-                    State.setInteraction newInteraction state
+                State.setInteraction newInteraction state
 
             PinchEnd _ ->
                 State.setInteraction Nothing state

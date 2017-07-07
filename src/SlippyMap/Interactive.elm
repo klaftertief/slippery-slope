@@ -1,20 +1,22 @@
 module SlippyMap.Interactive
     exposing
         ( Config
-        , config
+        , Msg
         , State
         , center
+        , config
         , jumpTo
         , panTo
         , renderState
-        , Msg
+        , subscriptions
         , update
         , view
-        , subscriptions
         )
 
 {-|
+
 @docs Config, config, State, center, jumpTo, panTo, renderState, Msg, update, view, subscriptions
+
 -}
 
 import Html exposing (Html)

@@ -1,13 +1,15 @@
 module SlippyMap.Geo.Coordinate
     exposing
-        ( Coordinate
-        , Bounds
-        , zoomTo
+        ( Bounds
+        , Coordinate
         , center
+        , zoomTo
         )
 
 {-|
+
 @docs Coordinate, Bounds, zoomTo, center
+
 -}
 
 
@@ -35,10 +37,10 @@ zoomTo zoom coordinate =
         scale =
             2 ^ (zoom - coordinate.zoom)
     in
-        { column = coordinate.column * scale
-        , row = coordinate.row * scale
-        , zoom = zoom
-        }
+    { column = coordinate.column * scale
+    , row = coordinate.row * scale
+    , zoom = zoom
+    }
 
 
 {-| -}
@@ -48,7 +50,7 @@ center ( start, end ) =
         endZoomed =
             zoomTo start.zoom end
     in
-        { column = (start.column + endZoomed.column) / 2
-        , row = (start.row + endZoomed.row) / 2
-        , zoom = start.zoom
-        }
+    { column = (start.column + endZoomed.column) / 2
+    , row = (start.row + endZoomed.row) / 2
+    , zoom = start.zoom
+    }

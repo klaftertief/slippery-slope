@@ -1,33 +1,35 @@
 module SlippyMap.Map.State
     exposing
-        ( State(..)
-        , Interaction(..)
-        , Drag
-        , Pinch
+        ( Drag
         , Focus(..)
-        , defaultState
+        , Interaction(..)
+        , Pinch
+        , State(..)
         , center
-        , getTransform
-        , withInteractionTransform
+        , defaultState
         , getCoordinateBounds
         , getTileCover
-        , setTransform
-        , setInteraction
-        , setFocus
-        , setCenter
-        , setSize
-        , setZoom
-        , zoomIn
-        , zoomOut
-        , zoomByAround
-        , zoomInAround
-        , setTarget
+        , getTransform
         , resetTarget
+        , setCenter
+        , setFocus
+        , setInteraction
+        , setSize
+        , setTarget
+        , setTransform
+        , setZoom
         , stepTarget
+        , withInteractionTransform
+        , zoomByAround
+        , zoomIn
+        , zoomInAround
+        , zoomOut
         )
 
 {-|
+
 @docs State, center, getTransform, getCoordinateBounds, getTileCover
+
 -}
 
 import Mouse exposing (Position)
@@ -39,8 +41,7 @@ import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Time exposing (Time)
 
 
-{-|
-TODO: Maybe just have the most basic state here, e.g. the Transform, and move Drag and Focus to the interactive module?
+{-| TODO: Maybe just have the most basic state here, e.g. the Transform, and move Drag and Focus to the interactive module?
 -}
 type State
     = State
@@ -129,14 +130,14 @@ stepTarget duration (State state) =
                         currentTransform
                         targetTransform
             in
-                if progress >= 1 then
-                    State state
-                        |> setTransform newTransform
-                        |> resetTarget
-                else
-                    State state
-                        |> setTransform newTransform
-                        |> setTarget newTargetDuration targetTransform
+            if progress >= 1 then
+                State state
+                    |> setTransform newTransform
+                    |> resetTarget
+            else
+                State state
+                    |> setTransform newTransform
+                    |> setTarget newTargetDuration targetTransform
 
         Nothing ->
             State state
@@ -235,9 +236,9 @@ withPinchTransform { last, current } ((State { transform }) as state) =
             Transform.scaleZoom
                 (currentDistance / lastDistance)
     in
-        state
-            |> moveTo newCenterPoint
-            |> zoomByAround zoomDelta currentCenter
+    state
+        |> moveTo newCenterPoint
+        |> zoomByAround zoomDelta currentCenter
 
 
 moveTo : Point -> State -> State
@@ -294,9 +295,9 @@ zoomByAround delta point ((State { transform }) as state) =
             else
                 transform.zoom + delta
     in
-        setTransform
-            (Transform.zoomToAround transform newZoom point)
-            state
+    setTransform
+        (Transform.zoomToAround transform newZoom point)
+        state
 
 
 {-| -}

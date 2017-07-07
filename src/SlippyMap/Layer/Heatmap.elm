@@ -8,14 +8,15 @@ module SlippyMap.Layer.Heatmap
 {-| A heatmap layer.
 
 @docs Config, defaultConfig, layer
+
 -}
 
 import Color exposing (Color)
 import Heatmap
 import Heatmap.Gradient as Heatmap exposing (Gradient)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
+import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -43,13 +44,12 @@ defaultHeatmapConfig : Layer.RenderState -> Heatmap.Config ( Location, Float )
 defaultHeatmapConfig renderState =
     Heatmap.config
         { toPoint =
-            (\( location, value ) ->
+            \( location, value ) ->
                 let
                     { x, y } =
                         renderState.locationToContainerPoint location
                 in
-                    { x = x, y = y, weight = value }
-            )
+                { x = x, y = y, weight = value }
         , gradient = defaultGradient
         }
         |> Heatmap.withRadius (renderState.zoom * 2)
@@ -88,7 +88,7 @@ render (Config config) dataLocations renderState =
                 )
                 dataLocations
     in
-        Svg.g []
-            [ Heatmap.view (config.heatmap renderState)
-                dataLocationsFiltered
-            ]
+    Svg.g []
+        [ Heatmap.view (config.heatmap renderState)
+            dataLocationsFiltered
+        ]

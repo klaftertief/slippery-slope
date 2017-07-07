@@ -5,8 +5,8 @@ import Html exposing (Html)
 import Html.Attributes
 import Http
 import RemoteData exposing (WebData)
-import SlippyMap.Interactive as Map
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
+import SlippyMap.Interactive as Map
 import SlippyMap.Layer.RemoteImage as RemoteImage
 
 
@@ -36,8 +36,8 @@ init =
         tilesToLoad =
             newTilesToLoad initialModel
     in
-        initialModel
-            ! (List.map (getTile <| layerConfig initialModel.tiles) tilesToLoad)
+    initialModel
+        ! List.map (getTile <| layerConfig initialModel.tiles) tilesToLoad
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -51,8 +51,8 @@ update msg model =
                 tilesToLoad =
                     newTilesToLoad newModel
             in
-                newModel
-                    ! (List.map (getTile <| layerConfig model.tiles) tilesToLoad)
+            newModel
+                ! List.map (getTile <| layerConfig model.tiles) tilesToLoad
 
         TileResponse key data ->
             { model
@@ -84,7 +84,7 @@ newTilesToLoad model =
                 |> Dict.keys
                 |> List.map Tile.fromComparable
     in
-        tilesToLoad
+    tilesToLoad
 
 
 getTile : RemoteImage.Config -> Tile -> Cmd Msg
@@ -96,17 +96,17 @@ getTile config ({ z, x, y } as tile) =
         url =
             RemoteImage.toUrl config tile
     in
-        Http.request
-            { method = "GET"
-            , headers = []
-            , url = url
-            , body = Http.emptyBody
-            , expect = Http.expectStringResponse (\_ -> Ok tile)
-            , timeout = Nothing
-            , withCredentials = False
-            }
-            |> RemoteData.sendRequest
-            |> Cmd.map (TileResponse comparable)
+    Http.request
+        { method = "GET"
+        , headers = []
+        , url = url
+        , body = Http.emptyBody
+        , expect = Http.expectStringResponse (\_ -> Ok tile)
+        , timeout = Nothing
+        , withCredentials = False
+        }
+        |> RemoteData.sendRequest
+        |> Cmd.map (TileResponse comparable)
 
 
 mapConfig : Map.Config Msg

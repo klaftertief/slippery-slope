@@ -8,10 +8,11 @@ module SlippyMap.Layer.Popup
 {-| A layer to display popups.
 
 @docs Config, config, layer
+
 -}
 
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -76,13 +77,13 @@ renderPopup (Config config) { locationToContainerPoint } ( location, popup ) =
         popupPoint =
             locationToContainerPoint location
     in
-        Svg.g
-            [ Svg.Attributes.transform
-                ("translate("
-                    ++ toString popupPoint.x
-                    ++ " "
-                    ++ toString popupPoint.y
-                    ++ ")"
-                )
-            ]
-            [ config.renderPopup popup ]
+    Svg.g
+        [ Svg.Attributes.transform
+            ("translate("
+                ++ toString popupPoint.x
+                ++ " "
+                ++ toString popupPoint.y
+                ++ ")"
+            )
+        ]
+        [ config.renderPopup popup ]

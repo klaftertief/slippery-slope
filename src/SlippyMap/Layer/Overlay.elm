@@ -8,11 +8,12 @@ module SlippyMap.Layer.Overlay
 {-| A layer to show something at specific bounds.
 
 @docs Config, defaultConfig, layer
+
 -}
 
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
+import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -74,16 +75,16 @@ renderOverlay (Config config) { locationToContainerPoint } ( bounds, overlay ) =
             , southWestPoint.y - northEastPoint.y
             )
     in
-        Svg.g
-            [ Svg.Attributes.transform
-                ("translate("
-                    ++ toString southWestPoint.x
-                    ++ " "
-                    ++ toString northEastPoint.y
-                    ++ ")"
-                )
-            ]
-            [ config.renderOverlay
-                overlaySize
-                overlay
-            ]
+    Svg.g
+        [ Svg.Attributes.transform
+            ("translate("
+                ++ toString southWestPoint.x
+                ++ " "
+                ++ toString northEastPoint.y
+                ++ ")"
+            )
+        ]
+        [ config.renderOverlay
+            overlaySize
+            overlay
+        ]

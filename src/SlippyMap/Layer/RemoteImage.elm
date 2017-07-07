@@ -2,22 +2,23 @@ module SlippyMap.Layer.RemoteImage
     exposing
         ( Config
         , config
-        , withTile
-        , withAttribution
-        , toUrl
         , layer
+        , toUrl
+        , withAttribution
+        , withTile
         )
 
 {-| A layer to display remote image tiles.
 
 @docs Config, layer, toUrl, withTile, withAttribution, config
+
 -}
 
 import Regex
 import RemoteData exposing (WebData)
+import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
-import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -28,6 +29,7 @@ import Svg.Attributes
 {-| Configuration for the layer.
 
 TODO: add type alias for internal config
+
 -}
 type Config
     = Config TileLayer.Config ConfigInternal
@@ -52,16 +54,16 @@ config template subDomains =
                 |> replace "{y}" (toString (y % (2 ^ z)))
                 |> replace "{s}"
                     ((abs (x + y) % (max 1 <| List.length subDomains))
-                        |> (flip List.drop) subDomains
+                        |> flip List.drop subDomains
                         |> List.head
                         |> Maybe.withDefault ""
                     )
     in
-        Config
-            TileLayer.config
-            { toUrl = toUrl
-            , fromTile = always RemoteData.NotAsked
-            }
+    Config
+        TileLayer.config
+        { toUrl = toUrl
+        , fromTile = always RemoteData.NotAsked
+        }
 
 
 {-| -}

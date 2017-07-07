@@ -3,14 +3,15 @@ module SlippyMap.Static exposing (State, center, view)
 {-| Just a static map.
 
 @docs view, center, State
+
 -}
 
+import Html exposing (Html)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config
 import SlippyMap.Map.State as State
 import SlippyMap.Map.View as View
-import Html exposing (Html)
 
 
 {-| Opaque internal state.

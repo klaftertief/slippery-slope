@@ -3,11 +3,11 @@ module SlippyMap.Control.Zoom exposing (control)
 {-| Zoom control for a map.
 -}
 
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
-import SlippyMap.Map.Msg as Msg exposing (Msg(ZoomIn, ZoomOut))
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
+import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Map.Msg as Msg exposing (Msg(ZoomIn, ZoomOut))
 import Svg exposing (Svg)
 import Svg.Attributes
 

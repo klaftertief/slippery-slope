@@ -25,6 +25,7 @@ project { lon, lat } =
 
     >>> unproject { x = 0.12147491593880534, y = 1.0364605326049743 }
     { lon = 6.96, lat = 50.93999999999998 }
+
 -}
 unproject : Point -> Location
 unproject { x, y } =
@@ -65,6 +66,7 @@ latToY lat =
 
     >>> xToLon pi
     180
+
 -}
 xToLon : Float -> Float
 xToLon =
@@ -75,6 +77,7 @@ xToLon =
 
     >>> yToLat pi
     85.05112877980659
+
 -}
 yToLat : Float -> Float
 yToLat y =
@@ -88,6 +91,7 @@ yToLat y =
 
     >>> degreesToRadians 180
     pi
+
 -}
 degreesToRadians : Float -> Float
 degreesToRadians deg =
@@ -101,6 +105,7 @@ degreesToRadians deg =
 
     >>> radiansToDegrees pi
     180
+
 -}
 radiansToDegrees : Float -> Float
 radiansToDegrees rad =

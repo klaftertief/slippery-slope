@@ -2,13 +2,14 @@ module SlippyMap.Layer.Tile
     exposing
         ( Config
         , config
-        , withAttribution
         , layer
+        , withAttribution
         )
 
 {-| Prototype for tile layers.
 
 @docs Config, config, withAttribution, layer
+
 -}
 
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
@@ -83,10 +84,10 @@ render fromTile renderTile renderState =
                 (tile (fromTile >> renderTile renderState1) renderState1)
                 renderState1.tileCover
     in
-        Svg.Keyed.node "g"
-            []
-            --(tilesZoomMinusOne ++ tilesZoomActual)
-            tilesZoomActual
+    Svg.Keyed.node "g"
+        []
+        --(tilesZoomMinusOne ++ tilesZoomActual)
+        tilesZoomActual
 
 
 tile : (Tile -> Svg msg) -> Layer.RenderState -> Tile -> ( String, Svg msg )
@@ -108,16 +109,16 @@ tile render renderState ({ z, x, y } as tile) =
         point =
             renderState.coordinateToContainerPoint tileCoordinate
     in
-        ( key
-        , Svg.g
-            [ Svg.Attributes.class "tile"
-            , Svg.Attributes.transform
-                ("translate("
-                    ++ toString point.x
-                    ++ " "
-                    ++ toString point.y
-                    ++ ")"
-                )
-            ]
-            [ render tile ]
-        )
+    ( key
+    , Svg.g
+        [ Svg.Attributes.class "tile"
+        , Svg.Attributes.transform
+            ("translate("
+                ++ toString point.x
+                ++ " "
+                ++ toString point.y
+                ++ ")"
+            )
+        ]
+        [ render tile ]
+    )

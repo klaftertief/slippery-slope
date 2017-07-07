@@ -1,7 +1,7 @@
 module SlippyMap.Map.Msg
     exposing
-        ( Msg(..)
-        , DragMsg(..)
+        ( DragMsg(..)
+        , Msg(..)
         , PinchMsg(..)
         )
 

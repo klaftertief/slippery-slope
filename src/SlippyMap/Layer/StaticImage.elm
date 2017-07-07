@@ -2,19 +2,20 @@ module SlippyMap.Layer.StaticImage
     exposing
         ( Config
         , config
-        , withAttribution
         , layer
+        , withAttribution
         )
 
 {-| A layer to display static image tiles.
 
 @docs Config, config, withAttribution, layer
+
 -}
 
 import Regex
+import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
-import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -46,14 +47,14 @@ config urlTemplate subDomains =
                 |> replace "{y}" (toString (y % (2 ^ z)))
                 |> replace "{s}"
                     ((abs (x + y) % (max 1 <| List.length subDomains))
-                        |> (flip List.drop) subDomains
+                        |> flip List.drop subDomains
                         |> List.head
                         |> Maybe.withDefault ""
                     )
     in
-        Config
-            TileLayer.config
-            { toUrl = toUrl }
+    Config
+        TileLayer.config
+        { toUrl = toUrl }
 
 
 {-| -}
@@ -68,8 +69,7 @@ withAttribution attribution (Config tileLayerConfig configInternal) =
 -- LAYER
 
 
-{-|
--}
+{-| -}
 layer : Config -> Layer msg
 layer ((Config tileLayerConfig _) as config) =
     TileLayer.layer identity

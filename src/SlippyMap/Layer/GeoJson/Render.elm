@@ -87,14 +87,14 @@ renderGeoJsonPoint (Config internalConfig) attributes position =
         { x, y } =
             internalConfig.project position
     in
-        [ Svg.circle
-            (attributes
-                ++ [ Svg.Attributes.cx (toString x)
-                   , Svg.Attributes.cy (toString y)
-                   ]
-            )
-            []
-        ]
+    [ Svg.circle
+        (attributes
+            ++ [ Svg.Attributes.cx (toString x)
+               , Svg.Attributes.cy (toString y)
+               ]
+        )
+        []
+    ]
 
 
 {-| -}
@@ -121,12 +121,12 @@ renderGeoJsonPolygon config attributes positionListList =
             )
                 ++ "Z"
     in
-        [ Svg.path
-            (attributes
-                ++ [ Svg.Attributes.fillRule "evenodd", Svg.Attributes.d pathDefinition ]
-            )
-            []
-        ]
+    [ Svg.path
+        (attributes
+            ++ [ Svg.Attributes.fillRule "evenodd", Svg.Attributes.d pathDefinition ]
+        )
+        []
+    ]
 
 
 {-| -}

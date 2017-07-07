@@ -3,6 +3,7 @@ module SlippyMap.Geo.Location exposing (..)
 {-| Geographical coordinates
 
 @docs Location, Bounds, center, wrap, isInsideBounds
+
 -}
 
 

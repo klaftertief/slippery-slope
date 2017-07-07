@@ -10,12 +10,13 @@ module SlippyMap.Layer.Grid
 TODO: rename to Graticule
 
 @docs Config, defaultConfig, layer
+
 -}
 
 import Color exposing (Color)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Transform as Transform exposing (Transform)
+import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -26,6 +27,7 @@ import Svg.Attributes
 {-| Configuration for the layer.
 
 Note: Your Config should never be held in your model. It should only appear in view code.
+
 -}
 type Config
     = Config
@@ -83,10 +85,10 @@ render (Config config) renderState =
                         )
                     )
     in
-        Svg.g []
-            (List.map (line config.majorTickColor) lons
-                ++ List.map (line config.majorTickColor) lats
-            )
+    Svg.g []
+        (List.map (line config.majorTickColor) lons
+            ++ List.map (line config.majorTickColor) lats
+        )
 
 
 line : Color -> ( Point, Point ) -> Svg msg

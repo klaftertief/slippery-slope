@@ -1,7 +1,9 @@
-module SlippyMap.Geo.Point exposing (Point, Bounds, add, subtract, multiplyBy, divideBy, distance)
+module SlippyMap.Geo.Point exposing (Bounds, Point, add, distance, divideBy, multiplyBy, subtract)
 
 {-|
+
 @docs Point, Bounds, add, subtract, multiplyBy, divideBy, distance
+
 -}
 
 
