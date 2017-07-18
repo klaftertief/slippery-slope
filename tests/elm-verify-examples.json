@@ -1,0 +1,10 @@
+{
+  "root": "../src",
+  "tests": [
+    "SlippyMap.Geo.CRS.EPSG3857",
+    "SlippyMap.Geo.Mercator",
+    "SlippyMap.Geo.Point",
+    "SlippyMap.Geo.Projection.SphericalMercator",
+    "SlippyMap.Geo.Projection.PlateCarree"
+  ]
+}

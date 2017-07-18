@@ -10,8 +10,8 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 
 {-| Converts given location in WGS84 Datum to a XY Point in radians from Spherical Mercator EPSG:900913.
 
-    >>> project { lon = 6.96, lat = 50.94 }
-    { x = 0.12147491593880534, y = 1.0364605326049743 }
+    project { lon = 6.96, lat = 50.94 }
+    --> { x = 0.12147491593880534, y = 1.0364605326049743 }
 
 -}
 project : Location -> Point
@@ -23,8 +23,8 @@ project { lon, lat } =
 
 {-| Converts given point in radians from Spherical Mercator EPSG:900913WGS84 Datum to a location in in WGS84 Datum.
 
-    >>> unproject { x = 0.12147491593880534, y = 1.0364605326049743 }
-    { lon = 6.96, lat = 50.93999999999998 }
+    unproject { x = 0.12147491593880534, y = 1.0364605326049743 }
+    --> { lon = 6.96, lat = 50.93999999999998 }
 
 -}
 unproject : Point -> Location
@@ -36,14 +36,11 @@ unproject { x, y } =
 
 {-| Converts given longitude in WGS84 Datum to radians from Spherical Mercator EPSG:900913.
 
-    >>> lonToX 0
-    0
+    lonToX 0 --> 0
 
-    >>> lonToX 180
-    pi
+    lonToX 180 --> pi
 
-    >>> lonToX -180
-    -pi
+    lonToX -180 --> -pi
 
 -}
 lonToX : Float -> Float
@@ -61,11 +58,9 @@ latToY lat =
 
 {-| Converts radians from Spherical Mercator EPSG:900913 to longitude in WGS84 Datum.
 
-    >>> xToLon 0
-    0
+    xToLon 0 --> 0
 
-    >>> xToLon pi
-    180
+    xToLon pi --> 180
 
 -}
 xToLon : Float -> Float
@@ -75,8 +70,7 @@ xToLon =
 
 {-| Converts radians from Spherical Mercator EPSG:900913 to latitude in WGS84 Datum.
 
-    >>> yToLat pi
-    85.05112877980659
+    yToLat pi --> 85.05112877980659
 
 -}
 yToLat : Float -> Float
@@ -86,11 +80,9 @@ yToLat y =
 
 {-| Converts angles in degrees to radians.
 
-    >>> degreesToRadians 0
-    0
+    degreesToRadians 0 --> 0
 
-    >>> degreesToRadians 180
-    pi
+    degreesToRadians 180 --> pi
 
 -}
 degreesToRadians : Float -> Float
@@ -100,11 +92,9 @@ degreesToRadians deg =
 
 {-| Converts angles in degrees to radians.
 
-    >>> radiansToDegrees 0
-    0
+    radiansToDegrees 0 --> 0
 
-    >>> radiansToDegrees pi
-    180
+    radiansToDegrees pi --> 180
 
 -}
 radiansToDegrees : Float -> Float

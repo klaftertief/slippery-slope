@@ -41,9 +41,9 @@ subtract q p =
 
 {-| Multiply a point's coordinates by a factor.
 
-    >>> { x = 1, y = 2 }
-    ... |> multiplyBy 2
-    { x = 2, y = 4 }
+    { x = 1, y = 2 }
+        |> multiplyBy 2
+    --> { x = 2, y = 4 }
 
 -}
 multiplyBy : Float -> Point -> Point
@@ -55,9 +55,9 @@ multiplyBy k p =
 
 {-| Divide a point's coordinates by a factor.
 
-    >>> { x = 2, y = 4 }
-    ... |> divideBy 2
-    { x = 1, y = 2 }
+    { x = 2, y = 4 }
+        |> divideBy 2
+    --> { x = 1, y = 2 }
 
 -}
 divideBy : Float -> Point -> Point
