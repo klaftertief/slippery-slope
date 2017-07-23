@@ -11,7 +11,7 @@ import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..))
-import SlippyMap.Map.State as State exposing (Drag, Focus(..), Interaction(..), State(..))
+import SlippyMap.Map.State as State exposing (Drag, Focus(..), Interaction(..), State(..), Target(..))
 
 
 {-| -}
@@ -22,13 +22,13 @@ subscriptions (Config config) ((State { interaction, focus, target }) as state) 
             let
                 dragSubscriptions =
                     case interaction of
-                        Nothing ->
+                        NoInteraction ->
                             []
 
-                        Just (Pinching _) ->
+                        Pinching _ ->
                             []
 
-                        Just (Dragging _) ->
+                        Dragging _ ->
                             [ Mouse.moves (DragAt >> DragMsg)
                             , Mouse.ups (DragEnd >> DragMsg)
                             ]
@@ -43,10 +43,10 @@ subscriptions (Config config) ((State { interaction, focus, target }) as state) 
 
                 stepSubscriptions =
                     case target of
-                        Nothing ->
+                        NoTarget ->
                             []
 
-                        Just _ ->
+                        MoveTo _ ->
                             [ AnimationFrame.diffs Step ]
             in
             (dragSubscriptions

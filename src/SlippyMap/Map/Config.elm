@@ -1,60 +1,71 @@
 module SlippyMap.Map.Config
     exposing
         ( Config(Config)
-        , dynamicConfig
+        , interactive
         , size
-        , staticConfig
+        , static
         )
 
 {-|
 
-@docs Config, staticConfig, dynamicConfig, size
+@docs Config, static, interactive, size
 
-TODO: Split types between for static and interactive configs
 TODO: Add field for client position decoder
-TODO: Add CRS field
 
 -}
 
+import SlippyMap.Geo.CRS as CRS exposing (CRS)
+import SlippyMap.Geo.CRS.EPSG3857 as EPSG3857
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.Msg as Msg exposing (Msg)
 
 
 {-| Configuration for the map.
 -}
 type Config msg
-    = Config
-        { attributionPrefix : Maybe String
-        , dimensions : { width : Int, height : Int }
-        , minZoom : Float
-        , maxZoom : Float
-        , toMsg : Maybe (Msg -> msg)
+    = Config (ConfigInternal msg)
+
+
+type alias ConfigInternal msg =
+    { attributionPrefix : Maybe String
+    , size : Point
+    , minZoom : Float
+    , maxZoom : Float
+    , toMsg : Maybe (Msg -> msg)
+    , crs : CRS
+    }
+
+
+defaultConfigInternal : ConfigInternal msg
+defaultConfigInternal =
+    { attributionPrefix = Just "Elm"
+    , size = { x = 600, y = 400 }
+    , minZoom = 0
+    , maxZoom = 19
+    , toMsg = Nothing
+    , crs = EPSG3857.crs
+    }
+
+
+{-| -}
+static : { width : Int, height : Int } -> Config msg
+static { width, height } =
+    Config
+        { defaultConfigInternal
+            | size = { x = toFloat width, y = toFloat height }
         }
 
 
 {-| -}
-staticConfig : { width : Int, height : Int } -> Config msg
-staticConfig dimensions =
+interactive : { width : Int, height : Int } -> (Msg -> msg) -> Config msg
+interactive { width, height } toMsg =
     Config
-        { attributionPrefix = Just "Elm"
-        , dimensions = dimensions
-        , minZoom = 0
-        , maxZoom = 19
-        , toMsg = Nothing
-        }
-
-
-{-| -}
-dynamicConfig : { width : Int, height : Int } -> (Msg -> msg) -> Config msg
-dynamicConfig dimensions toMsg =
-    Config
-        { attributionPrefix = Just "Elm"
-        , dimensions = dimensions
-        , minZoom = 0
-        , maxZoom = 19
-        , toMsg = Just toMsg
+        { defaultConfigInternal
+            | size = { x = toFloat width, y = toFloat height }
+            , toMsg = Just toMsg
         }
 
 
 size : Config msg -> { width : Int, height : Int }
-size (Config { dimensions }) =
-    dimensions
+size (Config { size }) =
+    { width = round size.x, height = round size.y }

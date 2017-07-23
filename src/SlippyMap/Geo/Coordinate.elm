@@ -3,14 +3,18 @@ module SlippyMap.Geo.Coordinate
         ( Bounds
         , Coordinate
         , center
+        , fromPoint
+        , toPoint
         , zoomTo
         )
 
 {-|
 
-@docs Coordinate, Bounds, zoomTo, center
+@docs Coordinate, Bounds, zoomTo, center, fromPoint, toPoint
 
 -}
+
+import SlippyMap.Geo.Point as Point exposing (Point)
 
 
 {-| -}
@@ -53,4 +57,32 @@ center ( start, end ) =
     { column = (start.column + endZoomed.column) / 2
     , row = (start.row + endZoomed.row) / 2
     , zoom = start.zoom
+    }
+
+
+{-| -}
+fromPoint : Int -> Float -> Point -> Coordinate
+fromPoint tileSize atZoom { x, y } =
+    let
+        scale =
+            toFloat tileSize
+    in
+    { column = x / scale
+    , row = y / scale
+    , zoom = atZoom
+    }
+
+
+{-| -}
+toPoint : Int -> Float -> Coordinate -> Point
+toPoint tileSize atZoom coordinate =
+    let
+        { column, row, zoom } =
+            zoomTo atZoom coordinate
+
+        scale =
+            toFloat tileSize
+    in
+    { x = column * scale
+    , y = row * scale
     }

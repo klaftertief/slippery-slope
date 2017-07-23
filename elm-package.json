@@ -10,6 +10,9 @@
         "SlippyMap.Static",
         "SlippyMap.Interactive",
         "SlippyMap.Geo.Coordinate",
+        "SlippyMap.Geo.CRS",
+        "SlippyMap.Geo.CRS.EPSG3857",
+        "SlippyMap.Geo.CRS.Simple",
         "SlippyMap.Geo.Location",
         "SlippyMap.Geo.Mercator",
         "SlippyMap.Geo.Point",
@@ -27,7 +30,8 @@
         "SlippyMap.Layer.Popup",
         "SlippyMap.Layer.RemoteImage",
         "SlippyMap.Layer.StaticImage",
-        "SlippyMap.Layer.Tile"
+        "SlippyMap.Layer.Tile",
+        "SlippyMap.Map.Transform"
     ],
     "dependencies": {
         "elm-lang/animation-frame": "1.0.1 <= v < 2.0.0",

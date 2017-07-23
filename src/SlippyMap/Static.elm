@@ -32,4 +32,4 @@ center location zoom =
 -}
 view : { width : Int, height : Int } -> State -> List (Layer msg) -> Html msg
 view dimensions (State state) =
-    View.view (Config.staticConfig dimensions) state
+    View.view (Config.static dimensions) state

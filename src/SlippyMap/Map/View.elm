@@ -24,11 +24,8 @@ import Svg.Attributes
 
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
-view (Config config) ((State { transform, interaction }) as state) layers =
+view (Config config) ((State { scene, interaction }) as state) layers =
     let
-        renderState =
-            Layer.transformToRenderState transform
-
         -- TODO: only get attributions from currently visible layers, whatever that means or how it's implemented
         layerAttributions =
             layers
@@ -77,19 +74,19 @@ view (Config config) ((State { transform, interaction }) as state) layers =
         ([ Html.Attributes.tabindex 0
          , Html.Attributes.style
             [ ( "position", "relative" )
-            , ( "width", toString transform.width ++ "px" )
-            , ( "height", toString transform.height ++ "px" )
+            , ( "width", toString config.size.x ++ "px" )
+            , ( "height", toString config.size.y ++ "px" )
             , ( "background", "#eee" )
             ]
          , Html.Attributes.classList
-            [ ( "with-interaction", interaction /= Nothing ) ]
+            [ ( "with-interaction", interaction /= State.NoInteraction ) ]
          ]
             ++ handlers
         )
         [ Html.div
             [ Html.Attributes.style
                 [ ( "position"
-                  , if interaction /= Nothing then
+                  , if interaction /= State.NoInteraction then
                         "fixed"
                     else
                         "absolute"
@@ -103,16 +100,17 @@ view (Config config) ((State { transform, interaction }) as state) layers =
             []
         , Svg.svg
             [ Svg.Attributes.class "esm__map"
-            , Svg.Attributes.height (toString transform.height)
-            , Svg.Attributes.width (toString transform.width)
+            , Svg.Attributes.height (toString config.size.y)
+            , Svg.Attributes.width (toString config.size.x)
             , Svg.Attributes.style "position: absolute;"
             ]
             [ Svg.g
                 [ Svg.Attributes.class "esm__layers" ]
-                (List.concatMap
-                    (viewPane (Config config) renderState layers)
-                    Layer.panes
-                )
+                -- (List.concatMap
+                --     (viewPane (Config config) renderState layers)
+                --     Layer.panes
+                -- )
+                []
             ]
 
         -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
@@ -130,12 +128,12 @@ view (Config config) ((State { transform, interaction }) as state) layers =
             [ Html.Attributes.class "esm__controls" ]
             [ Attribution.control config.attributionPrefix
                 layerAttributions
-            , case config.toMsg of
-                Just toMsg ->
-                    Html.map toMsg <| Zoom.control renderState
 
-                Nothing ->
-                    Html.text ""
+            -- , case config.toMsg of
+            --     Just toMsg ->
+            --         Html.map toMsg <| Zoom.control renderState
+            --     Nothing ->
+            --         Html.text ""
             ]
         ]
 

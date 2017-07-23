@@ -1,6 +1,9 @@
-module SlippyMap.Geo.CRS.Simple exposing (..)
+module SlippyMap.Geo.CRS.Simple exposing (crs)
 
 {-| A simple CRS that maps longitude and latitude into `x` and `y` directly. May be used for maps of flat surfaces (e.g. game maps). Note that the `y` axis should still be inverted (going from bottom to top). `distance()` returns simple euclidean distance.
+
+@docs crs
+
 -}
 
 import SlippyMap.Geo.CRS exposing (CRS)
@@ -10,6 +13,7 @@ import SlippyMap.Geo.Projection.PlateCarree as Projection
 import SlippyMap.Geometry.Transformation as Transformation exposing (Transformation)
 
 
+{-| -}
 crs : CRS
 crs =
     { locationToPoint = locationToPoint
@@ -28,16 +32,40 @@ transformation =
     Transformation 1 0 -1 0
 
 
+{-|
+
+    locationToPoint 0
+        { lon = 0, lat = 0 }
+    --> { x = 0, y = 0 }
+
+    locationToPoint 1
+        { lon = 200, lat = -400 }
+    --> { x = 400, y = 800 }
+
+-}
 locationToPoint : Float -> Location -> Point
-locationToPoint zoom location =
+locationToPoint atZoom location =
     location
         |> project
         |> Transformation.transform transformation
+        |> Point.multiplyBy (scale atZoom)
 
 
+{-|
+
+    pointToLocation 0
+        { x = 0, y = 0 }
+    --> { lon = 0, lat = 0 }
+
+    pointToLocation 1
+        { x = 2000, y = 4000 }
+    --> { lon = 1000, lat = -2000 }
+
+-}
 pointToLocation : Float -> Point -> Location
-pointToLocation zoom point =
+pointToLocation atZoom point =
     point
+        |> Point.divideBy (scale atZoom)
         |> Transformation.untransform transformation
         |> unproject
 

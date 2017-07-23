@@ -14,141 +14,127 @@ import SlippyMap.Map.State as State exposing (Drag, Focus, Interaction(..), Pinc
 
 {-| -}
 update : Config msg -> Msg -> State -> State
-update ((Config { dimensions }) as config) msg ((State { transform }) as state) =
+update ((Config { size }) as config) msg ((State { scene }) as state) =
     safeState config state <|
-        State.setSize dimensions <|
-            case msg of
-                ZoomIn ->
-                    --State.zoomIn state
-                    State.setTarget 100
-                        { transform | zoom = transform.zoom + 1 }
-                        state
+        case msg of
+            ZoomIn ->
+                State.zoomIn state
 
-                ZoomOut ->
-                    --State.zoomOut state
-                    State.setTarget 100
-                        { transform | zoom = transform.zoom - 1 }
-                        state
+            ZoomOut ->
+                State.zoomOut state
 
-                ZoomInAround point ->
-                    State.zoomInAround point state
+            ZoomInAround point ->
+                State.zoomInAround point state
 
-                ZoomByAround delta point ->
-                    State.zoomByAround delta point state
+            ZoomByAround delta point ->
+                State.zoomByAround delta point state
 
-                DragMsg dragMsg ->
-                    updateDrag dragMsg state
+            DragMsg dragMsg ->
+                updateDrag dragMsg state
 
-                PinchMsg pinchMsg ->
-                    updatePinch pinchMsg state
+            PinchMsg pinchMsg ->
+                updatePinch pinchMsg state
 
-                SetFocus focus ->
-                    State.setFocus focus state
+            SetFocus focus ->
+                State.setFocus focus state
 
-                KeyboardNavigation keyCode ->
-                    let
-                        offset =
-                            50
+            KeyboardNavigation keyCode ->
+                let
+                    offset =
+                        50
 
-                        moveBy =
-                            case keyCode of
-                                -- Left
-                                37 ->
-                                    { x = -offset, y = 0 }
+                    moveBy =
+                        case keyCode of
+                            -- Left
+                            37 ->
+                                { x = -offset, y = 0 }
 
-                                -- Up
-                                38 ->
-                                    { x = 0, y = -offset }
+                            -- Up
+                            38 ->
+                                { x = 0, y = -offset }
 
-                                -- Right
-                                39 ->
-                                    { x = offset, y = 0 }
+                            -- Right
+                            39 ->
+                                { x = offset, y = 0 }
 
-                                -- Down
-                                40 ->
-                                    { x = 0, y = offset }
+                            -- Down
+                            40 ->
+                                { x = 0, y = offset }
 
-                                _ ->
-                                    { x = 0, y = 0 }
-                    in
-                    State.setTransform
-                        (Transform.moveTo transform
-                            { x = transform.width / 2 + moveBy.x
-                            , y = transform.height / 2 + moveBy.y
-                            }
-                        )
-                        state
+                            _ ->
+                                { x = 0, y = 0 }
+                in
+                state
 
-                Step duration ->
-                    State.stepTarget duration state
+            Step duration ->
+                state
 
-                PanTo duration center ->
-                    State.setTarget duration
-                        { transform | center = center }
-                        state
+            PanTo duration center ->
+                state
 
 
 updateDrag : DragMsg -> State -> State
 updateDrag dragMsg ((State { interaction }) as state) =
-    State.withInteractionTransform <|
+    State.withInteraction <|
         case dragMsg of
             DragStart xy ->
                 State.setInteraction
-                    (Just <| Dragging (Drag xy xy))
+                    (Dragging (Drag xy xy))
                     state
 
             DragAt xy ->
-                State.setInteraction
-                    (Maybe.map
-                        (\i ->
-                            case i of
-                                Dragging { current } ->
-                                    Dragging (Drag current xy)
+                let
+                    newInteraction =
+                        case interaction of
+                            NoInteraction ->
+                                Dragging (Drag xy xy)
 
-                                Pinching { current } ->
-                                    Dragging (Drag (Tuple.first current) xy)
-                        )
-                        interaction
-                    )
+                            Dragging { current } ->
+                                Dragging (Drag current xy)
+
+                            Pinching { current } ->
+                                Dragging (Drag (Tuple.first current) xy)
+                in
+                State.setInteraction newInteraction
                     state
 
             DragEnd _ ->
-                State.setInteraction Nothing state
+                State.setInteraction NoInteraction state
 
 
 updatePinch : PinchMsg -> State -> State
 updatePinch pinchMsg ((State { interaction }) as state) =
-    State.withInteractionTransform <|
+    State.withInteraction <|
         case pinchMsg of
             PinchStart touches ->
-                State.setInteraction (Just <| Pinching (Pinch touches touches)) state
+                State.setInteraction (Pinching (Pinch touches touches)) state
 
             PinchAt touches ->
                 let
                     newInteraction =
                         case interaction of
-                            Nothing ->
-                                Just <| Pinching (Pinch touches touches)
+                            NoInteraction ->
+                                Pinching (Pinch touches touches)
 
-                            Just (Dragging { current }) ->
-                                Just <| Pinching (Pinch ( current, current ) touches)
+                            Dragging { current } ->
+                                Pinching (Pinch ( current, current ) touches)
 
-                            Just (Pinching { current }) ->
-                                Just <| Pinching (Pinch current touches)
+                            Pinching { current } ->
+                                Pinching (Pinch current touches)
                 in
                 State.setInteraction newInteraction state
 
             PinchEnd _ ->
-                State.setInteraction Nothing state
+                State.setInteraction NoInteraction state
 
 
 {-| TODO: Well, thos is not really the way to do it.
 -}
 safeState : Config msg -> State -> State -> State
-safeState (Config config) oldState ((State { transform }) as newState) =
+safeState (Config config) oldState ((State { scene }) as newState) =
     if
-        (config.minZoom <= transform.zoom)
-            && (config.maxZoom >= transform.zoom)
+        (config.minZoom <= scene.zoom)
+            && (config.maxZoom >= scene.zoom)
     then
         newState
     else

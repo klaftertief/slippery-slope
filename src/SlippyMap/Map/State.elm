@@ -4,22 +4,17 @@ module SlippyMap.Map.State
         , Focus(..)
         , Interaction(..)
         , Pinch
+        , Scene
         , State(..)
+        , Target(..)
         , center
         , defaultState
-        , getCoordinateBounds
-        , getTileCover
-        , getTransform
-        , resetTarget
         , setCenter
         , setFocus
         , setInteraction
-        , setSize
-        , setTarget
-        , setTransform
+        , setScene
         , setZoom
-        , stepTarget
-        , withInteractionTransform
+        , withInteraction
         , zoomByAround
         , zoomIn
         , zoomInAround
@@ -33,33 +28,38 @@ module SlippyMap.Map.State
 -}
 
 import Mouse exposing (Position)
-import SlippyMap.Geo.Coordinate as Coordinate exposing (Coordinate)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import Time exposing (Time)
 
 
-{-| TODO: Maybe just have the most basic state here, e.g. the Transform, and move Drag and Focus to the interactive module?
--}
+{-| -}
 type State
     = State
-        { transform : Transform
-        , target : Maybe Target
-        , interaction : Maybe Interaction
+        { scene : Scene
+        , target : Target
+        , interaction : Interaction
         , focus : Focus
         }
 
 
-type alias Target =
-    { transform : Transform
-    , duration : Time
+type alias Scene =
+    { center : Location
+    , zoom : Float
     }
 
 
+type Target
+    = NoTarget
+    | MoveTo
+        { scene : Scene
+        , duration : Time
+        }
+
+
 type Interaction
-    = Dragging Drag
+    = NoInteraction
+    | Dragging Drag
     | Pinching Pinch
 
 
@@ -83,73 +83,20 @@ type Focus
 defaultState : State
 defaultState =
     State
-        { transform = defaultTransform
-        , target = Nothing
-        , interaction = Nothing
+        { scene = defaultScene
+        , target = NoTarget
+        , interaction = NoInteraction
         , focus = HasNoFocus
         }
 
 
-setTransform : Transform -> State -> State
-setTransform newTransform (State state) =
+setScene : Scene -> State -> State
+setScene newScene (State state) =
     State
-        { state | transform = newTransform }
+        { state | scene = newScene }
 
 
-setTarget : Time -> Transform -> State -> State
-setTarget targetDuration targetTransform (State state) =
-    State
-        { state
-            | target =
-                Just
-                    { transform = targetTransform
-                    , duration = targetDuration
-                    }
-        }
-
-
-stepTarget : Time -> State -> State
-stepTarget duration (State state) =
-    case state.target of
-        Just target ->
-            let
-                currentTransform =
-                    state.transform
-
-                targetTransform =
-                    target.transform
-
-                progress =
-                    clamp 0 1 (duration / target.duration)
-
-                newTargetDuration =
-                    max 0 (target.duration - duration)
-
-                newTransform =
-                    Transform.progress progress
-                        currentTransform
-                        targetTransform
-            in
-            if progress >= 1 then
-                State state
-                    |> setTransform newTransform
-                    |> resetTarget
-            else
-                State state
-                    |> setTransform newTransform
-                    |> setTarget newTargetDuration targetTransform
-
-        Nothing ->
-            State state
-
-
-resetTarget : State -> State
-resetTarget (State state) =
-    State
-        { state | target = Nothing }
-
-
-setInteraction : Maybe Interaction -> State -> State
+setInteraction : Interaction -> State -> State
 setInteraction newInteraction (State state) =
     State
         { state | interaction = newInteraction }
@@ -161,124 +108,52 @@ setFocus newFocus (State state) =
         { state | focus = newFocus }
 
 
-defaultTransform : Transform
-defaultTransform =
-    Transform.defaultTransform
+defaultScene : Scene
+defaultScene =
+    { center = Location 0 0
+    , zoom = 0
+    }
 
 
-withInteractionTransform : State -> State
-withInteractionTransform ((State { interaction }) as state) =
+withInteraction : State -> State
+withInteraction ((State { interaction }) as state) =
     case interaction of
-        Just (Dragging drag) ->
-            withDragTransform drag state
+        Dragging drag ->
+            state
 
-        Just (Pinching pinch) ->
-            withPinchTransform pinch state
+        Pinching pinch ->
+            state
 
-        Nothing ->
+        NoInteraction ->
             state
 
 
-withDragTransform : Drag -> State -> State
-withDragTransform { last, current } ((State { transform }) as state) =
-    setTransform
-        (Transform.moveTo transform
-            { x = transform.width / 2 + toFloat (last.x - current.x)
-            , y = transform.height / 2 + toFloat (last.y - current.y)
-            }
-        )
-        state
-
-
-withPinchTransform : Pinch -> State -> State
-withPinchTransform { last, current } ((State { transform }) as state) =
-    let
-        toPoint position =
-            { x = toFloat position.x
-            , y = toFloat position.y
-            }
-
-        centerPoint ( pos1, pos2 ) =
-            Point.add
-                (toPoint pos1)
-                (toPoint pos2)
-                |> Point.divideBy 2
-
-        distance ( pos1, pos2 ) =
-            Point.distance
-                (toPoint pos1)
-                (toPoint pos2)
-
-        lastCenter =
-            centerPoint last
-
-        lastDistance =
-            distance last
-
-        currentCenter =
-            centerPoint current
-
-        currentDistance =
-            distance current
-
-        newCenterPoint =
-            { x =
-                (transform.width / 2)
-                    + lastCenter.x
-                    - currentCenter.x
-            , y =
-                (transform.height / 2)
-                    + lastCenter.y
-                    - currentCenter.y
-            }
-
-        zoomDelta =
-            Transform.scaleZoom
-                (currentDistance / lastDistance)
-    in
-    state
-        |> moveTo newCenterPoint
-        |> zoomByAround zoomDelta currentCenter
-
-
 moveTo : Point -> State -> State
-moveTo newCenterPoint ((State { transform }) as state) =
-    setTransform
-        (Transform.moveTo transform newCenterPoint)
-        state
+moveTo newCenterPoint ((State { scene }) as state) =
+    state
 
 
 setCenter : Location -> State -> State
-setCenter newCenter ((State { transform }) as state) =
-    setTransform { transform | center = newCenter } state
-
-
-setSize : { width : Int, height : Int } -> State -> State
-setSize { width, height } ((State { transform }) as state) =
-    setTransform
-        { transform
-            | width = toFloat width
-            , height = toFloat height
-        }
-        state
+setCenter newCenter ((State { scene }) as state) =
+    setScene { scene | center = newCenter } state
 
 
 setZoom : Float -> State -> State
-setZoom newZoom ((State { transform }) as state) =
+setZoom newZoom ((State { scene }) as state) =
     if isNaN newZoom || isInfinite newZoom then
         state
     else
-        setTransform { transform | zoom = newZoom } state
+        setScene { scene | zoom = newZoom } state
 
 
 zoomIn : State -> State
-zoomIn ((State { transform }) as state) =
-    setZoom (transform.zoom + 1) state
+zoomIn ((State { scene }) as state) =
+    setZoom (scene.zoom + 1) state
 
 
 zoomOut : State -> State
-zoomOut ((State { transform }) as state) =
-    setZoom (transform.zoom - 1) state
+zoomOut ((State { scene }) as state) =
+    setZoom (scene.zoom - 1) state
 
 
 zoomInAround : Point -> State -> State
@@ -287,17 +162,15 @@ zoomInAround =
 
 
 zoomByAround : Float -> Point -> State -> State
-zoomByAround delta point ((State { transform }) as state) =
+zoomByAround delta point ((State { scene }) as state) =
     let
         newZoom =
             if isNaN delta || isInfinite delta then
-                transform.zoom
+                scene.zoom
             else
-                transform.zoom + delta
+                scene.zoom + delta
     in
-    setTransform
-        (Transform.zoomToAround transform newZoom point)
-        state
+    state
 
 
 {-| -}
@@ -309,24 +182,6 @@ center initialCenter initialZoom =
 
 
 {-| -}
-getTransform : State -> Transform
-getTransform (State { transform }) =
-    transform
-
-
-{-| -}
-getLocationBounds : State -> Location.Bounds
-getLocationBounds =
-    getTransform >> Transform.locationBounds
-
-
-{-| -}
-getCoordinateBounds : State -> Coordinate.Bounds
-getCoordinateBounds =
-    getTransform >> Transform.tileBounds
-
-
-{-| -}
-getTileCover : State -> List Tile
-getTileCover =
-    getCoordinateBounds >> Tile.cover
+getScene : State -> Scene
+getScene (State { scene }) =
+    scene

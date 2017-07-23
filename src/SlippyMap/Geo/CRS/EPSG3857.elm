@@ -1,6 +1,9 @@
-module SlippyMap.Geo.CRS.EPSG3857 exposing (..)
+module SlippyMap.Geo.CRS.EPSG3857 exposing (crs)
 
 {-| The most common CRS for online maps, used by almost all free and commercial tile providers. Uses Spherical Mercator projection.
+
+@docs crs
+
 -}
 
 import SlippyMap.Geo.CRS exposing (CRS)
@@ -10,6 +13,7 @@ import SlippyMap.Geo.Projection.SphericalMercator as Projection
 import SlippyMap.Geometry.Transformation as Transformation exposing (Transformation)
 
 
+{-| -}
 crs : CRS
 crs =
     { locationToPoint = locationToPoint
@@ -32,20 +36,51 @@ transformation =
     Transformation s 0.5 -s 0.5
 
 
+{-| Geo location to point in pixels
+
+    locationToPoint 0
+        { lon = 0, lat = 0 }
+    --> { x = 128, y = 128 }
+
+    locationToPoint 1
+        { lon = 0, lat = 0 }
+    --> { x = 256, y = 256 }
+
+    locationToPoint 0
+        { lon = 180, lat = 85.0511287798 }
+    --> { x = 256, y = 0 }
+
+-}
 locationToPoint : Float -> Location -> Point
-locationToPoint zoom location =
+locationToPoint atZoom location =
     location
         |> project
         |> Transformation.transform transformation
+        |> Point.multiplyBy (scale atZoom)
 
 
+{-|
+
+    pointToLocation 0
+        { x = 128, y = 128 }
+    --> { lon = 0, lat = 0 }
+
+-}
 pointToLocation : Float -> Point -> Location
-pointToLocation zoom point =
+pointToLocation atZoom point =
     point
+        |> Point.divideBy (scale atZoom)
         |> Transformation.untransform transformation
         |> unproject
 
 
+{-| Geo location to point in meters
+
+    project
+        { lon = 30, lat = 50 }
+    --> { x = 3339584.7238, y = 6446275.84102 }
+
+-}
 project : Location -> Point
 project =
     Projection.project
