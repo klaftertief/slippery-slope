@@ -5,12 +5,11 @@ import GeoJson exposing (GeoJson)
 import SlippyMap.Geo.CRS.EPSG3857 as CRS
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.Layer.GeoJson.Render as Render
+import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Graticule as Graticule
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import SlippyMap.Static as Static
 import Svg
-import Svg.Attributes
 
 
 transform : Transform
@@ -26,80 +25,8 @@ main : Svg.Svg msg
 main =
     Static.view { width = 512, height = 512 }
         (Static.center (Location 0 0) 1)
-        [ Graticule.layer ]
-
-
-main2 : Svg.Svg msg
-main2 =
-    let
-        centerPoint =
-            Transform.locationToScreenPoint transform transform.center
-
-        viewBox =
-            [ 0, 0, transform.size.x, transform.size.y ]
-                |> List.map toString
-                |> String.join " "
-
-        project ( lon, lat, _ ) =
-            Transform.locationToScreenPoint transform (Location lon lat)
-
-        style =
-            always
-                [ Svg.Attributes.stroke "#111"
-                , Svg.Attributes.strokeWidth "1"
-                , Svg.Attributes.fill "#111"
-                , Svg.Attributes.fillOpacity "0.2"
-                , Svg.Attributes.strokeLinecap "round"
-                , Svg.Attributes.strokeLinejoin "round"
-                ]
-
-        graticuleStyle =
-            always
-                [ Svg.Attributes.stroke "#666"
-                , Svg.Attributes.strokeWidth "0.5"
-                , Svg.Attributes.strokeOpacity "0.5"
-                , Svg.Attributes.strokeDasharray "2"
-
-                -- , Svg.Attributes.shapeRendering "crispEdges"
-                , Svg.Attributes.fill "none"
-                ]
-
-        renderConfig =
-            Render.Config
-                { project = project
-                , style = style
-                }
-
-        graticuleRenderConfig =
-            Render.Config
-                { project = project
-                , style = graticuleStyle
-                }
-    in
-    Svg.svg
-        [ Svg.Attributes.width (toString transform.size.x)
-        , Svg.Attributes.height (toString transform.size.y)
-        , Svg.Attributes.viewBox viewBox
-        ]
-        [ Render.renderGeoJson renderConfig (Maybe.withDefault myGeoJson Data.World.geoJson)
-        , Render.renderGeoJson graticuleRenderConfig Graticule.graticule
-        , Svg.circle
-            [ Svg.Attributes.r "8"
-            , Svg.Attributes.fill "#3388ff"
-            , Svg.Attributes.stroke "white"
-            , Svg.Attributes.strokeWidth "3"
-
-            -- , Svg.Attributes.cx (toString <| floor centerPoint.x)
-            -- , Svg.Attributes.cy (toString <| floor centerPoint.y)
-            , Svg.Attributes.transform
-                ("translate("
-                    ++ toString centerPoint.x
-                    ++ " "
-                    ++ toString centerPoint.y
-                    ++ ")"
-                )
-            ]
-            []
+        [ Graticule.layer
+        , GeoJson.layer GeoJson.defaultConfig (Maybe.withDefault myGeoJson Data.World.geoJson)
         ]
 
 

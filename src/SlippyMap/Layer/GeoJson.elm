@@ -12,9 +12,10 @@ module SlippyMap.Layer.GeoJson
 -}
 
 import GeoJson exposing (GeoJson)
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
+import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Layer.GeoJson.Render as Render
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -37,7 +38,7 @@ defaultConfig =
         { style =
             always
                 [ Svg.Attributes.stroke "#3388ff"
-                , Svg.Attributes.strokeWidth "3"
+                , Svg.Attributes.strokeWidth "2"
                 , Svg.Attributes.fill "#3388ff"
                 , Svg.Attributes.fillOpacity "0.2"
                 , Svg.Attributes.strokeLinecap "round"
@@ -56,14 +57,11 @@ layer config geoJson =
     Layer.withRender Layer.overlay (render config geoJson)
 
 
-render : Config msg -> GeoJson -> Layer.RenderState -> Svg msg
-render (Config internalConfig) geoJson ({ locationToContainerPoint } as renderstate) =
+render : Config msg -> GeoJson -> Transform -> Svg msg
+render (Config internalConfig) geoJson transform =
     let
-        centerPoint =
-            renderstate.centerPoint
-
         project ( lon, lat, _ ) =
-            locationToContainerPoint { lon = lon, lat = lat }
+            Transform.locationToScreenPoint transform (Location lon lat)
 
         renderConfig =
             Render.Config
