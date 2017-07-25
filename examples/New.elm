@@ -2,23 +2,11 @@ module New exposing (..)
 
 import Data.World
 import GeoJson exposing (GeoJson)
-import SlippyMap.Geo.CRS.EPSG3857 as CRS
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Graticule as Graticule
-import SlippyMap.Map.Transform as Transform exposing (Transform)
 import SlippyMap.Static as Static
 import Svg
-
-
-transform : Transform
-transform =
-    { size = Point 512 512
-    , crs = CRS.crs
-    , center = Location 0 0
-    , zoom = 1
-    }
 
 
 main : Svg.Svg msg
