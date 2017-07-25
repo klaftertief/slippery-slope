@@ -148,8 +148,6 @@ withRender (Config configInternal) render =
 
 TODO: Support layers with different tile sizes
 
-TODO: add `project...` fields for projections between different coordinate systems
-
 -}
 type alias RenderState =
     { center : Location
