@@ -22,7 +22,6 @@
         "SlippyMap.Layer.GeoJson",
         "SlippyMap.Layer.GeoJson.Render",
         "SlippyMap.Layer.Graticule",
-        "SlippyMap.Layer.Grid",
         "SlippyMap.Layer.Heatmap",
         "SlippyMap.Layer.JsonTile",
         "SlippyMap.Layer.LowLevel",
