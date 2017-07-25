@@ -1,10 +1,12 @@
 module SlippyMap.Playground exposing (..)
 
+import Data.World
 import GeoJson exposing (GeoJson)
-import SlippyMap.Geo.CRS.EPSG3857 as EPSG3857
+import SlippyMap.Geo.CRS.EPSG3857 as CRS
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer.GeoJson.Render as Render
+import SlippyMap.Layer.Graticule as Graticule
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg
 import Svg.Attributes
@@ -12,10 +14,10 @@ import Svg.Attributes
 
 transform : Transform
 transform =
-    { size = Point 600 400
-    , crs = EPSG3857.crs
-    , center = Location 4.21875 56.36525013685606
-    , zoom = 4
+    { size = Point 512 512
+    , crs = CRS.crs
+    , center = Location 0 0
+    , zoom = 1
     }
 
 
@@ -40,12 +42,22 @@ main =
 
         style =
             always
-                [ Svg.Attributes.stroke "#3388ff"
-                , Svg.Attributes.strokeWidth "3"
-                , Svg.Attributes.fill "#3388ff"
+                [ Svg.Attributes.stroke "#111"
+                , Svg.Attributes.strokeWidth "1"
+                , Svg.Attributes.fill "#111"
                 , Svg.Attributes.fillOpacity "0.2"
                 , Svg.Attributes.strokeLinecap "round"
                 , Svg.Attributes.strokeLinejoin "round"
+                ]
+
+        graticuleStyle =
+            always
+                [ Svg.Attributes.stroke "#666"
+                , Svg.Attributes.strokeWidth "0.5"
+                , Svg.Attributes.strokeOpacity "0.5"
+
+                -- , Svg.Attributes.shapeRendering "crispEdges"
+                , Svg.Attributes.fill "none"
                 ]
 
         renderConfig =
@@ -53,14 +65,20 @@ main =
                 { project = project
                 , style = style
                 }
+
+        graticuleRenderConfig =
+            Render.Config
+                { project = project
+                , style = graticuleStyle
+                }
     in
     Svg.svg
         [ Svg.Attributes.width (toString transform.size.x)
         , Svg.Attributes.height (toString transform.size.y)
         , Svg.Attributes.viewBox viewBox
         ]
-        [ Svg.g []
-            [ Render.renderGeoJson renderConfig myGeoJson ]
+        [ Render.renderGeoJson renderConfig (Maybe.withDefault myGeoJson Data.World.geoJson)
+        , Render.renderGeoJson graticuleRenderConfig Graticule.graticule
         , Svg.circle
             [ Svg.Attributes.r "8"
             , Svg.Attributes.fill "#3388ff"
