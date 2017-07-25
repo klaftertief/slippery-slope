@@ -68,7 +68,7 @@ renderGeoJsonGeometry config attributes geometry =
             renderGeoJsonLineString config attributes positionList
 
         GeoJson.MultiLineString positionListList ->
-            List.concatMap (renderGeoJsonLineString config attributes) positionListList
+            renderGeoJsonMultiLineString config attributes positionListList
 
         GeoJson.Polygon positionListList ->
             renderGeoJsonPolygon config attributes positionListList
@@ -103,7 +103,22 @@ renderGeoJsonLineString config attributes positionList =
     [ Svg.path
         (attributes
             ++ [ pathPoints config positionList
-                    |> Svg.Attributes.points
+                    |> Svg.Attributes.d
+               ]
+        )
+        []
+    ]
+
+
+{-| -}
+renderGeoJsonMultiLineString : Config msg -> List (Svg.Attribute msg) -> List (List GeoJson.Position) -> List (Svg msg)
+renderGeoJsonMultiLineString config attributes positionListList =
+    [ Svg.path
+        (attributes
+            ++ [ positionListList
+                    |> List.map (\positionList -> pathPoints config positionList)
+                    |> String.join ""
+                    |> Svg.Attributes.d
                ]
         )
         []
@@ -117,7 +132,7 @@ renderGeoJsonPolygon config attributes positionListList =
         pathDefinition =
             (positionListList
                 |> List.map (pathPoints config)
-                |> String.join " "
+                |> String.join ""
             )
                 ++ "Z"
     in
@@ -136,7 +151,7 @@ pathPoints (Config internalConfig) positionList =
         |> List.map
             (\position ->
                 internalConfig.project position
-                    |> (\{ x, y } -> toString x ++ " " ++ toString y)
+                    |> (\{ x, y } -> toString x ++ "," ++ toString y)
             )
         |> String.join "L"
         |> (\ll -> "M" ++ ll)
