@@ -6,12 +6,12 @@ module SlippyMap.Layer.Graticule
 
 {-| A layer to display graticlues.
 
-@docs Config, defaultConfig, layer
+@docs layer, graticule
 
 -}
 
 import GeoJson exposing (GeoJson)
-import SlippyMap.Layer.GeoJson.Render as Render
+import Json.Encode as Json
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import Svg exposing (Svg)
 
@@ -30,15 +30,14 @@ render renderState =
 {-| -}
 graticule : GeoJson
 graticule =
-    ( GeoJson.Geometry
-        (GeoJson.MultiLineString (lons ++ lats))
+    ( GeoJson.FeatureCollection (lons ++ lats)
     , Nothing
     )
 
 
-lats : List (List GeoJson.Position)
+lats : List GeoJson.FeatureObject
 lats =
-    List.range -17 18
+    List.range -18 18
         |> List.map toFloat
         |> List.map
             (\lon ->
@@ -49,18 +48,36 @@ lats =
                             ( lon * 10 - 0.001, lat, 0 )
                         )
             )
+        |> List.map
+            (\points ->
+                { id = Nothing
+                , properties = Json.null
+                , geometry =
+                    Just
+                        (GeoJson.LineString points)
+                }
+            )
 
 
-lons : List (List GeoJson.Position)
+lons : List GeoJson.FeatureObject
 lons =
-    List.range -80 80
+    List.range -8 8
         |> List.map toFloat
         |> List.map
             (\lat ->
-                List.range -179 180
+                List.range -180 180
                     |> List.map toFloat
                     |> List.map
                         (\lon ->
                             ( lon - 0.001, lat * 10, 0 )
                         )
+            )
+        |> List.map
+            (\points ->
+                { id = Nothing
+                , properties = Json.null
+                , geometry =
+                    Just
+                        (GeoJson.LineString points)
+                }
             )
