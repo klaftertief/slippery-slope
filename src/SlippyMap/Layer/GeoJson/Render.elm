@@ -1,7 +1,7 @@
 module SlippyMap.Layer.GeoJson.Render exposing (..)
 
 {-| GeoJson renderer.
-@docs Config, pathPoints, points, renderGeoJson, renderGeoJsonFeatureObject, renderGeoJsonGeometry, renderGeoJsonLineString, renderGeoJsonObject, renderGeoJsonPoint, renderGeoJsonPolygon
+@docs Config, pathPoints, points, renderGeoJson, renderGeoJsonFeatureObject, renderGeoJsonGeometry, renderGeoJsonLineString, renderGeoJsonMultiLineString, renderGeoJsonObject, renderGeoJsonPoint, renderGeoJsonPolygon
 -}
 
 import GeoJson exposing (GeoJson)
