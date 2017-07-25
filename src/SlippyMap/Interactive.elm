@@ -21,7 +21,7 @@ module SlippyMap.Interactive
 
 import Html exposing (Html)
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config
 import SlippyMap.Map.Msg as Msg
 import SlippyMap.Map.State as State

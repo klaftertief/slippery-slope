@@ -6,7 +6,6 @@ module SlippyMap.Map.Update exposing (update)
 
 -}
 
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (Drag, Focus, Interaction(..), Pinch, State(..))

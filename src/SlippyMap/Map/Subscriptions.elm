@@ -11,12 +11,12 @@ import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..))
-import SlippyMap.Map.State as State exposing (Drag, Focus(..), Interaction(..), State(..), Target(..))
+import SlippyMap.Map.State as State exposing (Drag, Focus(..), Interaction(..), State(..), Transition(..))
 
 
 {-| -}
 subscriptions : Config msg -> State -> Sub msg
-subscriptions (Config config) ((State { interaction, focus, target }) as state) =
+subscriptions (Config config) ((State { interaction, focus, transition }) as state) =
     case config.toMsg of
         Just toMsg ->
             let
@@ -42,8 +42,8 @@ subscriptions (Config config) ((State { interaction, focus, target }) as state) 
                             []
 
                 stepSubscriptions =
-                    case target of
-                        NoTarget ->
+                    case transition of
+                        NoTransition ->
                             []
 
                         MoveTo _ ->

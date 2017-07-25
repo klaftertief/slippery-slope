@@ -6,7 +6,7 @@ module SlippyMap.Map.State
         , Pinch
         , Scene
         , State(..)
-        , Target(..)
+        , Transition(..)
         , center
         , defaultState
         , setCenter
@@ -37,7 +37,7 @@ import Time exposing (Time)
 type State
     = State
         { scene : Scene
-        , target : Target
+        , transition : Transition
         , interaction : Interaction
         , focus : Focus
         }
@@ -49,8 +49,8 @@ type alias Scene =
     }
 
 
-type Target
-    = NoTarget
+type Transition
+    = NoTransition
     | MoveTo
         { scene : Scene
         , duration : Time
@@ -84,7 +84,7 @@ defaultState : State
 defaultState =
     State
         { scene = defaultScene
-        , target = NoTarget
+        , transition = NoTransition
         , interaction = NoInteraction
         , focus = HasNoFocus
         }

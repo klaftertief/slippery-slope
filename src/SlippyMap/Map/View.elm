@@ -14,10 +14,11 @@ import Mouse exposing (Position)
 import SlippyMap.Control.Attribution as Attribution
 import SlippyMap.Control.Zoom as Zoom
 import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (Focus(..), State(..))
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -26,6 +27,9 @@ import Svg.Attributes
 view : Config msg -> State -> List (Layer msg) -> Html msg
 view (Config config) ((State { scene, interaction }) as state) layers =
     let
+        transform =
+            Transform.transform (Config config) scene
+
         -- TODO: only get attributions from currently visible layers, whatever that means or how it's implemented
         layerAttributions =
             layers
@@ -106,11 +110,10 @@ view (Config config) ((State { scene, interaction }) as state) layers =
             ]
             [ Svg.g
                 [ Svg.Attributes.class "esm__layers" ]
-                -- (List.concatMap
-                --     (viewPane (Config config) renderState layers)
-                --     Layer.panes
-                -- )
-                []
+                (List.concatMap
+                    (viewPane (Config config) transform layers)
+                    Layer.panes
+                )
             ]
 
         -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
@@ -138,11 +141,11 @@ view (Config config) ((State { scene, interaction }) as state) layers =
         ]
 
 
-viewPane : Config msg -> Layer.RenderState -> List (Layer msg) -> Layer.Pane -> List (Svg msg)
-viewPane (Config config) renderState layers pane =
+viewPane : Config msg -> Transform -> List (Layer msg) -> Layer.Pane -> List (Svg msg)
+viewPane (Config config) transform layers pane =
     layers
         |> List.filter (Layer.getPane >> (==) pane)
-        |> List.map (\layer -> Layer.render layer renderState)
+        |> List.map (\layer -> Layer.render layer transform)
 
 
 clientPosition : Decoder Point

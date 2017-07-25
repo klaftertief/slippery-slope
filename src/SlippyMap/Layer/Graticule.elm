@@ -12,8 +12,12 @@ module SlippyMap.Layer.Graticule
 
 import GeoJson exposing (GeoJson)
 import Json.Encode as Json
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Layer.GeoJson.Render as Render
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
+import Svg.Attributes
 
 
 {-| -}
@@ -22,9 +26,34 @@ layer =
     Layer.withRender Layer.overlay render
 
 
-render : Layer.RenderState -> Svg msg
-render renderState =
-    Svg.g [] []
+render : Transform -> Svg msg
+render transform =
+    let
+        project ( lon, lat, _ ) =
+            Transform.locationToScreenPoint transform (Location lon lat)
+    in
+    Svg.g []
+        [ Render.renderGeoJson (renderConfig project) graticule
+        ]
+
+
+style =
+    always
+        [ Svg.Attributes.stroke "#666"
+        , Svg.Attributes.strokeWidth "0.5"
+        , Svg.Attributes.strokeOpacity "0.5"
+        , Svg.Attributes.strokeDasharray "2"
+
+        -- , Svg.Attributes.shapeRendering "crispEdges"
+        , Svg.Attributes.fill "none"
+        ]
+
+
+renderConfig project =
+    Render.Config
+        { project = project
+        , style = style
+        }
 
 
 {-| -}

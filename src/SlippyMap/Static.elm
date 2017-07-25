@@ -8,7 +8,7 @@ module SlippyMap.Static exposing (State, center, view)
 
 import Html exposing (Html)
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config
 import SlippyMap.Map.State as State
 import SlippyMap.Map.View as View

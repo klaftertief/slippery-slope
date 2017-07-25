@@ -1,4 +1,4 @@
-module SlippyMap.Playground exposing (..)
+module New exposing (..)
 
 import Data.World
 import GeoJson exposing (GeoJson)
@@ -8,6 +8,7 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer.GeoJson.Render as Render
 import SlippyMap.Layer.Graticule as Graticule
 import SlippyMap.Map.Transform as Transform exposing (Transform)
+import SlippyMap.Static as Static
 import Svg
 import Svg.Attributes
 
@@ -21,13 +22,15 @@ transform =
     }
 
 
-
--- 17 -> 17429363.28888889 11233069.463062841 600 400
--- 18 -> 34859026.57777778 22466338.926125683 600 400
-
-
 main : Svg.Svg msg
 main =
+    Static.view { width = 512, height = 512 }
+        (Static.center (Location 0 0) 1)
+        [ Graticule.layer ]
+
+
+main2 : Svg.Svg msg
+main2 =
     let
         centerPoint =
             Transform.locationToScreenPoint transform transform.center
