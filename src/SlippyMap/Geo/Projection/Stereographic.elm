@@ -47,10 +47,26 @@ project { lon, lat } =
 -}
 unproject : Point -> Location
 unproject { x, y } =
+    let
+        z =
+            sqrt ((x / radius) ^ 2 + (y / radius) ^ 2)
+
+        c =
+            2 * atan z
+
+        sinC =
+            sin c
+
+        cosC =
+            cos c
+    in
     { lon =
-        radiansToDegrees (2 * atan (x / radius))
+        radiansToDegrees (atan2 ((x / radius) * sinC) (z * cosC))
     , lat =
-        radiansToDegrees (2 * atan (y / radius))
+        if z == 0 then
+            0
+        else
+            radiansToDegrees (asin ((y / radius) * sinC / z))
     }
 
 
