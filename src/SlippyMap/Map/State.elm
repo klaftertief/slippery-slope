@@ -80,7 +80,7 @@ withInteraction config ((State { interaction }) as state) =
             withDrag config drag state
 
         Pinching pinch ->
-            state
+            withPinch config pinch state
 
         NoInteraction ->
             state
@@ -98,6 +98,50 @@ withDrag ((Config.Config { size }) as config) { last, current } state =
                     }
     in
     moveTo config newCenterPoint state
+
+
+withPinch : Config msg -> Pinch -> State -> State
+withPinch ((Config.Config { crs, size }) as config) { last, current } ((State { scene }) as state) =
+    let
+        toPoint position =
+            { x = toFloat position.x
+            , y = toFloat position.y
+            }
+
+        centerPoint ( pos1, pos2 ) =
+            Point.center
+                (toPoint pos1)
+                (toPoint pos2)
+
+        distance ( pos1, pos2 ) =
+            Point.distance
+                (toPoint pos1)
+                (toPoint pos2)
+
+        lastCenter =
+            centerPoint last
+
+        lastDistance =
+            distance last
+
+        currentCenter =
+            centerPoint current
+
+        currentDistance =
+            distance current
+
+        newCenterPoint =
+            size
+                |> Point.divideBy 2
+                |> Point.add lastCenter
+                |> Point.subtract currentCenter
+
+        zoomDelta =
+            crs.zoom (256 * currentDistance / lastDistance)
+    in
+    state
+        |> moveTo config newCenterPoint
+        |> zoomByAround config zoomDelta currentCenter
 
 
 moveTo : Config msg -> Point -> State -> State

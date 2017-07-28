@@ -1,8 +1,8 @@
-module SlippyMap.Geo.Point exposing (Bounds, Point, add, distance, divideBy, multiplyBy, subtract)
+module SlippyMap.Geo.Point exposing (Bounds, Point, add, center, distance, divideBy, multiplyBy, subtract)
 
 {-|
 
-@docs Point, Bounds, add, subtract, multiplyBy, divideBy, distance
+@docs Point, Bounds, add, subtract, multiplyBy, divideBy, center, distance
 
 -}
 
@@ -65,6 +65,13 @@ divideBy k p =
     { x = p.x / k
     , y = p.y / k
     }
+
+
+{-| -}
+center : Point -> Point -> Point
+center q p =
+    add q p
+        |> divideBy 2
 
 
 {-| -}

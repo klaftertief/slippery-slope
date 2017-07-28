@@ -12,7 +12,6 @@ import Set exposing (Set)
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer.Circle as Circle
 import SlippyMap.Layer.GeoJson as GeoJsonLayer
-import SlippyMap.Layer.Grid as Grid
 import SlippyMap.Layer.Heatmap as Heatmap
 import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Layer.Marker as Marker
@@ -193,7 +192,6 @@ toggableLayers =
 
         --, ( "Circle II", circleLayer2 )
         --, ( "Circle III", circleLayer3 )
-        , ( "Graticules", graticuleLayer )
         ]
 
 
@@ -203,11 +201,6 @@ imageLayer =
         (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
             |> StaticImage.withAttribution "© OpenStreetMap contributors"
         )
-
-
-graticuleLayer : Layer Msg
-graticuleLayer =
-    Grid.layer Grid.defaultConfig
 
 
 overlayLayer : Layer Msg

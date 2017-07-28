@@ -49,7 +49,7 @@ view (Config config) ((State { scene, interaction }) as state) layers =
                             (Decode.map (DragStart >> DragMsg) Mouse.position)
                         , Html.Events.onWithOptions "touchstart"
                             { preventDefault = True
-                            , stopPropagation = True
+                            , stopPropagation = False
                             }
                             (Decode.map touchesStartMsg touchesDecoder)
                         , Html.Events.on "touchmove"
@@ -76,20 +76,19 @@ view (Config config) ((State { scene, interaction }) as state) layers =
                     []
     in
     Html.div
-        ([ Html.Attributes.tabindex 0
-         , Html.Attributes.style
+        [ Html.Attributes.tabindex 0
+        , Html.Attributes.style
             [ ( "position", "relative" )
             , ( "width", toString config.size.x ++ "px" )
             , ( "height", toString config.size.y ++ "px" )
             , ( "background", "#eee" )
             ]
-         , Html.Attributes.classList
+        , Html.Attributes.classList
             [ ( "with-interaction", interaction /= Types.NoInteraction ) ]
-         ]
-            ++ handlers
-        )
+        ]
         [ Html.div
-            [ Html.Attributes.style
+            ([ -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
+               Html.Attributes.style
                 [ ( "position"
                   , if interaction /= Types.NoInteraction then
                         "fixed"
@@ -101,10 +100,15 @@ view (Config config) ((State { scene, interaction }) as state) layers =
                 , ( "right", "0" )
                 , ( "bottom", "0" )
                 ]
-            ]
+             ]
+                ++ handlers
+            )
             []
         , Svg.svg
             [ Svg.Attributes.class "esm__map"
+
+            -- Important for touch pinching
+            , Svg.Attributes.pointerEvents "none"
             , Svg.Attributes.height (toString config.size.y)
             , Svg.Attributes.width (toString config.size.x)
             , Svg.Attributes.style "position: absolute;"
@@ -116,18 +120,6 @@ view (Config config) ((State { scene, interaction }) as state) layers =
                     Layer.panes
                 )
             ]
-
-        -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
-        --, Html.div
-        --    [ Html.Attributes.style
-        --        [ ( "position", "absolute" )
-        --        , ( "left", "0" )
-        --        , ( "top", "0" )
-        --        , ( "right", "0" )
-        --        , ( "bottom", "0" )
-        --        ]
-        --    ]
-        --    []
         , Html.div
             [ Html.Attributes.class "esm__controls" ]
             [ Attribution.control config.attributionPrefix
