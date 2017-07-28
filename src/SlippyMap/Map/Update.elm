@@ -8,73 +8,73 @@ module SlippyMap.Map.Update exposing (update)
 
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
-import SlippyMap.Map.State as State exposing (Drag, Focus, Interaction(..), Pinch, State(..))
+import SlippyMap.Map.State as State exposing (State(..))
+import SlippyMap.Map.Types as Types exposing (Drag, Focus, Interaction(..), Pinch)
 
 
 {-| -}
 update : Config msg -> Msg -> State -> State
-update ((Config { size }) as config) msg ((State { scene }) as state) =
-    safeState config state <|
-        case msg of
-            ZoomIn ->
-                State.zoomIn state
+update config msg ((State { scene }) as state) =
+    case msg of
+        ZoomIn ->
+            State.zoomIn config state
 
-            ZoomOut ->
-                State.zoomOut state
+        ZoomOut ->
+            State.zoomOut config state
 
-            ZoomInAround point ->
-                State.zoomInAround point state
+        ZoomInAround point ->
+            State.zoomInAround config point state
 
-            ZoomByAround delta point ->
-                State.zoomByAround delta point state
+        ZoomByAround delta point ->
+            State.zoomByAround config delta point state
 
-            DragMsg dragMsg ->
-                updateDrag dragMsg state
+        DragMsg dragMsg ->
+            updateDrag config dragMsg state
 
-            PinchMsg pinchMsg ->
-                updatePinch pinchMsg state
+        PinchMsg pinchMsg ->
+            updatePinch config pinchMsg state
 
-            SetFocus focus ->
-                State.setFocus focus state
+        SetFocus focus ->
+            State.setFocus focus state
 
-            KeyboardNavigation keyCode ->
-                let
-                    offset =
-                        50
+        KeyboardNavigation keyCode ->
+            let
+                offset =
+                    50
 
-                    moveBy =
-                        case keyCode of
-                            -- Left
-                            37 ->
-                                { x = -offset, y = 0 }
+                moveBy =
+                    case keyCode of
+                        -- Left
+                        37 ->
+                            { x = -offset, y = 0 }
 
-                            -- Up
-                            38 ->
-                                { x = 0, y = -offset }
+                        -- Up
+                        38 ->
+                            { x = 0, y = -offset }
 
-                            -- Right
-                            39 ->
-                                { x = offset, y = 0 }
+                        -- Right
+                        39 ->
+                            { x = offset, y = 0 }
 
-                            -- Down
-                            40 ->
-                                { x = 0, y = offset }
+                        -- Down
+                        40 ->
+                            { x = 0, y = offset }
 
-                            _ ->
-                                { x = 0, y = 0 }
-                in
-                state
+                        _ ->
+                            { x = 0, y = 0 }
+            in
+            state
 
-            Step duration ->
-                state
+        Step duration ->
+            state
 
-            PanTo duration center ->
-                state
+        PanTo duration center ->
+            state
 
 
-updateDrag : DragMsg -> State -> State
-updateDrag dragMsg ((State { interaction }) as state) =
-    State.withInteraction <|
+updateDrag : Config msg -> DragMsg -> State -> State
+updateDrag config dragMsg ((State { interaction }) as state) =
+    State.withInteraction config <|
         case dragMsg of
             DragStart xy ->
                 State.setInteraction
@@ -101,9 +101,9 @@ updateDrag dragMsg ((State { interaction }) as state) =
                 State.setInteraction NoInteraction state
 
 
-updatePinch : PinchMsg -> State -> State
-updatePinch pinchMsg ((State { interaction }) as state) =
-    State.withInteraction <|
+updatePinch : Config msg -> PinchMsg -> State -> State
+updatePinch config pinchMsg ((State { interaction }) as state) =
+    State.withInteraction config <|
         case pinchMsg of
             PinchStart touches ->
                 State.setInteraction (Pinching (Pinch touches touches)) state
@@ -125,16 +125,3 @@ updatePinch pinchMsg ((State { interaction }) as state) =
 
             PinchEnd _ ->
                 State.setInteraction NoInteraction state
-
-
-{-| TODO: Well, thos is not really the way to do it.
--}
-safeState : Config msg -> State -> State -> State
-safeState (Config config) oldState ((State { scene }) as newState) =
-    if
-        (config.minZoom <= scene.zoom)
-            && (config.maxZoom >= scene.zoom)
-    then
-        newState
-    else
-        oldState

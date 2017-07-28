@@ -25,7 +25,7 @@ init size =
     { mapState =
         Map.center (mapConfig size)
             { lon = 7, lat = 51 }
-            6
+            3
     , size = size
     }
         ! []

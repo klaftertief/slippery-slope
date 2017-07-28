@@ -42,8 +42,8 @@ style =
         [ Svg.Attributes.stroke "#666"
         , Svg.Attributes.strokeWidth "0.5"
         , Svg.Attributes.strokeOpacity "0.5"
-        , Svg.Attributes.strokeDasharray "2"
 
+        -- , Svg.Attributes.strokeDasharray "2"
         -- , Svg.Attributes.shapeRendering "crispEdges"
         , Svg.Attributes.fill "none"
         ]

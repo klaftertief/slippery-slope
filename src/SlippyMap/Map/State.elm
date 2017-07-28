@@ -1,12 +1,6 @@
 module SlippyMap.Map.State
     exposing
-        ( Drag
-        , Focus(..)
-        , Interaction(..)
-        , Pinch
-        , Scene
-        , State(..)
-        , Transition(..)
+        ( State(..)
         , center
         , defaultState
         , setCenter
@@ -27,10 +21,11 @@ module SlippyMap.Map.State
 
 -}
 
-import Mouse exposing (Position)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
-import Time exposing (Time)
+import SlippyMap.Map.Config as Config exposing (Config)
+import SlippyMap.Map.Transform as Transform exposing (Transform)
+import SlippyMap.Map.Types as Types exposing (..)
 
 
 {-| -}
@@ -41,43 +36,6 @@ type State
         , interaction : Interaction
         , focus : Focus
         }
-
-
-type alias Scene =
-    { center : Location
-    , zoom : Float
-    }
-
-
-type Transition
-    = NoTransition
-    | MoveTo
-        { scene : Scene
-        , duration : Time
-        }
-
-
-type Interaction
-    = NoInteraction
-    | Dragging Drag
-    | Pinching Pinch
-
-
-type alias Drag =
-    { last : Position
-    , current : Position
-    }
-
-
-type alias Pinch =
-    { last : ( Position, Position )
-    , current : ( Position, Position )
-    }
-
-
-type Focus
-    = HasFocus
-    | HasNoFocus
 
 
 defaultState : State
@@ -115,11 +73,11 @@ defaultScene =
     }
 
 
-withInteraction : State -> State
-withInteraction ((State { interaction }) as state) =
+withInteraction : Config msg -> State -> State
+withInteraction config ((State { interaction }) as state) =
     case interaction of
         Dragging drag ->
-            state
+            withDrag config drag state
 
         Pinching pinch ->
             state
@@ -128,57 +86,110 @@ withInteraction ((State { interaction }) as state) =
             state
 
 
-moveTo : Point -> State -> State
-moveTo newCenterPoint ((State { scene }) as state) =
-    state
+withDrag : Config msg -> Drag -> State -> State
+withDrag ((Config.Config { size }) as config) { last, current } state =
+    let
+        newCenterPoint =
+            size
+                |> Point.divideBy 2
+                |> Point.add
+                    { x = toFloat (last.x - current.x)
+                    , y = toFloat (last.y - current.y)
+                    }
+    in
+    moveTo config newCenterPoint state
 
 
-setCenter : Location -> State -> State
-setCenter newCenter ((State { scene }) as state) =
-    setScene { scene | center = newCenter } state
+moveTo : Config msg -> Point -> State -> State
+moveTo config newCenterPoint ((State { scene }) as state) =
+    let
+        transform =
+            Transform.transform config scene
+
+        newCenter =
+            Transform.screenPointToLocation transform
+                newCenterPoint
+    in
+    setCenter config newCenter state
 
 
-setZoom : Float -> State -> State
-setZoom newZoom ((State { scene }) as state) =
+setCenter : Config msg -> Location -> State -> State
+setCenter config newCenter ((State { scene }) as state) =
+    setScene
+        { scene | center = newCenter }
+        state
+
+
+setZoom : Config msg -> Float -> State -> State
+setZoom (Config.Config { minZoom, maxZoom }) newZoom ((State { scene }) as state) =
     if isNaN newZoom || isInfinite newZoom then
         state
     else
-        setScene { scene | zoom = newZoom } state
+        setScene
+            { scene | zoom = clamp minZoom maxZoom newZoom }
+            state
 
 
-zoomIn : State -> State
-zoomIn ((State { scene }) as state) =
-    setZoom (scene.zoom + 1) state
+zoomIn : Config msg -> State -> State
+zoomIn config ((State { scene }) as state) =
+    setZoom config (scene.zoom + 1) state
 
 
-zoomOut : State -> State
-zoomOut ((State { scene }) as state) =
-    setZoom (scene.zoom - 1) state
+zoomOut : Config msg -> State -> State
+zoomOut config ((State { scene }) as state) =
+    setZoom config (scene.zoom - 1) state
 
 
-zoomInAround : Point -> State -> State
-zoomInAround =
-    zoomByAround 1
+zoomInAround : Config msg -> Point -> State -> State
+zoomInAround config =
+    zoomByAround config 1
 
 
-zoomByAround : Float -> Point -> State -> State
-zoomByAround delta point ((State { scene }) as state) =
+zoomByAround : Config msg -> Float -> Point -> State -> State
+zoomByAround ((Config.Config { size, minZoom, maxZoom }) as config) delta around ((State { scene }) as state) =
     let
         newZoom =
             if isNaN delta || isInfinite delta then
                 scene.zoom
             else
-                scene.zoom + delta
+                clamp minZoom maxZoom (scene.zoom + delta)
+
+        transform =
+            Transform.transform config scene
+
+        transformZoomed =
+            Transform.transform config { scene | zoom = newZoom }
+
+        currentCenterPoint =
+            Transform.locationToPoint transform scene.center
+
+        aroundPoint =
+            around
+                |> Point.add currentCenterPoint
+                |> Point.subtract (Point.divideBy 2 size)
+
+        aroundLocation =
+            Transform.pointToLocation transform aroundPoint
+
+        aroundPointZoomed =
+            Transform.locationToPoint transformZoomed aroundLocation
+
+        aroundPointDiff =
+            Point.subtract aroundPoint aroundPointZoomed
+
+        newCenter =
+            Transform.pointToLocation transformZoomed
+                (Point.add currentCenterPoint aroundPointDiff)
     in
-    state
+    setScene { center = newCenter, zoom = newZoom } state
 
 
 {-| -}
-center : Location -> Float -> State
-center initialCenter initialZoom =
+center : Config msg -> Location -> Float -> State
+center config initialCenter initialZoom =
     defaultState
-        |> setCenter initialCenter
-        |> setZoom initialZoom
+        |> setCenter config initialCenter
+        |> setZoom config initialZoom
 
 
 {-| -}

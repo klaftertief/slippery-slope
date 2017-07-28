@@ -4,12 +4,13 @@ module SlippyMap.Map.Transform
         , locationToPoint
         , locationToScreenPoint
         , pointToLocation
+        , screenPointToLocation
         , transform
         )
 
 {-| TODO: Maybe rename module to `ViewState`?
 
-@docs Transform, locationToPoint, locationToScreenPoint, pointToLocation, transform
+@docs Transform, locationToPoint, locationToScreenPoint, pointToLocation, transform, screenPointToLocation
 
 -}
 
@@ -17,7 +18,7 @@ import SlippyMap.Geo.CRS as CRS exposing (CRS)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.Config as Config exposing (Config)
-import SlippyMap.Map.State as State exposing (Scene)
+import SlippyMap.Map.Types as Types exposing (Scene)
 
 
 {-| -}
@@ -73,3 +74,10 @@ locationToScreenPoint transform location =
 pointToLocation : Transform -> Point -> Location
 pointToLocation transform point =
     transform.crs.pointToLocation transform.zoom point
+
+
+{-| -}
+screenPointToLocation : Transform -> Point -> Location
+screenPointToLocation transform point =
+    transform.crs.pointToLocation transform.zoom
+        (Point.add (origin transform) point)

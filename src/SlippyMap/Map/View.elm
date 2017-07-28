@@ -17,8 +17,9 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
-import SlippyMap.Map.State as State exposing (Focus(..), State(..))
+import SlippyMap.Map.State as State exposing (State(..))
 import SlippyMap.Map.Transform as Transform exposing (Transform)
+import SlippyMap.Map.Types as Types exposing (Focus(..))
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -83,14 +84,14 @@ view (Config config) ((State { scene, interaction }) as state) layers =
             , ( "background", "#eee" )
             ]
          , Html.Attributes.classList
-            [ ( "with-interaction", interaction /= State.NoInteraction ) ]
+            [ ( "with-interaction", interaction /= Types.NoInteraction ) ]
          ]
             ++ handlers
         )
         [ Html.div
             [ Html.Attributes.style
                 [ ( "position"
-                  , if interaction /= State.NoInteraction then
+                  , if interaction /= Types.NoInteraction then
                         "fixed"
                     else
                         "absolute"
@@ -131,12 +132,12 @@ view (Config config) ((State { scene, interaction }) as state) layers =
             [ Html.Attributes.class "esm__controls" ]
             [ Attribution.control config.attributionPrefix
                 layerAttributions
+            , case config.toMsg of
+                Just toMsg ->
+                    Html.map toMsg <| Zoom.control transform
 
-            -- , case config.toMsg of
-            --     Just toMsg ->
-            --         Html.map toMsg <| Zoom.control renderState
-            --     Nothing ->
-            --         Html.text ""
+                Nothing ->
+                    Html.text ""
             ]
         ]
 

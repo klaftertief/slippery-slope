@@ -6,14 +6,14 @@ module SlippyMap.Control.Zoom exposing (control)
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
 import SlippyMap.Map.Msg as Msg exposing (Msg(ZoomIn, ZoomOut))
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
 
-control : Layer.RenderState -> Html Msg
-control renderState =
+control : Transform -> Html Msg
+control transform =
     Html.div
         [ Html.Attributes.class "esm__zoom"
         , Html.Attributes.style

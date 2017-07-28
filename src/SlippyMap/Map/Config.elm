@@ -48,24 +48,22 @@ defaultConfigInternal =
 
 
 {-| -}
-static : { width : Int, height : Int } -> Config msg
-static { width, height } =
+static : Point -> Config msg
+static size =
     Config
-        { defaultConfigInternal
-            | size = { x = toFloat width, y = toFloat height }
-        }
+        { defaultConfigInternal | size = size }
 
 
 {-| -}
-interactive : { width : Int, height : Int } -> (Msg -> msg) -> Config msg
-interactive { width, height } toMsg =
+interactive : Point -> (Msg -> msg) -> Config msg
+interactive size toMsg =
     Config
         { defaultConfigInternal
-            | size = { x = toFloat width, y = toFloat height }
+            | size = size
             , toMsg = Just toMsg
         }
 
 
-size : Config msg -> { width : Int, height : Int }
+size : Config msg -> Point
 size (Config { size }) =
-    { width = round size.x, height = round size.y }
+    size

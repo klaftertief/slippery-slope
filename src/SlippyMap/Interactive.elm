@@ -7,7 +7,6 @@ module SlippyMap.Interactive
         , config
         , jumpTo
         , panTo
-          -- , renderState
         , subscriptions
         , update
         , view
@@ -41,9 +40,13 @@ type Config msg
 
 {-| -}
 config : { width : Int, height : Int } -> (Msg -> msg) -> Config msg
-config dimensions toMsg =
+config { width, height } toMsg =
+    let
+        size =
+            { x = toFloat width, y = toFloat height }
+    in
     Config <|
-        Config.interactive dimensions (Msg >> toMsg)
+        Config.interactive size (Msg >> toMsg)
 
 
 
@@ -59,17 +62,17 @@ type State
 center : Config msg -> Location -> Float -> State
 center (Config config) initialCenter initialZoom =
     State.defaultState
-        |> State.setCenter initialCenter
-        |> State.setZoom initialZoom
+        |> State.setCenter config initialCenter
+        |> State.setZoom config initialZoom
         |> State
 
 
 {-| -}
-jumpTo : Location -> Float -> State -> State
-jumpTo center zoom (State state) =
+jumpTo : Config msg -> Location -> Float -> State -> State
+jumpTo (Config config) center zoom (State state) =
     state
-        |> State.setCenter center
-        |> State.setZoom zoom
+        |> State.setCenter config center
+        |> State.setZoom config zoom
         |> State
 
 
@@ -80,10 +83,6 @@ panTo config center state =
 
 
 
--- {-| -}
--- renderState : State -> Layer.RenderState
--- renderState (State (State.State { transform })) =
---     Layer.transformToRenderState transform
 -- UPDATE
 
 

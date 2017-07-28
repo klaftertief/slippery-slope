@@ -12,7 +12,8 @@ import Svg
 main : Svg.Svg msg
 main =
     Static.view { width = 512, height = 512 }
-        (Static.center (Location 0 0) 1)
+        (Location 0 0)
+        1
         [ Graticule.layer
         , GeoJson.layer GeoJson.defaultConfig (Maybe.withDefault myGeoJson Data.World.geoJson)
         ]

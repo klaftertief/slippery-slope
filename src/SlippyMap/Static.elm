@@ -1,8 +1,8 @@
-module SlippyMap.Static exposing (State, center, view)
+module SlippyMap.Static exposing (view)
 
 {-| Just a static map.
 
-@docs view, center, State
+@docs view
 
 -}
 
@@ -14,22 +14,13 @@ import SlippyMap.Map.State as State
 import SlippyMap.Map.View as View
 
 
-{-| Opaque internal state.
--}
-type State
-    = State State.State
-
-
-{-| Center map at a given location and zoom level.
--}
-center : Location -> Float -> State
-center location zoom =
-    State <|
-        State.center location zoom
-
-
 {-| Show a map, no interactions.
 -}
-view : { width : Int, height : Int } -> State -> List (Layer msg) -> Html msg
-view dimensions (State state) =
-    View.view (Config.static dimensions) state
+view : { width : Int, height : Int } -> Location -> Float -> List (Layer msg) -> Html msg
+view { width, height } location zoom =
+    let
+        config =
+            Config.static { x = toFloat width, y = toFloat height }
+    in
+    View.view config
+        (State.center config location zoom)

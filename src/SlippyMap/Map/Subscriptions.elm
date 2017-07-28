@@ -11,7 +11,8 @@ import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..))
-import SlippyMap.Map.State as State exposing (Drag, Focus(..), Interaction(..), State(..), Transition(..))
+import SlippyMap.Map.State as State exposing (State(..))
+import SlippyMap.Map.Types as Types exposing (Drag, Focus(..), Interaction(..), Transition(..))
 
 
 {-| -}
