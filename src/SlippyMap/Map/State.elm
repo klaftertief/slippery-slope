@@ -137,11 +137,12 @@ withPinch ((Config.Config { crs, size }) as config) { last, current } ((State { 
                 |> Point.subtract currentCenter
 
         zoomDelta =
-            crs.zoom (256 * currentDistance / lastDistance)
+            crs.zoom (crs.scale 0 * currentDistance / lastDistance)
     in
     state
         |> moveTo config newCenterPoint
-        |> zoomByAround config zoomDelta currentCenter
+        -- |> zoomByAround config zoomDelta currentCenter
+        |> setZoom config (scene.zoom + zoomDelta)
 
 
 moveTo : Config msg -> Point -> State -> State
