@@ -4,11 +4,12 @@ module SlippyMap.Map.Config
         , interactive
         , size
         , static
+        , withCRS
         )
 
 {-|
 
-@docs Config, static, interactive, size
+@docs Config, static, interactive, size, withCRS
 
 TODO: Add field for client position decoder
 
@@ -64,6 +65,14 @@ interactive size toMsg =
         }
 
 
+{-| -}
+withCRS : CRS -> Config msg -> Config msg
+withCRS crs (Config configInternal) =
+    Config
+        { configInternal | crs = crs }
+
+
+{-| -}
 size : Config msg -> Point
 size (Config { size }) =
     size

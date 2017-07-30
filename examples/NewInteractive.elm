@@ -3,6 +3,7 @@ module NewInteractive exposing (..)
 import Data.World
 import GeoJson exposing (GeoJson)
 import Html exposing (Html)
+import SlippyMap.Geo.CRS.EPSG3857 as CRS
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Graticule as Graticule
@@ -50,6 +51,7 @@ update msg model =
 mapConfig : Window.Size -> Map.Config Msg
 mapConfig size =
     Map.config size MapMsg
+        |> Map.withCRS CRS.crs
 
 
 view : Model -> Html Msg

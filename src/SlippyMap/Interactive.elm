@@ -10,15 +10,17 @@ module SlippyMap.Interactive
         , subscriptions
         , update
         , view
+        , withCRS
         )
 
 {-|
 
-@docs Config, config, State, center, jumpTo, panTo, Msg, update, view, subscriptions
+@docs Config, config, State, center, jumpTo, panTo, Msg, update, view, subscriptions, withCRS
 
 -}
 
 import Html exposing (Html)
+import SlippyMap.Geo.CRS as CRS exposing (CRS)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config
@@ -47,6 +49,13 @@ config { width, height } toMsg =
     in
     Config <|
         Config.interactive size (Msg >> toMsg)
+
+
+{-| -}
+withCRS : CRS -> Config msg -> Config msg
+withCRS crs (Config config) =
+    Config <|
+        Config.withCRS crs config
 
 
 
