@@ -4,7 +4,9 @@ import Data.World
 import GeoJson exposing (GeoJson)
 import Html exposing (Html)
 import SlippyMap.Geo.CRS.EPSG3857 as CRS
+import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
+import SlippyMap.Layer.Circle as Circle
 import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Graticule as Graticule
 import Window
@@ -61,6 +63,12 @@ view model =
             model.mapState
             [ Graticule.layer
             , GeoJson.layer GeoJson.defaultConfig (Maybe.withDefault myGeoJson Data.World.geoJson)
+            , Circle.layer (Circle.config 500)
+                (Location 7 51)
+            , Circle.layer (Circle.config 500)
+                (Location 7 80)
+            , Circle.layer (Circle.config 500)
+                (Location 7 0)
             ]
         ]
 

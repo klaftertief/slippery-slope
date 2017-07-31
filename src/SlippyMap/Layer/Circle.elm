@@ -11,10 +11,11 @@ module SlippyMap.Layer.Circle
 
 -}
 
+import GeoJson exposing (GeoJson)
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Mercator as Mercator
-import SlippyMap.Geo.Transform as Transform
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Layer.GeoJson.Render as Render
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -37,9 +38,9 @@ config radius =
     Config
         { radius = radius
         , style =
-            [ Svg.Attributes.stroke "#3388ff"
+            [ Svg.Attributes.stroke "#8833ff"
             , Svg.Attributes.strokeWidth "3"
-            , Svg.Attributes.fill "#3388ff"
+            , Svg.Attributes.fill "#8833ff"
             , Svg.Attributes.fillOpacity "0.2"
             , Svg.Attributes.strokeLinecap "round"
             , Svg.Attributes.strokeLinejoin "round"
@@ -57,26 +58,53 @@ layer config location =
     Layer.withRender Layer.overlay (render config location)
 
 
-render : Config msg -> Location -> Layer.RenderState -> Svg msg
-render (Config internalConfig) location ({ locationToContainerPoint } as renderState) =
+render : Config msg -> Location -> Transform -> Svg msg
+render ((Config internalConfig) as config) location transform =
     let
-        -- TODO: convert meters to pixels at given location
-        radiusX =
-            (internalConfig.radius / 1000)
-                * Transform.zoomScale renderState.zoom
+        project ( lon, lat, _ ) =
+            Transform.locationToScreenPoint transform (Location lon lat)
 
-        radiusY =
-            radiusX * (max 1 <| Mercator.latToY location.lat)
-
-        { x, y } =
-            locationToContainerPoint location
+        renderConfig =
+            Render.Config
+                { project = project
+                , style = always internalConfig.style
+                }
     in
-    Svg.ellipse
-        (internalConfig.style
-            ++ [ Svg.Attributes.cx (toString x)
-               , Svg.Attributes.cy (toString y)
-               , Svg.Attributes.rx (toString radiusX)
-               , Svg.Attributes.ry (toString radiusY)
-               ]
-        )
-        []
+    Svg.g []
+        [ Render.renderGeoJson renderConfig (circle config location)
+        ]
+
+
+{-| -}
+circle : Config msg -> Location -> GeoJson
+circle (Config { radius }) { lon, lat } =
+    let
+        distanceX =
+            radius / (111.32 * cos (lat * pi / 180))
+
+        distanceY =
+            radius / 110.574
+
+        steps =
+            64
+
+        points =
+            List.range 0 steps
+                |> List.map
+                    (\i ->
+                        let
+                            theta =
+                                (toFloat i / toFloat steps) * 2 * pi
+
+                            x =
+                                distanceX * cos theta
+
+                            y =
+                                distanceY * sin theta
+                        in
+                        ( lon + x, lat + y, 0 )
+                    )
+    in
+    ( GeoJson.Geometry (GeoJson.Polygon [ points ])
+    , Nothing
+    )
