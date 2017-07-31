@@ -1,14 +1,15 @@
-module SlippyMap.Layer.GeoJson.Render exposing (..)
+module SlippyMap.Layer.GeoJson.Render exposing (Config(Config), renderGeoJson)
 
 {-| GeoJson renderer.
 
 TODO: Move out of layer namespace
 
-@docs Config, pathPoints, points, renderGeoJson, renderGeoJsonFeatureObject, renderGeoJsonGeometry, renderGeoJsonLineString, renderGeoJsonMultiLineString, renderGeoJsonObject, renderGeoJsonPoint, renderGeoJsonPolygon
+@docs Config, renderGeoJson
 
 -}
 
 import GeoJson exposing (GeoJson)
+import Json.Decode
 import Json.Encode as Json
 import SlippyMap.Geo.Point as Point exposing (Point)
 import Svg exposing (Svg)
@@ -53,7 +54,7 @@ renderGeoJsonObject config geoJsonObject =
 {-| -}
 renderGeoJsonFeatureObject : Config msg -> GeoJson.FeatureObject -> List (Svg msg)
 renderGeoJsonFeatureObject ((Config { style }) as config) featureObject =
-    Maybe.map (renderGeoJsonGeometry config (style featureObject))
+    Maybe.map (renderGeoJsonGeometry config (style featureObject ++ propertiesStyle featureObject))
         featureObject.geometry
         |> Maybe.withDefault []
 
@@ -172,3 +173,101 @@ points (Config internalConfig) positionList =
         )
         ""
         positionList
+
+
+propertiesStyle : GeoJson.FeatureObject -> List (Svg.Attribute msg)
+propertiesStyle { properties } =
+    let
+        decodedProperties =
+            Json.Decode.decodeValue propertiesDecoder properties
+    in
+    case decodedProperties of
+        Ok props ->
+            [ -- Hm, title attributes won't work in SVG in general
+              Maybe.map Svg.Attributes.title props.title
+            , Maybe.map Svg.Attributes.stroke props.stroke
+            , Maybe.map (toString >> Svg.Attributes.strokeOpacity) props.strokeOpacity
+            , Maybe.map (toString >> Svg.Attributes.strokeWidth) props.strokeWidth
+            , Maybe.map Svg.Attributes.fill props.fill
+            , Maybe.map (toString >> Svg.Attributes.fillOpacity) props.fillOpacity
+            ]
+                |> List.filterMap identity
+
+        Err _ ->
+            []
+
+
+{-| <https://github.com/mapbox/simplestyle-spec/tree/master/1.1.0>
+-}
+type alias Properties =
+    { title : Maybe String
+    , markerColor : Maybe String
+    , markerSize : Maybe MarkerSize
+    , stroke : Maybe String
+    , strokeOpacity : Maybe Float
+    , strokeWidth : Maybe Float
+    , fill : Maybe String
+    , fillOpacity : Maybe Float
+    }
+
+
+type MarkerSize
+    = MarkerSizeSmall
+    | MarkerSizeMedium
+    | MarkerSizeLarge
+
+
+propertiesDecoder : Json.Decode.Decoder Properties
+propertiesDecoder =
+    Json.Decode.map8 Properties
+        (Json.Decode.maybe <|
+            Json.Decode.field "title"
+                Json.Decode.string
+        )
+        (Json.Decode.maybe <|
+            Json.Decode.field "marker-color"
+                Json.Decode.string
+        )
+        (Json.Decode.maybe <|
+            (Json.Decode.field "marker-size"
+                Json.Decode.string
+                |> Json.Decode.andThen markerSizeDecoder
+            )
+        )
+        (Json.Decode.maybe <|
+            Json.Decode.field "stroke"
+                Json.Decode.string
+        )
+        (Json.Decode.maybe <|
+            Json.Decode.field "stroke-opacity"
+                Json.Decode.float
+        )
+        (Json.Decode.maybe <|
+            Json.Decode.field "stroke-width"
+                Json.Decode.float
+        )
+        (Json.Decode.maybe <|
+            Json.Decode.field "fill"
+                Json.Decode.string
+        )
+        (Json.Decode.maybe <|
+            Json.Decode.field "fill-opacity"
+                Json.Decode.float
+        )
+
+
+markerSizeDecoder : String -> Json.Decode.Decoder MarkerSize
+markerSizeDecoder size =
+    Json.Decode.succeed <|
+        case size of
+            "small" ->
+                MarkerSizeSmall
+
+            "medium" ->
+                MarkerSizeMedium
+
+            "large" ->
+                MarkerSizeLarge
+
+            _ ->
+                MarkerSizeMedium

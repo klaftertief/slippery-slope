@@ -13,6 +13,7 @@ module SlippyMap.Layer.Graticule
 import GeoJson exposing (GeoJson)
 import Json.Encode as Json
 import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Layer.GeoJson.Render as Render
 import SlippyMap.Map.Transform as Transform exposing (Transform)
@@ -37,18 +38,19 @@ render transform =
         ]
 
 
-style =
-    always
-        [ Svg.Attributes.stroke "#666"
-        , Svg.Attributes.strokeWidth "0.5"
-        , Svg.Attributes.strokeOpacity "0.5"
+style : GeoJson.FeatureObject -> List (Svg.Attribute msg)
+style { properties } =
+    [ Svg.Attributes.stroke "#666"
+    , Svg.Attributes.strokeWidth "0.5"
+    , Svg.Attributes.strokeOpacity "0.5"
 
-        -- , Svg.Attributes.strokeDasharray "2"
-        -- , Svg.Attributes.shapeRendering "crispEdges"
-        , Svg.Attributes.fill "none"
-        ]
+    -- , Svg.Attributes.strokeDasharray "2"
+    -- , Svg.Attributes.shapeRendering "crispEdges"
+    , Svg.Attributes.fill "none"
+    ]
 
 
+renderConfig : (GeoJson.Position -> Point) -> Render.Config msg
 renderConfig project =
     Render.Config
         { project = project
@@ -80,7 +82,10 @@ lats =
         |> List.map
             (\points ->
                 { id = Nothing
-                , properties = Json.null
+                , properties =
+                    Json.object
+                        [ ( "title", Json.string "Some lat" )
+                        ]
                 , geometry =
                     Just
                         (GeoJson.LineString points)
@@ -104,7 +109,9 @@ lons =
         |> List.map
             (\points ->
                 { id = Nothing
-                , properties = Json.null
+                , properties =
+                    Json.object
+                        [ ( "title", Json.string "Some lon" ) ]
                 , geometry =
                     Just
                         (GeoJson.LineString points)
