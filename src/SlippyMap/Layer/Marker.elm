@@ -2,14 +2,13 @@ module SlippyMap.Layer.Marker
     exposing
         ( Config
         , config
-        , defaultConfig
         , layer
-        , simpleLayer
+        , render
         )
 
 {-| A layer to display markers.
 
-@docs Config, config, defaultConfig, layer, simpleLayer
+@docs Config, config, layer, render
 
 -}
 
@@ -37,42 +36,12 @@ config renderMarker =
 
 
 {-| -}
-defaultConfig : Config () msg
-defaultConfig =
-    config (always circleMarker)
-
-
-circleMarker : Svg msg
-circleMarker =
-    Svg.circle
-        [ Svg.Attributes.r "8"
-        , Svg.Attributes.fill "#3388ff"
-        , Svg.Attributes.stroke "white"
-        , Svg.Attributes.strokeWidth "3"
-        ]
-        []
-
-
-
--- LAYER
-
-
-{-| -}
-simpleLayer : Config () msg -> List Location -> Layer msg
-simpleLayer config locations =
-    let
-        locatedMarkers =
-            List.map (\location -> ( location, () )) locations
-    in
-    Layer.withRender Layer.marker (render config locatedMarkers)
-
-
-{-| -}
 layer : Config marker msg -> List ( Location, marker ) -> Layer msg
 layer config locatedMarkers =
     Layer.withRender Layer.marker (render config locatedMarkers)
 
 
+{-| -}
 render : Config marker msg -> List ( Location, marker ) -> Layer.RenderState -> Svg msg
 render config locatedMarkers ({ transform } as renderState) =
     let
