@@ -12,6 +12,8 @@ import SlippyMap.Interactive as Map
 import SlippyMap.Layer.Circle as Circle
 import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Graticule as Graticule
+import SlippyMap.Layer.Marker.Circle as CircleMarker
+import SlippyMap.Layer.Marker.Pin as PinMarker
 import Svg.Attributes
 import Window
 
@@ -34,7 +36,7 @@ init : Window.Size -> ( Model, Cmd Msg )
 init size =
     { mapState =
         Map.center (mapConfig size)
-            { lon = 7, lat = 51 }
+            { lon = 0, lat = 0 }
             3
     , size = size
     , info = Nothing
@@ -76,32 +78,34 @@ view model =
         [ Map.view (mapConfig model.size)
             model.mapState
             [ Graticule.layer
-            , GeoJson.layer
-                (GeoJson.defaultConfig
-                    (\featureObject ->
-                        let
-                            propertiesName =
-                                Json.Decode.decodeValue
-                                    (Json.Decode.field "name" Json.Decode.string)
-                                    featureObject.properties
-                        in
-                        case propertiesName of
-                            Ok name ->
-                                [ Html.Events.onClick (SetInfo name)
-                                , Svg.Attributes.pointerEvents "visible"
-                                ]
 
-                            Err _ ->
-                                []
-                    )
-                )
-                (Maybe.withDefault myGeoJson Data.World.geoJson)
+            -- , GeoJson.layer
+            --     (GeoJson.defaultConfig
+            --         (\featureObject ->
+            --             let
+            --                 propertiesName =
+            --                     Json.Decode.decodeValue
+            --                         (Json.Decode.field "name" Json.Decode.string)
+            --                         featureObject.properties
+            --             in
+            --             case propertiesName of
+            --                 Ok name ->
+            --                     [ Html.Events.onClick (SetInfo name)
+            --                     , Svg.Attributes.pointerEvents "visible"
+            --                     ]
+            --                 Err _ ->
+            --                     []
+            --         )
+            --     )
+            --     (Maybe.withDefault myGeoJson Data.World.geoJson)
             , Circle.layer (Circle.config 500)
                 (Location 0 60)
             , Circle.layer (Circle.config 500)
                 (Location 0 30)
             , Circle.layer (Circle.config 500)
                 (Location 0 0)
+            , CircleMarker.layer [ Location 10 20 ]
+            , PinMarker.layer [ Location -10 0 ]
             ]
         , Html.p
             [ Html.Attributes.style

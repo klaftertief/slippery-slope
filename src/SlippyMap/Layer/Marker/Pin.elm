@@ -1,4 +1,4 @@
-module SlippyMap.Layer.Marker.Circle
+module SlippyMap.Layer.Marker.Pin
     exposing
         ( config
         , layer
@@ -25,11 +25,11 @@ config =
 
 icon : Svg msg
 icon =
-    Svg.circle
-        [ Svg.Attributes.r "8"
-        , Svg.Attributes.fill "#3388ff"
+    Svg.path
+        [ Svg.Attributes.fill "#3388ff"
         , Svg.Attributes.stroke "white"
         , Svg.Attributes.strokeWidth "3"
+        , Svg.Attributes.d "M-16,-31.2c0,12.6 16,31.2 16,31.2c0,0 16,-18.6 16,-31.2c0,-9.288 -7.154,-16.8 -16,-16.8c-8.846,0 -16,7.512 -16,16.8Z"
         ]
         []
 

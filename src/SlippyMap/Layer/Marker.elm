@@ -13,7 +13,8 @@ module SlippyMap.Layer.Marker
 -}
 
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -24,14 +25,14 @@ import Svg.Attributes
 {-| Configuration for the layer.
 -}
 type Config marker msg
-    = Config { renderMarker : marker -> Svg msg }
+    = Config { icon : marker -> Svg msg }
 
 
 {-| -}
 config : (marker -> Svg msg) -> Config marker msg
-config renderMarker =
+config icon =
     Config
-        { renderMarker = renderMarker
+        { icon = icon
         }
 
 
@@ -42,31 +43,29 @@ layer config locatedMarkers =
 
 
 {-| -}
-render : Config marker msg -> List ( Location, marker ) -> Layer.RenderState -> Svg msg
-render config locatedMarkers ({ transform } as renderState) =
+render : Config marker msg -> List ( Location, marker ) -> Transform -> Svg msg
+render config locatedMarkers transform =
     let
-        centerPoint =
-            renderState.centerPoint
-
-        bounds =
-            renderState.locationBounds
-
+        -- centerPoint =
+        --     renderState.centerPoint
+        -- bounds =
+        --     renderState.locationBounds
         locatedMarkersFiltered =
-            List.filter
-                (\( location, _ ) ->
-                    Location.isInsideBounds bounds location
-                )
-                locatedMarkers
+            -- List.filter
+            --     (\( location, _ ) ->
+            --         Location.isInsideBounds bounds location
+            --     )
+            locatedMarkers
     in
     Svg.g []
-        (List.map (renderMarker config renderState) locatedMarkersFiltered)
+        (List.map (icon config transform) locatedMarkersFiltered)
 
 
-renderMarker : Config marker msg -> Layer.RenderState -> ( Location, marker ) -> Svg msg
-renderMarker (Config config) { locationToContainerPoint } ( location, marker ) =
+icon : Config marker msg -> Transform -> ( Location, marker ) -> Svg msg
+icon (Config config) transform ( location, marker ) =
     let
         markerPoint =
-            locationToContainerPoint location
+            Transform.locationToScreenPoint transform location
     in
     Svg.g
         [ Svg.Attributes.transform
@@ -77,4 +76,4 @@ renderMarker (Config config) { locationToContainerPoint } ( location, marker ) =
                 ++ ")"
             )
         ]
-        [ config.renderMarker marker ]
+        [ config.icon marker ]
