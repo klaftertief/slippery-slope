@@ -3,24 +3,31 @@ module NewInteractive exposing (..)
 import Data.World
 import GeoJson exposing (GeoJson)
 import Html exposing (Html)
+import Html.Attributes
+import Html.Events
+import Json.Decode
 import SlippyMap.Geo.CRS.EPSG3857 as CRS
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer.Circle as Circle
 import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Graticule as Graticule
+import Svg.Attributes
 import Window
 
 
 type alias Model =
     { mapState : Map.State
     , size : Window.Size
+    , info : Maybe String
     }
 
 
 type Msg
     = MapMsg Map.Msg
     | Resize Window.Size
+    | SetInfo String
+    | ResetInfo
 
 
 init : Window.Size -> ( Model, Cmd Msg )
@@ -30,6 +37,7 @@ init size =
             { lon = 7, lat = 51 }
             3
     , size = size
+    , info = Nothing
     }
         ! []
 
@@ -49,6 +57,12 @@ update msg model =
         Resize size ->
             { model | size = size } ! []
 
+        SetInfo info ->
+            { model | info = Just info } ! []
+
+        ResetInfo ->
+            { model | info = Nothing } ! []
+
 
 mapConfig : Window.Size -> Map.Config Msg
 mapConfig size =
@@ -62,14 +76,43 @@ view model =
         [ Map.view (mapConfig model.size)
             model.mapState
             [ Graticule.layer
-            , GeoJson.layer GeoJson.defaultConfig (Maybe.withDefault myGeoJson Data.World.geoJson)
+            , GeoJson.layer
+                (GeoJson.defaultConfig
+                    (\featureObject ->
+                        let
+                            propertiesName =
+                                Json.Decode.decodeValue
+                                    (Json.Decode.field "name" Json.Decode.string)
+                                    featureObject.properties
+                        in
+                        case propertiesName of
+                            Ok name ->
+                                [ Html.Events.onClick (SetInfo name)
+                                , Svg.Attributes.pointerEvents "visible"
+                                ]
+
+                            Err _ ->
+                                []
+                    )
+                )
+                (Maybe.withDefault myGeoJson Data.World.geoJson)
             , Circle.layer (Circle.config 500)
-                (Location 7 51)
+                (Location 0 60)
             , Circle.layer (Circle.config 500)
-                (Location 7 80)
+                (Location 0 30)
             , Circle.layer (Circle.config 500)
-                (Location 7 0)
+                (Location 0 0)
             ]
+        , Html.p
+            [ Html.Attributes.style
+                [ ( "position", "absolute" )
+                , ( "top", "1em" )
+                , ( "left", "1em" )
+                , ( "right", "1em" )
+                , ( "text-align", "center" )
+                ]
+            ]
+            [ Html.text (toString model.info) ]
         ]
 
 

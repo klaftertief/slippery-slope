@@ -32,11 +32,11 @@ type Config msg
 
 
 {-| -}
-defaultConfig : Config msg
-defaultConfig =
+defaultConfig : (GeoJson.FeatureObject -> List (Svg.Attribute msg)) -> Config msg
+defaultConfig events =
     Config
         { style =
-            always
+            \featureObject ->
                 [ Svg.Attributes.stroke "#3388ff"
                 , Svg.Attributes.strokeWidth "2"
                 , Svg.Attributes.fill "#3388ff"
@@ -44,6 +44,7 @@ defaultConfig =
                 , Svg.Attributes.strokeLinecap "round"
                 , Svg.Attributes.strokeLinejoin "round"
                 ]
+                    ++ events featureObject
         }
 
 
