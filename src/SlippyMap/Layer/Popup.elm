@@ -12,7 +12,8 @@ module SlippyMap.Layer.Popup
 -}
 
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -65,17 +66,17 @@ layer config locatedPopups =
     Layer.withRender Layer.popup (render config locatedPopups)
 
 
-render : Config popup msg -> List ( Location, popup ) -> Layer.RenderState -> Svg msg
-render config locatedPopups ({ transform } as renderState) =
+render : Config popup msg -> List ( Location, popup ) -> Transform -> Svg msg
+render config locatedPopups transform =
     Svg.g []
-        (List.map (renderPopup config renderState) locatedPopups)
+        (List.map (renderPopup config transform) locatedPopups)
 
 
-renderPopup : Config popup msg -> Layer.RenderState -> ( Location, popup ) -> Svg msg
-renderPopup (Config config) { locationToContainerPoint } ( location, popup ) =
+renderPopup : Config popup msg -> Transform -> ( Location, popup ) -> Svg msg
+renderPopup (Config config) transform ( location, popup ) =
     let
         popupPoint =
-            locationToContainerPoint location
+            Transform.locationToScreenPoint transform location
     in
     Svg.g
         [ Svg.Attributes.transform
