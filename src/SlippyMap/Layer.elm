@@ -4,11 +4,10 @@ module SlippyMap.Layer
         , Layer
         , Pane(..)
         , base
-        , getAttribution
+        , flatten
+        , getAttributions
         , getPane
-        , isBaseLayer
-        , isMarkerLayer
-        , isOverlayLayer
+        , group
         , marker
         , overlay
         , panes
@@ -20,7 +19,7 @@ module SlippyMap.Layer
 
 {-| LowLevel Layer
 
-@docs Config, Pane, marker, popup, overlay, base, withAttribution, Layer, RenderState, transformToRenderState, withRender, getAttribution, getPane, panes, isBaseLayer, isOverlayLayer, isMarkerLayer, render
+@docs Config, Pane, marker, popup, overlay, base, withAttribution, Layer, group, flatten, withRender, getAttributions, getPane, panes, render
 
 -}
 
@@ -109,6 +108,7 @@ withAttribution attribution (Config configInternal) =
 -}
 type Layer msg
     = Layer (LayerInternal msg)
+    | LayerGroup (List (Layer msg))
 
 
 type alias LayerInternal msg =
@@ -127,42 +127,63 @@ withRender (Config configInternal) render =
 
 
 {-| -}
+group : List (Layer msg) -> Layer msg
+group layers =
+    LayerGroup layers
+
+
+{-| -}
 type alias Render msg =
     Transform -> Svg msg
 
 
 {-| -}
-getAttribution : Layer msg -> Maybe String
-getAttribution (Layer { config }) =
-    config.attribution
+getAttributions : Layer msg -> List String
+getAttributions layer =
+    case layer of
+        Layer { config } ->
+            config.attribution
+                |> Maybe.map List.singleton
+                |> Maybe.withDefault []
+
+        LayerGroup layers ->
+            List.concatMap getAttributions layers
 
 
 {-| -}
-getPane : Layer msg -> Pane
-getPane (Layer { config }) =
-    config.pane
+flatten : List (Layer msg) -> List (Layer msg)
+flatten layers =
+    List.concatMap flattenHelp layers
+
+
+flattenHelp : Layer msg -> List (Layer msg)
+flattenHelp layer =
+    case layer of
+        Layer layer ->
+            [ Layer layer ]
+
+        LayerGroup layers ->
+            List.concatMap flattenHelp layers
 
 
 {-| -}
-isBaseLayer : Layer msg -> Bool
-isBaseLayer (Layer { config }) =
-    config.pane == BasePane
+getPane : Layer msg -> Maybe Pane
+getPane layer =
+    case layer of
+        Layer { config } ->
+            Just config.pane
 
-
-{-| -}
-isOverlayLayer : Layer msg -> Bool
-isOverlayLayer (Layer { config }) =
-    config.pane == OverlayPane
-
-
-{-| -}
-isMarkerLayer : Layer msg -> Bool
-isMarkerLayer (Layer { config }) =
-    config.pane == MarkerPane
+        LayerGroup _ ->
+            Nothing
 
 
 {-| TODO: Layers should have general attributes like class name. Inject here.
 -}
 render : Layer msg -> Render msg
-render (Layer { render }) =
-    render
+render layer =
+    case layer of
+        Layer { render } ->
+            render
+
+        LayerGroup _ ->
+            always (Svg.text "")

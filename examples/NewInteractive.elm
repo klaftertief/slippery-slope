@@ -9,11 +9,13 @@ import Json.Decode
 import SlippyMap.Geo.CRS.EPSG3857 as CRS
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
+import SlippyMap.Layer as Layer
 import SlippyMap.Layer.Circle as Circle
 import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Graticule as Graticule
 import SlippyMap.Layer.Marker.Circle as CircleMarker
 import SlippyMap.Layer.Marker.Pin as PinMarker
+import SlippyMap.Layer.Popup as Popup
 import Svg.Attributes
 import Window
 
@@ -98,14 +100,18 @@ view model =
             --         )
             --     )
             --     (Maybe.withDefault myGeoJson Data.World.geoJson)
-            , Circle.layer (Circle.config 500)
-                (Location 0 60)
-            , Circle.layer (Circle.config 500)
-                (Location 0 30)
-            , Circle.layer (Circle.config 500)
-                (Location 0 0)
+            , Layer.group
+                [ Circle.layer (Circle.config 500)
+                    (Location 0 60)
+                , Circle.layer (Circle.config 500)
+                    (Location 0 30)
+                , Circle.layer (Circle.config 500)
+                    (Location 0 0)
+                ]
             , CircleMarker.layer [ Location 10 20 ]
             , PinMarker.layer [ Location -10 0 ]
+            , Popup.layer Popup.config
+                [ ( Location 10 20, "I'm a popup" ) ]
             ]
         , Html.p
             [ Html.Attributes.style
