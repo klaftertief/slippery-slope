@@ -26,16 +26,17 @@ import Svg.Attributes
 
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
-view (Config config) ((State { scene, interaction }) as state) layers =
+view (Config config) ((State { scene, interaction }) as state) nestedLayers =
     let
         transform =
             Transform.transform (Config config) scene
 
+        layers =
+            Layer.flatten nestedLayers
+
         -- TODO: only get attributions from currently visible layers, whatever that means or how it's implemented
         layerAttributions =
-            layers
-                |> List.map Layer.getAttribution
-                |> List.filterMap identity
+            List.concatMap Layer.getAttributions layers
 
         -- TODO: make list depend on config
         handlers =
@@ -137,7 +138,7 @@ view (Config config) ((State { scene, interaction }) as state) layers =
 viewPane : Config msg -> Transform -> List (Layer msg) -> Layer.Pane -> List (Svg msg)
 viewPane (Config config) transform layers pane =
     layers
-        |> List.filter (Layer.getPane >> (==) pane)
+        |> List.filter (Layer.getPane >> (==) (Just pane))
         |> List.map (\layer -> Layer.render layer transform)
 
 
