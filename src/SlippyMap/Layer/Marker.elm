@@ -58,11 +58,11 @@ render config locatedMarkers transform =
             locatedMarkers
     in
     Svg.g []
-        (List.map (icon config transform) locatedMarkersFiltered)
+        (List.map (marker config transform) locatedMarkersFiltered)
 
 
-icon : Config marker msg -> Transform -> ( Location, marker ) -> Svg msg
-icon (Config config) transform ( location, marker ) =
+marker : Config marker msg -> Transform -> ( Location, marker ) -> Svg msg
+marker (Config config) transform ( location, marker ) =
     let
         markerPoint =
             Transform.locationToScreenPoint transform location
