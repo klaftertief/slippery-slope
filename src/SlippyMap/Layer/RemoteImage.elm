@@ -17,8 +17,9 @@ module SlippyMap.Layer.RemoteImage
 import Regex
 import RemoteData exposing (WebData)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -100,8 +101,13 @@ layer ((Config tileLayerConfig configInternal) as config) =
         tileLayerConfig
 
 
-tile : Config -> Layer.RenderState -> WebData Tile -> Svg msg
-tile (Config _ configInternal) renderState tileResponse =
+tile : Config -> Transform -> WebData Tile -> Svg msg
+tile (Config _ configInternal) transform tileResponse =
+    let
+        scale =
+            transform.crs.scale
+                (transform.zoom - toFloat (round transform.zoom))
+    in
     case tileResponse of
         RemoteData.NotAsked ->
             Svg.text_ [] [ Svg.text "Not Asked" ]
@@ -114,12 +120,16 @@ tile (Config _ configInternal) renderState tileResponse =
 
         RemoteData.Success tile ->
             Svg.image
-                [ Svg.Attributes.width (toString renderState.transform.tileSize)
-                , Svg.Attributes.height (toString renderState.transform.tileSize)
+                [ Svg.Attributes.width
+                    -- (toString renderState.transform.tileSize)
+                    "256"
+                , Svg.Attributes.height
+                    -- (toString renderState.transform.tileSize)
+                    "256"
                 , Svg.Attributes.xlinkHref (configInternal.toUrl tile)
                 , Svg.Attributes.transform
                     ("scale("
-                        ++ toString renderState.tileScale
+                        ++ toString scale
                         ++ ")"
                     )
                 ]

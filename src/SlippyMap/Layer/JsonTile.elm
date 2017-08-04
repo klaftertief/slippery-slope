@@ -10,8 +10,9 @@ import Json.Decode as Json
 import Regex
 import RemoteData exposing (WebData)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 
 
@@ -27,7 +28,7 @@ type Config msg
 type alias ConfigInternal msg =
     { toUrl : Tile -> String
     , fromTile : Tile -> ( Tile, WebData Json.Value )
-    , render : ( Tile, Json.Value ) -> Layer.RenderState -> Svg msg
+    , render : ( Tile, Json.Value ) -> Transform -> Svg msg
     }
 
 
@@ -66,7 +67,7 @@ withTile fromTile (Config tileLayerConfig configInternal) =
 
 
 {-| -}
-withRender : (( Tile, Json.Value ) -> Layer.RenderState -> Svg msg) -> Config msg -> Config msg
+withRender : (( Tile, Json.Value ) -> Transform -> Svg msg) -> Config msg -> Config msg
 withRender render (Config tileLayerConfig configInternal) =
     Config
         tileLayerConfig
@@ -99,8 +100,8 @@ layer ((Config tileLayerConfig configInternal) as config) =
         tileLayerConfig
 
 
-tile : Config msg -> Layer.RenderState -> ( Tile, WebData Json.Value ) -> Svg msg
-tile (Config _ configInternal) renderState ( tile, tileResponse ) =
+tile : Config msg -> Transform -> ( Tile, WebData Json.Value ) -> Svg msg
+tile (Config _ configInternal) transform ( tile, tileResponse ) =
     case tileResponse of
         RemoteData.NotAsked ->
             Svg.text_ [] [ Svg.text "Not Asked" ]
@@ -112,7 +113,7 @@ tile (Config _ configInternal) renderState ( tile, tileResponse ) =
             Svg.text_ [] [ Svg.text ("Error: " ++ toString e) ]
 
         RemoteData.Success value ->
-            configInternal.render ( tile, value ) renderState
+            configInternal.render ( tile, value ) transform
 
 
 

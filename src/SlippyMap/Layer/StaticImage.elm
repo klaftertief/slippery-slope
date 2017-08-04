@@ -14,8 +14,9 @@ module SlippyMap.Layer.StaticImage
 
 import Regex
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -77,15 +78,24 @@ layer ((Config tileLayerConfig _) as config) =
         tileLayerConfig
 
 
-tile : Config -> Layer.RenderState -> Tile -> Svg msg
-tile (Config _ configInternal) renderState ({ z, x, y } as tile) =
+tile : Config -> Transform -> Tile -> Svg msg
+tile (Config _ configInternal) transform ({ z, x, y } as tile) =
+    let
+        scale =
+            transform.crs.scale
+                (transform.zoom - toFloat (round transform.zoom))
+    in
     Svg.image
-        [ Svg.Attributes.width (toString renderState.transform.tileSize)
-        , Svg.Attributes.height (toString renderState.transform.tileSize)
+        [ Svg.Attributes.width
+            -- (toString renderState.transform.tileSize)
+            "256"
+        , Svg.Attributes.height
+            -- (toString renderState.transform.tileSize)
+            "256"
         , Svg.Attributes.xlinkHref (configInternal.toUrl tile)
         , Svg.Attributes.transform
             ("scale("
-                ++ toString renderState.tileScale
+                ++ toString scale
                 ++ ")"
             )
         ]
