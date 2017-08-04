@@ -12,8 +12,10 @@ module SlippyMap.Layer.Tile
 
 -}
 
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Keyed
@@ -33,7 +35,7 @@ type alias ConfigInternal =
 config : Config
 config =
     Config
-        { layerConfig = Layer.tile
+        { layerConfig = Layer.base
         }
 
 
@@ -51,47 +53,38 @@ withAttribution attribution (Config configInternal) =
 
 {-| TODO: should the function params live in a/the config?
 -}
-layer : (Tile -> a) -> (Layer.RenderState -> a -> Svg msg) -> Config -> Layer msg
+layer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Config -> Layer msg
 layer fromTile renderTile (Config configInternal) =
     Layer.withRender configInternal.layerConfig (render fromTile renderTile)
 
 
-render : (Tile -> a) -> (Layer.RenderState -> a -> Svg msg) -> Layer.RenderState -> Svg msg
-render fromTile renderTile renderState =
+render : (Tile -> a) -> (Transform -> a -> Svg msg) -> Transform -> Svg msg
+render fromTile renderTile transform =
     let
         scale =
-            renderState.tileScale
+            transform.crs.scale
+                (transform.zoom - toFloat (round transform.zoom))
 
         centerPoint =
-            renderState.halfSize
+            Transform.locationToPoint transform
+                transform.center
 
         tiles =
-            renderState.tileCover
+            -- renderState.tileCover
+            []
 
-        transform =
-            renderState.transform
-
-        renderState1 =
-            Layer.transformToRenderState { transform | zoom = transform.zoom - 1, tileSize = transform.tileSize * 2 }
-
-        tilesZoomActual =
+        tilesRendered =
             List.map
-                (tile (fromTile >> renderTile renderState) renderState)
+                (tile (fromTile >> renderTile transform) transform)
                 tiles
-
-        tilesZoomMinusOne =
-            List.map
-                (tile (fromTile >> renderTile renderState1) renderState1)
-                renderState1.tileCover
     in
     Svg.Keyed.node "g"
         []
-        --(tilesZoomMinusOne ++ tilesZoomActual)
-        tilesZoomActual
+        tilesRendered
 
 
-tile : (Tile -> Svg msg) -> Layer.RenderState -> Tile -> ( String, Svg msg )
-tile render renderState ({ z, x, y } as tile) =
+tile : (Tile -> Svg msg) -> Transform -> Tile -> ( String, Svg msg )
+tile render transform ({ z, x, y } as tile) =
     let
         key =
             toString z
@@ -106,8 +99,18 @@ tile render renderState ({ z, x, y } as tile) =
             , zoom = toFloat z
             }
 
+        scale =
+            transform.crs.scale transform.zoom
+
+        origin =
+            Transform.origin transform
+
         point =
-            renderState.coordinateToContainerPoint tileCoordinate
+            { x = toFloat x
+            , y = toFloat y
+            }
+                |> Point.multiplyBy scale
+                |> Point.subtract origin
     in
     ( key
     , Svg.g

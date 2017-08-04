@@ -3,6 +3,7 @@ module SlippyMap.Map.Transform
         ( Transform
         , locationToPoint
         , locationToScreenPoint
+        , origin
         , pointToLocation
         , screenPointToLocation
         , transform
@@ -10,7 +11,7 @@ module SlippyMap.Map.Transform
 
 {-| TODO: Maybe rename module to `ViewState`?
 
-@docs Transform, locationToPoint, locationToScreenPoint, pointToLocation, transform, screenPointToLocation
+@docs Transform, locationToPoint, locationToScreenPoint, pointToLocation, transform, screenPointToLocation, origin
 
 -}
 
