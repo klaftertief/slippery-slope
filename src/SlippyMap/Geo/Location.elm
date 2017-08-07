@@ -2,7 +2,7 @@ module SlippyMap.Geo.Location exposing (..)
 
 {-| Geographical coordinates
 
-@docs Location, Bounds, center, wrap, isInsideBounds
+@docs Location, Bounds, center, wrap, isInsideBounds, boundsAreOverlapping
 
 -}
 
@@ -42,3 +42,28 @@ isInsideBounds { southWest, northEast } { lon, lat } =
         && (lon < northEast.lon)
         && (lat > southWest.lat)
         && (lat < northEast.lat)
+
+
+{-| -}
+boundsAreOverlapping : Bounds -> Bounds -> Bool
+boundsAreOverlapping b1 b2 =
+    let
+        southWest1 =
+            b1.southWest
+
+        northEast1 =
+            b1.northEast
+
+        southWest2 =
+            b2.southWest
+
+        northEast2 =
+            b2.northEast
+
+        lonOverlaps =
+            (northEast2.lon > southWest1.lon) && (southWest2.lon < northEast1.lon)
+
+        latOverlaps =
+            (northEast2.lat > southWest1.lat) && (southWest2.lat < northEast1.lat)
+    in
+    latOverlaps && lonOverlaps

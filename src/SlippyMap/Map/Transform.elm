@@ -99,4 +99,85 @@ screenPointToLocation transform point =
 {-| -}
 tileCover : Transform -> List Tile
 tileCover transform =
-    { z = 0, x = 0, y = 0 } :: Tile.children { z = 0, x = 0, y = 0 }
+    let
+        rootTile =
+            { z = 0, x = 0, y = 0 }
+    in
+    (rootTile :: tileCoverHelp transform rootTile)
+        -- |> List.sortBy .z
+        |> List.filter
+            (\{ z } ->
+                (z == 0)
+                    || (z == floor transform.zoom)
+                    || (z == floor (transform.zoom + 1))
+            )
+
+
+tileCoverHelp : Transform -> Tile -> List Tile
+tileCoverHelp transform parentTile =
+    if transform.zoom <= toFloat parentTile.z then
+        []
+    else
+        let
+            visibleChildren =
+                Tile.children parentTile
+                    |> List.filterMap
+                        (\tile ->
+                            if isVisible transform tile then
+                                Just tile
+                            else
+                                Nothing
+                        )
+        in
+        visibleChildren
+            ++ List.concatMap (tileCoverHelp transform)
+                visibleChildren
+
+
+isVisible : Transform -> Tile -> Bool
+isVisible transform tile =
+    let
+        scale =
+            transform.crs.scale
+                (transform.zoom - toFloat tile.z)
+
+        originPoint =
+            origin transform
+
+        locationBounds =
+            bounds transform
+                |> (\( topLeft, bottomRight ) ->
+                        { southWest =
+                            screenPointToLocation transform
+                                { x = topLeft.x
+                                , y = bottomRight.y
+                                }
+                        , northEast =
+                            screenPointToLocation transform
+                                { x = bottomRight.x
+                                , y = topLeft.y
+                                }
+                        }
+                   )
+
+        toLocation ( x, y ) =
+            { x = toFloat x
+            , y = toFloat y
+            }
+                |> Point.multiplyBy scale
+                -- |> Point.subtract originPoint
+                |> screenPointToLocation transform
+
+        tileLocationBounds =
+            { southWest =
+                toLocation ( tile.x, tile.y + 1 )
+            , northEast =
+                toLocation ( tile.x + 1, tile.y )
+            }
+    in
+    Location.boundsAreOverlapping locationBounds
+        tileLocationBounds
+
+
+
+-- |> Debug.log ("overlapping" ++ toString tile)
