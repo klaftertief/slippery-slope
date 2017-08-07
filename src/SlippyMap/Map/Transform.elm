@@ -6,18 +6,20 @@ module SlippyMap.Map.Transform
         , origin
         , pointToLocation
         , screenPointToLocation
+        , tileCover
         , transform
         )
 
 {-| TODO: Maybe rename module to `ViewState`?
 
-@docs Transform, locationToPoint, locationToScreenPoint, pointToLocation, transform, screenPointToLocation, origin
+@docs Transform, locationToPoint, locationToScreenPoint, pointToLocation, transform, screenPointToLocation, origin, tileCover
 
 -}
 
 import SlippyMap.Geo.CRS as CRS exposing (CRS)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Map.Config as Config exposing (Config)
 import SlippyMap.Map.Types as Types exposing (Scene)
 
@@ -47,6 +49,16 @@ origin transform =
     Point.subtract
         (Point.divideBy 2 transform.size)
         (locationToPoint transform transform.center)
+
+
+{-| -}
+bounds : Transform -> ( Point, Point )
+bounds transform =
+    let
+        topLeft =
+            origin transform
+    in
+    ( topLeft, Point.add transform.size topLeft )
 
 
 {-| -}
@@ -82,3 +94,9 @@ screenPointToLocation : Transform -> Point -> Location
 screenPointToLocation transform point =
     transform.crs.pointToLocation transform.zoom
         (Point.add (origin transform) point)
+
+
+{-| -}
+tileCover : Transform -> List Tile
+tileCover transform =
+    { z = 0, x = 0, y = 0 } :: Tile.children { z = 0, x = 0, y = 0 }

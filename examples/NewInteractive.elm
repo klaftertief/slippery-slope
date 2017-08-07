@@ -16,6 +16,7 @@ import SlippyMap.Layer.Graticule as Graticule
 import SlippyMap.Layer.Marker.Circle as CircleMarker
 import SlippyMap.Layer.Marker.Pin as PinMarker
 import SlippyMap.Layer.Popup as Popup
+import SlippyMap.Layer.StaticImage as StaticImage
 import Svg.Attributes
 import Window
 
@@ -79,7 +80,11 @@ view model =
     Html.div []
         [ Map.view (mapConfig model.size)
             model.mapState
-            [ Graticule.layer
+            [ StaticImage.layer
+                (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
+                    |> StaticImage.withAttribution "© OpenStreetMap contributors"
+                )
+            , Graticule.layer
 
             -- , GeoJson.layer
             --     (GeoJson.defaultConfig

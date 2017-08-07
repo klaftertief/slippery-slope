@@ -1,8 +1,8 @@
-module SlippyMap.Geo.Tile exposing (Comparable, Tile, cover, fromComparable, toComparable)
+module SlippyMap.Geo.Tile exposing (Comparable, Tile, children, cover, fromComparable, toComparable)
 
 {-|
 
-@docs Tile, Comparable, toComparable, fromComparable, cover
+@docs Tile, Comparable, toComparable, fromComparable, cover, children
 
 -}
 
@@ -49,6 +49,26 @@ normalize { z, x, y } =
     , x = x % (2 ^ z)
     , y = y % (2 ^ z)
     }
+
+
+{-| -}
+children : Tile -> List Tile
+children { z, x, y } =
+    let
+        newZ =
+            z + 1
+
+        newX =
+            x * 2
+
+        newY =
+            y * 2
+    in
+    [ { z = newZ, x = newX, y = newY }
+    , { z = newZ, x = newX + 1, y = newY }
+    , { z = newZ, x = newX, y = newY + 1 }
+    , { z = newZ, x = newX + 1, y = newY + 1 }
+    ]
 
 
 {-| -}

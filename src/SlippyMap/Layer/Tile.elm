@@ -61,17 +61,8 @@ layer fromTile renderTile (Config configInternal) =
 render : (Tile -> a) -> (Transform -> a -> Svg msg) -> Transform -> Svg msg
 render fromTile renderTile transform =
     let
-        scale =
-            transform.crs.scale
-                (transform.zoom - toFloat (round transform.zoom))
-
-        centerPoint =
-            Transform.locationToPoint transform
-                transform.center
-
         tiles =
-            -- renderState.tileCover
-            []
+            Transform.tileCover transform
 
         tilesRendered =
             List.map
@@ -93,14 +84,9 @@ tile render transform ({ z, x, y } as tile) =
                 ++ "/"
                 ++ toString (y % (2 ^ z))
 
-        tileCoordinate =
-            { column = toFloat x
-            , row = toFloat y
-            , zoom = toFloat z
-            }
-
         scale =
-            transform.crs.scale transform.zoom
+            transform.crs.scale
+                (transform.zoom - toFloat z)
 
         origin =
             Transform.origin transform
