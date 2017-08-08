@@ -3,6 +3,8 @@ module SlippyMap.Map.State
         ( State(..)
         , center
         , defaultState
+        , moveBy
+        , moveTo
         , setCenter
         , setFocus
         , setInteraction
@@ -156,6 +158,17 @@ moveTo config newCenterPoint ((State { scene }) as state) =
                 newCenterPoint
     in
     setCenter config newCenter state
+
+
+moveBy : Config msg -> Point -> State -> State
+moveBy ((Config.Config { size }) as config) offset state =
+    let
+        newCenterPoint =
+            size
+                |> Point.divideBy 2
+                |> Point.add offset
+    in
+    moveTo config newCenterPoint state
 
 
 setCenter : Config msg -> Location -> State -> State

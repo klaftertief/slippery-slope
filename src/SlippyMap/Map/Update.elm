@@ -39,31 +39,31 @@ update config msg ((State { scene }) as state) =
 
         KeyboardNavigation keyCode ->
             let
-                offset =
+                distance =
                     50
 
-                moveBy =
+                offset =
                     case keyCode of
                         -- Left
                         37 ->
-                            { x = -offset, y = 0 }
+                            { x = -distance, y = 0 }
 
                         -- Up
                         38 ->
-                            { x = 0, y = -offset }
+                            { x = 0, y = -distance }
 
                         -- Right
                         39 ->
-                            { x = offset, y = 0 }
+                            { x = distance, y = 0 }
 
                         -- Down
                         40 ->
-                            { x = 0, y = offset }
+                            { x = 0, y = distance }
 
                         _ ->
                             { x = 0, y = 0 }
             in
-            state
+            State.moveBy config offset state
 
         Step duration ->
             state

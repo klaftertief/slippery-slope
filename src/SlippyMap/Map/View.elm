@@ -46,6 +46,8 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
                         (Html.Attributes.map toMsg)
                         [ Html.Events.on "dblclick"
                             (Decode.map ZoomInAround clientPosition)
+                        , Html.Events.onFocus (SetFocus HasFocus)
+                        , Html.Events.onBlur (SetFocus HasNoFocus)
                         , Html.Events.on "mousedown"
                             (Decode.map (DragStart >> DragMsg) Mouse.position)
                         , Html.Events.onWithOptions "touchstart"
@@ -69,27 +71,27 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
                                 )
                                 clientPosition
                             )
-                        , Html.Events.onFocus (SetFocus HasFocus)
-                        , Html.Events.onBlur (SetFocus HasNoFocus)
                         ]
 
                 Nothing ->
                     []
     in
     Html.div
-        [ Html.Attributes.tabindex 0
-        , Html.Attributes.style
+        ([ Html.Attributes.tabindex 0
+         , Html.Attributes.style
             [ ( "position", "relative" )
             , ( "width", toString config.size.x ++ "px" )
             , ( "height", toString config.size.y ++ "px" )
             , ( "background", "#eee" )
             ]
-        , Html.Attributes.classList
+         , Html.Attributes.classList
             [ ( "with-interaction", interaction /= Types.NoInteraction ) ]
-        ]
+         ]
+            ++ handlers
+        )
         [ Html.div
-            ([ -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
-               Html.Attributes.style
+            [ -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
+              Html.Attributes.style
                 [ ( "position"
                   , if interaction /= Types.NoInteraction then
                         "fixed"
@@ -101,9 +103,7 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
                 , ( "right", "0" )
                 , ( "bottom", "0" )
                 ]
-             ]
-                ++ handlers
-            )
+            ]
             []
         , Svg.svg
             [ Svg.Attributes.class "esm__map"
