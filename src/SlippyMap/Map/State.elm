@@ -186,9 +186,10 @@ setCenter config newCenter ((State { scene }) as state) =
     --     state
     setTransition
         (MoveTo
-            { scene =
+            { fromScene = scene
+            , toScene =
                 { scene | center = newCenter }
-            , duration = 500
+            , duration = 200
             , elapsed = 0
             }
         )
@@ -205,12 +206,13 @@ setZoom (Config.Config { minZoom, maxZoom }) newZoom ((State { scene }) as state
         --     state
         setTransition
             (MoveTo
-                { scene =
+                { fromScene = scene
+                , toScene =
                     { scene
                         | zoom =
                             clamp minZoom maxZoom newZoom
                     }
-                , duration = 500
+                , duration = 200
                 , elapsed = 0
                 }
             )
@@ -290,8 +292,11 @@ tickTransition diff ((State { transition, scene }) as state) =
     case transition of
         MoveTo target ->
             let
-                targetScene =
-                    target.scene
+                fromScene =
+                    target.fromScene
+
+                toScene =
+                    target.toScene
 
                 newElapsed =
                     target.elapsed + diff
@@ -302,17 +307,17 @@ tickTransition diff ((State { transition, scene }) as state) =
                 newScene =
                     { scene
                         | zoom =
-                            scene.zoom
-                                + (targetScene.zoom - scene.zoom)
+                            fromScene.zoom
+                                + (toScene.zoom - fromScene.zoom)
                                 * progress
                         , center =
                             { lon =
-                                scene.center.lon
-                                    + (targetScene.center.lon - scene.center.lon)
+                                fromScene.center.lon
+                                    + (toScene.center.lon - fromScene.center.lon)
                                     * progress
                             , lat =
-                                scene.center.lat
-                                    + (targetScene.center.lat - scene.center.lat)
+                                fromScene.center.lat
+                                    + (toScene.center.lat - fromScene.center.lat)
                                     * progress
                             }
                     }

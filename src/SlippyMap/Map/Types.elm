@@ -28,7 +28,8 @@ type alias Scene =
 type Transition
     = NoTransition
     | MoveTo
-        { scene : Scene
+        { fromScene : Scene
+        , toScene : Scene
         , duration : Time
         , elapsed : Time
         }
