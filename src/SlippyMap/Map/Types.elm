@@ -30,6 +30,7 @@ type Transition
     | MoveTo
         { scene : Scene
         , duration : Time
+        , elapsed : Time
         }
 
 

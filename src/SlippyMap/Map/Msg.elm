@@ -23,7 +23,7 @@ type Msg
     | PinchMsg PinchMsg
     | SetFocus Focus
     | KeyboardNavigation KeyCode
-    | Step Time
+    | Tick Time
     | PanTo Time Location
 
 

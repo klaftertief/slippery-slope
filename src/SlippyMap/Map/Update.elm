@@ -65,8 +65,8 @@ update config msg ((State { scene }) as state) =
             in
             State.moveBy config offset state
 
-        Step duration ->
-            state
+        Tick diff ->
+            State.tickTransition diff state
 
         PanTo duration center ->
             state

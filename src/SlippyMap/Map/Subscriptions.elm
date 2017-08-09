@@ -48,7 +48,7 @@ subscriptions (Config config) ((State { interaction, focus, transition }) as sta
                             []
 
                         MoveTo _ ->
-                            [ AnimationFrame.diffs Step ]
+                            [ AnimationFrame.diffs Tick ]
             in
             (dragSubscriptions
                 ++ keyboardNavigationSubscriptions

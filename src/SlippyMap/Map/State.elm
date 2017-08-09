@@ -10,6 +10,7 @@ module SlippyMap.Map.State
         , setInteraction
         , setScene
         , setZoom
+        , tickTransition
         , withInteraction
         , zoomByAround
         , zoomIn
@@ -28,6 +29,7 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.Config as Config exposing (Config)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import SlippyMap.Map.Types as Types exposing (..)
+import Time exposing (Time)
 
 
 {-| -}
@@ -54,6 +56,12 @@ setScene : Scene -> State -> State
 setScene newScene (State state) =
     State
         { state | scene = newScene }
+
+
+setTransition : Transition -> State -> State
+setTransition newTransition (State state) =
+    State
+        { state | transition = newTransition }
 
 
 setInteraction : Interaction -> State -> State
@@ -183,8 +191,20 @@ setZoom (Config.Config { minZoom, maxZoom }) newZoom ((State { scene }) as state
     if isNaN newZoom || isInfinite newZoom then
         state
     else
-        setScene
-            { scene | zoom = clamp minZoom maxZoom newZoom }
+        -- setScene
+        --     { scene | zoom = clamp minZoom maxZoom newZoom }
+        --     state
+        setTransition
+            (MoveTo
+                { scene =
+                    { scene
+                        | zoom =
+                            clamp minZoom maxZoom newZoom
+                    }
+                , duration = 500
+                , elapsed = 0
+                }
+            )
             state
 
 
@@ -254,3 +274,42 @@ center config initialCenter initialZoom =
 getScene : State -> Scene
 getScene (State { scene }) =
     scene
+
+
+tickTransition : Time -> State -> State
+tickTransition diff ((State { transition, scene }) as state) =
+    case transition of
+        MoveTo target ->
+            let
+                targetScene =
+                    target.scene
+
+                newElapsed =
+                    target.elapsed + diff
+
+                progress =
+                    clamp 0 1 (newElapsed / target.duration)
+
+                newScene =
+                    { scene
+                        | zoom =
+                            scene.zoom
+                                + (targetScene.zoom - scene.zoom)
+                                * progress
+                    }
+
+                newTransition =
+                    if progress >= 1 then
+                        NoTransition
+                    else
+                        MoveTo
+                            { target
+                                | elapsed = newElapsed
+                            }
+            in
+            state
+                |> setScene newScene
+                |> setTransition newTransition
+
+        NoTransition ->
+            state

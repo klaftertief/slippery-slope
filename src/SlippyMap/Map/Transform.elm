@@ -109,7 +109,7 @@ tileCover transform =
             (\{ z } ->
                 (z == 0)
                     || (z == floor transform.zoom)
-                    || (z == floor (transform.zoom + 1))
+                    || (z == floor (transform.zoom - 1))
             )
 
 
@@ -177,7 +177,3 @@ isVisible transform tile =
     in
     Location.boundsAreOverlapping locationBounds
         tileLocationBounds
-
-
-
--- |> Debug.log ("overlapping" ++ toString tile)
