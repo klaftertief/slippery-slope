@@ -181,8 +181,17 @@ moveBy ((Config.Config { size }) as config) offset state =
 
 setCenter : Config msg -> Location -> State -> State
 setCenter config newCenter ((State { scene }) as state) =
-    setScene
-        { scene | center = newCenter }
+    -- setScene
+    --     { scene | center = newCenter }
+    --     state
+    setTransition
+        (MoveTo
+            { scene =
+                { scene | center = newCenter }
+            , duration = 500
+            , elapsed = 0
+            }
+        )
         state
 
 
@@ -296,6 +305,16 @@ tickTransition diff ((State { transition, scene }) as state) =
                             scene.zoom
                                 + (targetScene.zoom - scene.zoom)
                                 * progress
+                        , center =
+                            { lon =
+                                scene.center.lon
+                                    + (targetScene.center.lon - scene.center.lon)
+                                    * progress
+                            , lat =
+                                scene.center.lat
+                                    + (targetScene.center.lat - scene.center.lat)
+                                    * progress
+                            }
                     }
 
                 newTransition =
