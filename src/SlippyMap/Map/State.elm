@@ -220,18 +220,18 @@ setZoom (Config.Config { minZoom, maxZoom }) newZoom ((State { scene }) as state
 
 
 zoomIn : Config msg -> State -> State
-zoomIn config ((State { scene }) as state) =
-    setZoom config (scene.zoom + 1) state
+zoomIn ((Config.Config { zoomDelta }) as config) ((State { scene }) as state) =
+    setZoom config (scene.zoom + zoomDelta) state
 
 
 zoomOut : Config msg -> State -> State
-zoomOut config ((State { scene }) as state) =
-    setZoom config (scene.zoom - 1) state
+zoomOut ((Config.Config { zoomDelta }) as config) ((State { scene }) as state) =
+    setZoom config (scene.zoom - zoomDelta) state
 
 
 zoomInAround : Config msg -> Point -> State -> State
-zoomInAround config =
-    zoomByAround config 1
+zoomInAround ((Config.Config { zoomDelta }) as config) =
+    zoomByAround config zoomDelta
 
 
 zoomByAround : Config msg -> Float -> Point -> State -> State
@@ -270,7 +270,11 @@ zoomByAround ((Config.Config { size, minZoom, maxZoom }) as config) delta around
             Transform.pointToLocation transformZoomed
                 (Point.add currentCenterPoint aroundPointDiff)
     in
-    setScene { center = newCenter, zoom = newZoom } state
+    setScene
+        { center = newCenter
+        , zoom = newZoom
+        }
+        state
 
 
 {-| -}

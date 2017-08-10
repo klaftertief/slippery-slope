@@ -5,11 +5,13 @@ module SlippyMap.Map.Config
         , size
         , static
         , withCRS
+        , withZoomDelta
+        , withZoomSnap
         )
 
 {-|
 
-@docs Config, static, interactive, size, withCRS
+@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta
 
 TODO: Add field for client position decoder
 
@@ -32,6 +34,8 @@ type alias ConfigInternal msg =
     , size : Point
     , minZoom : Float
     , maxZoom : Float
+    , zoomSnap : Float
+    , zoomDelta : Float
     , toMsg : Maybe (Msg -> msg)
     , crs : CRS
     }
@@ -43,6 +47,8 @@ defaultConfigInternal =
     , size = { x = 600, y = 400 }
     , minZoom = 0
     , maxZoom = 19
+    , zoomSnap = 0
+    , zoomDelta = 1
     , toMsg = Nothing
     , crs = EPSG3857.crs
     }
@@ -70,6 +76,20 @@ withCRS : CRS -> Config msg -> Config msg
 withCRS crs (Config configInternal) =
     Config
         { configInternal | crs = crs }
+
+
+{-| -}
+withZoomSnap : Float -> Config msg -> Config msg
+withZoomSnap zoomSnap (Config configInternal) =
+    Config
+        { configInternal | zoomSnap = zoomSnap }
+
+
+{-| -}
+withZoomDelta : Float -> Config msg -> Config msg
+withZoomDelta zoomDelta (Config configInternal) =
+    Config
+        { configInternal | zoomDelta = zoomDelta }
 
 
 {-| -}

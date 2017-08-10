@@ -2,10 +2,12 @@ module SlippyMap.Map.Update exposing (update)
 
 {-|
 
-@docs Msg, update
+@docs update
 
 -}
 
+import Keyboard exposing (KeyCode)
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (State(..))
@@ -38,38 +40,82 @@ update config msg ((State { scene }) as state) =
             State.setFocus focus state
 
         KeyboardNavigation keyCode ->
-            let
-                distance =
-                    50
+            case keyboardNavigation keyCode of
+                KeyboardMoveBy offset ->
+                    State.moveBy config offset state
 
-                offset =
-                    case keyCode of
-                        -- Left
-                        37 ->
-                            { x = -distance, y = 0 }
+                KeyboardZoomIn ->
+                    State.zoomIn config state
 
-                        -- Up
-                        38 ->
-                            { x = 0, y = -distance }
+                KeyboardZoomOut ->
+                    State.zoomOut config state
 
-                        -- Right
-                        39 ->
-                            { x = distance, y = 0 }
-
-                        -- Down
-                        40 ->
-                            { x = 0, y = distance }
-
-                        _ ->
-                            { x = 0, y = 0 }
-            in
-            State.moveBy config offset state
+                NoKeyboardNavigation ->
+                    state
 
         Tick diff ->
             State.tickTransition diff state
 
         PanTo duration center ->
             state
+
+
+type KeyboardNavigation
+    = KeyboardMoveBy Point
+    | KeyboardZoomIn
+    | KeyboardZoomOut
+    | NoKeyboardNavigation
+
+
+keyboardNavigation : KeyCode -> KeyboardNavigation
+keyboardNavigation keyCode =
+    let
+        distance =
+            50
+    in
+    case keyCode of
+        -- Left
+        37 ->
+            KeyboardMoveBy { x = -distance, y = 0 }
+
+        -- Up
+        38 ->
+            KeyboardMoveBy { x = 0, y = -distance }
+
+        -- Right
+        39 ->
+            KeyboardMoveBy { x = distance, y = 0 }
+
+        -- Down
+        40 ->
+            KeyboardMoveBy { x = 0, y = distance }
+
+        187 ->
+            KeyboardZoomIn
+
+        107 ->
+            KeyboardZoomIn
+
+        61 ->
+            KeyboardZoomIn
+
+        171 ->
+            KeyboardZoomIn
+
+        189 ->
+            KeyboardZoomOut
+
+        109 ->
+            KeyboardZoomOut
+
+        54 ->
+            KeyboardZoomOut
+
+        173 ->
+            KeyboardZoomOut
+
+        _ ->
+            NoKeyboardNavigation
 
 
 updateDrag : Config msg -> DragMsg -> State -> State
