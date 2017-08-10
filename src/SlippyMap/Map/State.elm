@@ -1,6 +1,7 @@
 module SlippyMap.Map.State
     exposing
         ( State(..)
+        , around
         , center
         , defaultState
         , moveBy
@@ -280,9 +281,61 @@ zoomByAround ((Config.Config { size, minZoom, maxZoom }) as config) delta around
 {-| -}
 center : Config msg -> Location -> Float -> State
 center config initialCenter initialZoom =
-    defaultState
-        |> setCenter config initialCenter
-        |> setZoom config initialZoom
+    -- defaultState
+    --     |> setCenter config initialCenter
+    --     |> setZoom config initialZoom
+    setScene
+        { center = initialCenter
+        , zoom = initialZoom
+        }
+        defaultState
+
+
+{-| -}
+around : Config msg -> Location.Bounds -> State
+around ((Config.Config { crs, size }) as config) { southWest, northEast } =
+    let
+        (State { scene }) =
+            defaultState
+
+        transform =
+            Transform.transform config scene
+
+        southWestPoint =
+            Transform.locationToPoint transform southWest
+
+        northEastPoint =
+            Transform.locationToPoint transform northEast
+
+        boundsSize =
+            Point.subtract
+                { x = southWestPoint.x, y = northEastPoint.y }
+                { x = northEastPoint.x, y = southWestPoint.y }
+                |> Debug.log "size"
+
+        scale =
+            min
+                (size.x / boundsSize.x)
+                (size.y / boundsSize.y)
+                |> Debug.log "scale"
+
+        zoom =
+            crs.zoom (crs.scale 0 * scale)
+                |> Debug.log "zoom"
+
+        -- Math.floor(zoom / snap) * snap;
+        center =
+            Point.center
+                southWestPoint
+                northEastPoint
+                |> Transform.pointToLocation transform
+                |> Debug.log "center"
+    in
+    setScene
+        { center = center
+        , zoom = zoom
+        }
+        defaultState
 
 
 {-| -}

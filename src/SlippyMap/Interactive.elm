@@ -3,6 +3,7 @@ module SlippyMap.Interactive
         ( Config
         , Msg
         , State
+        , around
         , center
         , config
         , jumpTo
@@ -15,7 +16,7 @@ module SlippyMap.Interactive
 
 {-|
 
-@docs Config, config, State, center, jumpTo, panTo, Msg, update, view, subscriptions, withCRS
+@docs Config, config, State, center, around, jumpTo, panTo, Msg, update, view, subscriptions, withCRS
 
 -}
 
@@ -70,9 +71,14 @@ type State
 {-| -}
 center : Config msg -> Location -> Float -> State
 center (Config config) initialCenter initialZoom =
-    State.defaultState
-        |> State.setCenter config initialCenter
-        |> State.setZoom config initialZoom
+    State.center config initialCenter initialZoom
+        |> State
+
+
+{-| -}
+around : Config msg -> Location.Bounds -> State
+around (Config config) initialBounds =
+    State.around config initialBounds
         |> State
 
 

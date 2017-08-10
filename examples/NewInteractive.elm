@@ -6,6 +6,7 @@ import Html exposing (Html)
 import Html.Attributes
 import Html.Events
 import Json.Decode
+import Layer.Debug
 import SlippyMap.Geo.CRS.EPSG3857 as CRS
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
@@ -38,9 +39,13 @@ type Msg
 init : Window.Size -> ( Model, Cmd Msg )
 init size =
     { mapState =
-        Map.center (mapConfig size)
-            { lon = 0, lat = 0 }
-            3
+        -- Map.center (mapConfig size)
+        --     { lon = 0, lat = 0 }
+        --     3
+        Map.around (mapConfig size)
+            { southWest = Location -20 -30
+            , northEast = Location 20 20
+            }
     , size = size
     , info = Nothing
     }
@@ -80,11 +85,14 @@ view model =
     Html.div []
         [ Map.view (mapConfig model.size)
             model.mapState
-            [ StaticImage.layer
-                (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
-                    |> StaticImage.withAttribution "© OpenStreetMap contributors"
-                )
-            , Graticule.layer
+            [ {- StaticImage.layer
+                     (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
+                         |> StaticImage.withAttribution "© OpenStreetMap contributors"
+                     )
+                 ,
+              -}
+              --   Layer.Debug.layer
+              Graticule.layer
 
             -- , GeoJson.layer
             --     (GeoJson.defaultConfig
@@ -98,25 +106,26 @@ view model =
             --             case propertiesName of
             --                 Ok name ->
             --                     [ Html.Events.onClick (SetInfo name)
-            --                     , Svg.Attributes.pointerEvents "visible"
+            --                     -- , Svg.Attributes.pointerEvents "visible"
             --                     ]
             --                 Err _ ->
             --                     []
             --         )
             --     )
             --     (Maybe.withDefault myGeoJson Data.World.geoJson)
-            , Layer.group
-                [ Circle.layer (Circle.config 500)
-                    (Location 0 60)
-                , Circle.layer (Circle.config 500)
-                    (Location 0 30)
-                , Circle.layer (Circle.config 500)
-                    (Location 0 0)
-                ]
-            , CircleMarker.layer [ Location 10 20 ]
-            , PinMarker.layer [ Location -10 0 ]
-            , Popup.layer Popup.config
-                [ ( Location 10 20, "I'm a popup" ) ]
+            -- , Layer.group
+            --     [ Circle.layer (Circle.config 500)
+            --         (Location 0 60)
+            --     , Circle.layer (Circle.config 500)
+            --         (Location 0 30)
+            --     , Circle.layer (Circle.config 500)
+            --         (Location 0 0)
+            --     ]
+            , CircleMarker.layer [ Location 0 0 ]
+
+            -- , PinMarker.layer [ Location -10 0 ]
+            -- , Popup.layer Popup.config
+            --     [ ( Location -10 0, "I'm a popup" ) ]
             ]
         , Html.p
             [ Html.Attributes.style
