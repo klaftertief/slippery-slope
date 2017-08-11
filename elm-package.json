@@ -35,7 +35,8 @@
         "SlippyMap.Layer.StaticImage",
         "SlippyMap.Layer.Tile",
         "SlippyMap.Map.Config",
-        "SlippyMap.Map.Transform"
+        "SlippyMap.Map.Transform",
+        "SlippyMap.Map.Update"
     ],
     "dependencies": {
         "elm-lang/animation-frame": "1.0.1 <= v < 2.0.0",
