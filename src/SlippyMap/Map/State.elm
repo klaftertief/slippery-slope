@@ -293,7 +293,7 @@ center config initialCenter initialZoom =
 
 {-| -}
 around : Config msg -> Location.Bounds -> State
-around ((Config.Config { crs, size }) as config) { southWest, northEast } =
+around ((Config.Config { crs, size, zoomSnap }) as config) { southWest, northEast } =
     let
         (State { scene }) =
             defaultState
@@ -311,29 +311,30 @@ around ((Config.Config { crs, size }) as config) { southWest, northEast } =
             Point.subtract
                 { x = southWestPoint.x, y = northEastPoint.y }
                 { x = northEastPoint.x, y = southWestPoint.y }
-                |> Debug.log "size"
 
         scale =
             min
                 (size.x / boundsSize.x)
                 (size.y / boundsSize.y)
-                |> Debug.log "scale"
 
         zoom =
             crs.zoom (crs.scale 0 * scale)
-                |> Debug.log "zoom"
 
-        -- Math.floor(zoom / snap) * snap;
+        zoomSnapped =
+            if zoomSnap == 0 then
+                zoom
+            else
+                toFloat (floor (zoom / zoomSnap)) * zoomSnap
+
         center =
             Point.center
                 southWestPoint
                 northEastPoint
                 |> Transform.pointToLocation transform
-                |> Debug.log "center"
     in
     setScene
         { center = center
-        , zoom = zoom
+        , zoom = zoomSnapped
         }
         defaultState
 
