@@ -4,6 +4,7 @@ module SlippyMap.Map.State
         , around
         , center
         , defaultState
+        , fitBounds
         , moveBy
         , moveTo
         , setCenter
@@ -279,25 +280,9 @@ zoomByAround ((Config.Config { size, minZoom, maxZoom }) as config) delta around
 
 
 {-| -}
-center : Config msg -> Location -> Float -> State
-center config initialCenter initialZoom =
-    -- defaultState
-    --     |> setCenter config initialCenter
-    --     |> setZoom config initialZoom
-    setScene
-        { center = initialCenter
-        , zoom = initialZoom
-        }
-        defaultState
-
-
-{-| -}
-around : Config msg -> Location.Bounds -> State
-around ((Config.Config { crs, size, zoomSnap }) as config) { southWest, northEast } =
+fitBounds : Config msg -> Location.Bounds -> State -> State
+fitBounds ((Config.Config { crs, size, zoomSnap }) as config) { southWest, northEast } (State { scene }) =
     let
-        (State { scene }) =
-            defaultState
-
         transform =
             Transform.transform config scene
 
@@ -337,6 +322,25 @@ around ((Config.Config { crs, size, zoomSnap }) as config) { southWest, northEas
         , zoom = zoomSnapped
         }
         defaultState
+
+
+{-| -}
+center : Config msg -> Location -> Float -> State
+center config initialCenter initialZoom =
+    -- defaultState
+    --     |> setCenter config initialCenter
+    --     |> setZoom config initialZoom
+    setScene
+        { center = initialCenter
+        , zoom = initialZoom
+        }
+        defaultState
+
+
+{-| -}
+around : Config msg -> Location.Bounds -> State
+around config bounds =
+    fitBounds config bounds defaultState
 
 
 {-| -}

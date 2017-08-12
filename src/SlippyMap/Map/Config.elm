@@ -53,7 +53,7 @@ defaultConfigInternal =
     , zoomDelta = 1
     , toMsg = Nothing
     , crs = EPSG3857.crs
-    , interactions = staticInteractions
+    , interactions = interactiveInteractions
     }
 
 
