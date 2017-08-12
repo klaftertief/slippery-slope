@@ -38,47 +38,18 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
         layerAttributions =
             List.concatMap Layer.getAttributions layers
 
-        -- TODO: make list depend on config
-        handlers =
+        interactionAttributes =
             case config.toMsg of
                 Just toMsg ->
                     List.map
                         (Html.Attributes.map toMsg)
-                        [ Html.Events.on "dblclick"
-                            (Decode.map ZoomInAround clientPosition)
-                        , Html.Events.onFocus (SetFocus HasFocus)
-                        , Html.Events.onBlur (SetFocus HasNoFocus)
-                        , Html.Events.on "mousedown"
-                            (Decode.map (DragStart >> DragMsg) Mouse.position)
-                        , Html.Events.onWithOptions "touchstart"
-                            { preventDefault = True
-                            , stopPropagation = False
-                            }
-                            (Decode.map touchesStartMsg touchesDecoder)
-                        , Html.Events.on "touchmove"
-                            (Decode.map touchesMoveMsg touchesDecoder)
-                        , Html.Events.on "touchend"
-                            (Decode.map touchesEndMsg (Decode.succeed (Tap (Position 0 0))))
-                        , Html.Events.on "touchcancel"
-                            (Decode.map touchesEndMsg (Decode.succeed (Tap (Position 0 0))))
-                        , Html.Events.onWithOptions "wheel"
-                            { preventDefault = True
-                            , stopPropagation = True
-                            }
-                            (Decode.map2 (\offset point -> ZoomByAround offset point)
-                                (Decode.field "deltaY" Decode.float
-                                    |> Decode.map (\y -> -y / 100)
-                                )
-                                clientPosition
-                            )
-                        ]
+                        (eventAttributes config.interactions)
 
                 Nothing ->
                     []
     in
     Html.div
-        ([ Html.Attributes.tabindex 0
-         , Html.Attributes.style
+        ([ Html.Attributes.style
             [ ( "position", "relative" )
             , ( "width", toString config.size.x ++ "px" )
             , ( "height", toString config.size.y ++ "px" )
@@ -87,7 +58,7 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
          , Html.Attributes.classList
             [ ( "with-interaction", interaction /= Types.NoInteraction ) ]
          ]
-            ++ handlers
+            ++ interactionAttributes
         )
         [ Html.div
             [ -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
@@ -132,6 +103,63 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
                 Nothing ->
                     Html.text ""
             ]
+        ]
+
+
+eventAttributes : Config.Interactions -> List (Html.Attribute Msg)
+eventAttributes interactions =
+    let
+        scrollWheelZoom =
+            if interactions.scrollWheelZoom then
+                [ Html.Events.onWithOptions "wheel"
+                    { preventDefault = True
+                    , stopPropagation = True
+                    }
+                    (Decode.map2 (\offset point -> ZoomByAround offset point)
+                        (Decode.field "deltaY" Decode.float
+                            |> Decode.map (\y -> -y / 100)
+                        )
+                        clientPosition
+                    )
+                ]
+            else
+                []
+
+        doubleClickZoom =
+            if interactions.doubleClickZoom then
+                [ Html.Events.on "dblclick"
+                    (Decode.map ZoomInAround clientPosition)
+                ]
+            else
+                []
+
+        keyboardControl =
+            if interactions.keyboardControl then
+                [ Html.Events.onFocus (SetFocus HasFocus)
+                , Html.Events.onBlur (SetFocus HasNoFocus)
+                , Html.Attributes.tabindex 0
+                ]
+            else
+                []
+    in
+    List.concat
+        [ scrollWheelZoom
+        , doubleClickZoom
+        , keyboardControl
+        , [ Html.Events.on "mousedown"
+                (Decode.map (DragStart >> DragMsg) Mouse.position)
+          , Html.Events.onWithOptions "touchstart"
+                { preventDefault = True
+                , stopPropagation = False
+                }
+                (Decode.map touchesStartMsg touchesDecoder)
+          , Html.Events.on "touchmove"
+                (Decode.map touchesMoveMsg touchesDecoder)
+          , Html.Events.on "touchend"
+                (Decode.map touchesEndMsg (Decode.succeed (Tap (Position 0 0))))
+          , Html.Events.on "touchcancel"
+                (Decode.map touchesEndMsg (Decode.succeed (Tap (Position 0 0))))
+          ]
         ]
 
 

@@ -1,6 +1,7 @@
 module SlippyMap.Map.Config
     exposing
         ( Config(Config)
+        , Interactions
         , interactive
         , size
         , static
@@ -11,7 +12,7 @@ module SlippyMap.Map.Config
 
 {-|
 
-@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta
+@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, Interactions
 
 TODO: Add field for client position decoder
 
@@ -38,6 +39,7 @@ type alias ConfigInternal msg =
     , zoomDelta : Float
     , toMsg : Maybe (Msg -> msg)
     , crs : CRS
+    , interactions : Interactions
     }
 
 
@@ -51,6 +53,34 @@ defaultConfigInternal =
     , zoomDelta = 1
     , toMsg = Nothing
     , crs = EPSG3857.crs
+    , interactions = staticInteractions
+    }
+
+
+{-| -}
+type alias Interactions =
+    { scrollWheelZoom : Bool
+    , doubleClickZoom : Bool
+    , touchZoom : Bool
+    , keyboardControl : Bool
+    }
+
+
+interactiveInteractions : Interactions
+interactiveInteractions =
+    { scrollWheelZoom = True
+    , doubleClickZoom = True
+    , touchZoom = True
+    , keyboardControl = True
+    }
+
+
+staticInteractions : Interactions
+staticInteractions =
+    { scrollWheelZoom = False
+    , doubleClickZoom = False
+    , touchZoom = True
+    , keyboardControl = False
     }
 
 
