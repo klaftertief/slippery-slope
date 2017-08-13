@@ -6,6 +6,7 @@ module SlippyMap.Map.State
         , defaultState
         , fitBounds
         , moveBy
+        , moveByAnimated
         , moveTo
         , setCenter
         , setFocus
@@ -22,7 +23,7 @@ module SlippyMap.Map.State
 
 {-|
 
-@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut
+@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, moveByAnimated
 
 -}
 
@@ -203,6 +204,34 @@ moveBy ((Config.Config { size }) as config) offset state =
                 |> Point.add offset
     in
     moveTo config newCenterPoint state
+
+
+{-| -}
+moveByAnimated : Config msg -> Point -> State -> State
+moveByAnimated ((Config.Config { size }) as config) offset ((State { scene }) as state) =
+    let
+        newCenterPoint =
+            size
+                |> Point.divideBy 2
+                |> Point.add offset
+
+        transform =
+            Transform.transform config scene
+
+        newCenter =
+            Transform.screenPointToLocation transform
+                newCenterPoint
+    in
+    setTransition
+        (MoveTo
+            { fromScene = scene
+            , toScene =
+                { scene | center = newCenter }
+            , duration = 400
+            , elapsed = 0
+            }
+        )
+        state
 
 
 {-| -}

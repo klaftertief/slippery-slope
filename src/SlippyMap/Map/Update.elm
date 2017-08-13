@@ -42,7 +42,7 @@ update config msg ((State { scene }) as state) =
         KeyboardNavigation keyCode ->
             case keyboardNavigation keyCode of
                 KeyboardMoveBy offset ->
-                    State.moveBy config offset state
+                    State.moveByAnimated config offset state
 
                 KeyboardZoomIn ->
                     State.zoomIn config state
@@ -140,8 +140,30 @@ updateDrag config dragMsg ((State { interaction }) as state) =
                 State.setInteraction newInteraction
                     state
 
-            DragEnd _ ->
-                State.setInteraction NoInteraction state
+            DragEnd xy ->
+                let
+                    maybeAnimate =
+                        case interaction of
+                            NoInteraction ->
+                                identity
+
+                            Dragging { last } ->
+                                let
+                                    speed =
+                                        5
+                                in
+                                State.moveByAnimated config
+                                    { x = -(xy.x - last.x) * speed |> toFloat
+                                    , y = -(xy.y - last.y) * speed |> toFloat
+                                    }
+
+                            Pinching { current } ->
+                                State.moveByAnimated config
+                                    { x = 100, y = 20 }
+                in
+                state
+                    |> State.setInteraction NoInteraction
+                    |> maybeAnimate
 
 
 updatePinch : Config msg -> PinchMsg -> State -> State
