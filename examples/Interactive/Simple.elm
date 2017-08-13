@@ -1,6 +1,7 @@
 module Interactive.Simple exposing (..)
 
 import Html exposing (Html)
+import Html.Attributes
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
 
@@ -49,8 +50,13 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    Html.div []
-        [ Map.view config
+    Html.div
+        [ Html.Attributes.style
+            [ ( "padding", "1.5rem" ) ]
+        ]
+        [ Html.h1 []
+            [ Html.text "Simple interactive map" ]
+        , Map.view config
             model.map
             [ Map.tileLayer ]
         ]
