@@ -1,26 +1,29 @@
 module SlippyMap.Interactive
     exposing
         ( Config
+        , Layer
         , Msg
         , State
         , around
         , at
         , config
         , subscriptions
+        , tileLayer
         , update
         , view
         )
 
-{-|
+{-| A convenience module re-exposing various specialised functions and types to quickly create a basic interactive map with a default configuration.
 
-@docs Config, config, State, at, around, Msg, update, view, subscriptions
+@docs Config, config, State, at, around, Msg, update, view, subscriptions, Layer, tileLayer
 
 -}
 
 import Html exposing (Html)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Layer as Layer
+import SlippyMap.Layer.StaticImage as StaticImageLayer
 import SlippyMap.Map.Config as Config
 import SlippyMap.Map.Msg as Msg
 import SlippyMap.Map.State as State
@@ -98,3 +101,21 @@ subscriptions =
 view : Config msg -> State -> List (Layer msg) -> Html msg
 view =
     View.view
+
+
+
+-- LAYER
+
+
+{-| -}
+type alias Layer msg =
+    Layer.Layer msg
+
+
+{-| -}
+tileLayer : Layer msg
+tileLayer =
+    StaticImageLayer.layer
+        (StaticImageLayer.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
+            |> StaticImageLayer.withAttribution "© OpenStreetMap contributors"
+        )

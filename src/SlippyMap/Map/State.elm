@@ -22,7 +22,7 @@ module SlippyMap.Map.State
 
 {-|
 
-@docs State, at, around, getTransform, getCoordinateBounds, getTileCover
+@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut
 
 -}
 
@@ -44,6 +44,7 @@ type State
         }
 
 
+{-| -}
 defaultState : State
 defaultState =
     State
@@ -70,24 +71,28 @@ around config initialBounds =
     fitBounds config initialBounds defaultState
 
 
+{-| -}
 setScene : Scene -> State -> State
 setScene newScene (State state) =
     State
         { state | scene = newScene }
 
 
+{-| -}
 setTransition : Transition -> State -> State
 setTransition newTransition (State state) =
     State
         { state | transition = newTransition }
 
 
+{-| -}
 setInteraction : Interaction -> State -> State
 setInteraction newInteraction (State state) =
     State
         { state | interaction = newInteraction }
 
 
+{-| -}
 setFocus : Focus -> State -> State
 setFocus newFocus (State state) =
     State
@@ -101,6 +106,7 @@ defaultScene =
     }
 
 
+{-| -}
 withInteraction : Config msg -> State -> State
 withInteraction config ((State { interaction }) as state) =
     case interaction of
@@ -173,6 +179,7 @@ withPinch ((Config.Config { crs, size }) as config) { last, current } ((State { 
         |> setZoom config (scene.zoom + zoomDelta)
 
 
+{-| -}
 moveTo : Config msg -> Point -> State -> State
 moveTo config newCenterPoint ((State { scene }) as state) =
     let
@@ -186,6 +193,7 @@ moveTo config newCenterPoint ((State { scene }) as state) =
     setCenter config newCenter state
 
 
+{-| -}
 moveBy : Config msg -> Point -> State -> State
 moveBy ((Config.Config { size }) as config) offset state =
     let
@@ -197,6 +205,7 @@ moveBy ((Config.Config { size }) as config) offset state =
     moveTo config newCenterPoint state
 
 
+{-| -}
 setCenter : Config msg -> Location -> State -> State
 setCenter config newCenter ((State { scene }) as state) =
     -- setTransition
@@ -214,6 +223,7 @@ setCenter config newCenter ((State { scene }) as state) =
         state
 
 
+{-| -}
 setZoom : Config msg -> Float -> State -> State
 setZoom (Config.Config { minZoom, maxZoom }) newZoom ((State { scene }) as state) =
     if isNaN newZoom || isInfinite newZoom then
@@ -237,21 +247,25 @@ setZoom (Config.Config { minZoom, maxZoom }) newZoom ((State { scene }) as state
             state
 
 
+{-| -}
 zoomIn : Config msg -> State -> State
 zoomIn ((Config.Config { zoomDelta }) as config) ((State { scene }) as state) =
     setZoom config (scene.zoom + zoomDelta) state
 
 
+{-| -}
 zoomOut : Config msg -> State -> State
 zoomOut ((Config.Config { zoomDelta }) as config) ((State { scene }) as state) =
     setZoom config (scene.zoom - zoomDelta) state
 
 
+{-| -}
 zoomInAround : Config msg -> Point -> State -> State
 zoomInAround ((Config.Config { zoomDelta }) as config) =
     zoomByAround config zoomDelta
 
 
+{-| -}
 zoomByAround : Config msg -> Float -> Point -> State -> State
 zoomByAround ((Config.Config { size, minZoom, maxZoom }) as config) delta around ((State { scene }) as state) =
     let
@@ -350,6 +364,7 @@ getScene (State { scene }) =
     scene
 
 
+{-| -}
 tickTransition : Time -> State -> State
 tickTransition diff ((State { transition, scene }) as state) =
     case transition of
