@@ -183,18 +183,18 @@ moveBy ((Config.Config { size }) as config) offset state =
 
 setCenter : Config msg -> Location -> State -> State
 setCenter config newCenter ((State { scene }) as state) =
-    -- setScene
-    --     { scene | center = newCenter }
+    -- setTransition
+    --     (MoveTo
+    --         { fromScene = scene
+    --         , toScene =
+    --             { scene | center = newCenter }
+    --         , duration = 200
+    --         , elapsed = 0
+    --         }
+    --     )
     --     state
-    setTransition
-        (MoveTo
-            { fromScene = scene
-            , toScene =
-                { scene | center = newCenter }
-            , duration = 200
-            , elapsed = 0
-            }
-        )
+    setScene
+        { scene | center = newCenter }
         state
 
 
@@ -284,7 +284,11 @@ fitBounds : Config msg -> Location.Bounds -> State -> State
 fitBounds ((Config.Config { crs, size, zoomSnap }) as config) { southWest, northEast } (State { scene }) =
     let
         transform =
-            Transform.transform config scene
+            Transform.transform config
+                -- scene
+                { center = Location 0 0
+                , zoom = 0
+                }
 
         southWestPoint =
             Transform.locationToPoint transform southWest

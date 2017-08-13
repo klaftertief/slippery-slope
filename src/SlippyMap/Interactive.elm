@@ -6,8 +6,8 @@ module SlippyMap.Interactive
         , around
         , center
         , config
+        , fitBounds
         , jumpTo
-        , panTo
         , subscriptions
         , update
         , view
@@ -16,7 +16,7 @@ module SlippyMap.Interactive
 
 {-|
 
-@docs Config, config, State, center, around, jumpTo, panTo, Msg, update, view, subscriptions, withCRS
+@docs Config, config, State, center, around, jumpTo, Msg, update, view, subscriptions, withCRS, fitBounds
 
 -}
 
@@ -92,9 +92,11 @@ jumpTo (Config config) center zoom (State state) =
 
 
 {-| -}
-panTo : Config msg -> Location -> State -> State
-panTo config center state =
-    update config (Msg <| Msg.PanTo 1000 center) state
+fitBounds : Config msg -> Location.Bounds -> State -> State
+fitBounds (Config config) bounds (State state) =
+    state
+        |> State.fitBounds config bounds
+        |> State
 
 
 

@@ -47,7 +47,7 @@ defaultConfigInternal : ConfigInternal msg
 defaultConfigInternal =
     { attributionPrefix = Just "Elm"
     , size = { x = 600, y = 400 }
-    , minZoom = 0
+    , minZoom = -5
     , maxZoom = 19
     , zoomSnap = 0
     , zoomDelta = 1

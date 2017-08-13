@@ -12,8 +12,9 @@ module SlippyMap.Layer.Overlay
 -}
 
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Transform as Transform exposing (Transform)
-import SlippyMap.Layer.LowLevel as Layer exposing (Layer)
+import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -55,32 +56,40 @@ layer config boundedOverlays =
     Layer.withRender Layer.overlay (render config boundedOverlays)
 
 
-render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Layer.RenderState -> Svg msg
-render config boundedOverlays renderState =
+render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Transform -> Svg msg
+render config boundedOverlays transform =
     Svg.g []
-        (List.map (renderOverlay config renderState) boundedOverlays)
+        (List.map (renderOverlay config transform) boundedOverlays)
 
 
-renderOverlay : Config overlay msg -> Layer.RenderState -> ( Location.Bounds, overlay ) -> Svg msg
-renderOverlay (Config config) { locationToContainerPoint } ( bounds, overlay ) =
+renderOverlay : Config overlay msg -> Transform -> ( Location.Bounds, overlay ) -> Svg msg
+renderOverlay (Config config) transform ( bounds, overlay ) =
     let
+        origin =
+            Transform.origin transform
+
         southWestPoint =
-            locationToContainerPoint bounds.southWest
+            Transform.locationToPoint transform
+                bounds.southWest
 
         northEastPoint =
-            locationToContainerPoint bounds.northEast
+            Transform.locationToPoint transform
+                bounds.northEast
 
         overlaySize =
             ( northEastPoint.x - southWestPoint.x
             , southWestPoint.y - northEastPoint.y
             )
+
+        translate =
+            Point.subtract origin southWestPoint
     in
     Svg.g
         [ Svg.Attributes.transform
             ("translate("
-                ++ toString southWestPoint.x
+                ++ toString translate.x
                 ++ " "
-                ++ toString northEastPoint.y
+                ++ toString (translate.y - southWestPoint.y + northEastPoint.y)
                 ++ ")"
             )
         ]
