@@ -410,6 +410,9 @@ tickTransition diff ((State { transition, scene }) as state) =
 
                 progress =
                     clamp 0 1 (newElapsed / target.duration)
+                        |> (\time ->
+                                1 - (1 - time) ^ 4
+                           )
 
                 newScene =
                     { scene
