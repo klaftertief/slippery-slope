@@ -4,30 +4,28 @@ module SlippyMap.Interactive
         , Msg
         , State
         , around
-        , center
+        , at
         , config
-        , fitBounds
-        , jumpTo
         , subscriptions
         , update
         , view
-        , withCRS
         )
 
 {-|
 
-@docs Config, config, State, center, around, jumpTo, Msg, update, view, subscriptions, withCRS, fitBounds
+@docs Config, config, State, at, around, Msg, update, view, subscriptions
 
 -}
 
 import Html exposing (Html)
-import SlippyMap.Geo.CRS as CRS exposing (CRS)
 import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config
 import SlippyMap.Map.Msg as Msg
 import SlippyMap.Map.State as State
 import SlippyMap.Map.Subscriptions as Subscriptions
+import SlippyMap.Map.Types as Types exposing (Scene, Size)
 import SlippyMap.Map.Update as Update
 import SlippyMap.Map.View as View
 
@@ -35,28 +33,15 @@ import SlippyMap.Map.View as View
 -- CONFIG
 
 
-{-| Configuration for the map.
--}
-type Config msg
-    = Config (Config.Config msg)
+{-| -}
+type alias Config msg =
+    Config.Config msg
 
 
 {-| -}
-config : { width : Int, height : Int } -> (Msg -> msg) -> Config msg
-config { width, height } toMsg =
-    let
-        size =
-            { x = toFloat width, y = toFloat height }
-    in
-    Config <|
-        Config.interactive size (Msg >> toMsg)
-
-
-{-| -}
-withCRS : CRS -> Config msg -> Config msg
-withCRS crs (Config config) =
-    Config <|
-        Config.withCRS crs config
+config : Size -> (Msg -> msg) -> Config msg
+config size =
+    Config.interactive (Point.fromSize size)
 
 
 
@@ -64,39 +49,20 @@ withCRS crs (Config config) =
 
 
 {-| -}
-type State
-    = State State.State
+type alias State =
+    State.State
 
 
 {-| -}
-center : Config msg -> Location -> Float -> State
-center (Config config) initialCenter initialZoom =
-    State.center config initialCenter initialZoom
-        |> State
+at : Config msg -> Scene -> State
+at =
+    State.at
 
 
 {-| -}
 around : Config msg -> Location.Bounds -> State
-around (Config config) initialBounds =
-    State.around config initialBounds
-        |> State
-
-
-{-| -}
-jumpTo : Config msg -> Location -> Float -> State -> State
-jumpTo (Config config) center zoom (State state) =
-    state
-        |> State.setCenter config center
-        |> State.setZoom config zoom
-        |> State
-
-
-{-| -}
-fitBounds : Config msg -> Location.Bounds -> State -> State
-fitBounds (Config config) bounds (State state) =
-    state
-        |> State.fitBounds config bounds
-        |> State
+around =
+    State.around
 
 
 
@@ -104,15 +70,14 @@ fitBounds (Config config) bounds (State state) =
 
 
 {-| -}
-type Msg
-    = Msg Msg.Msg
+type alias Msg =
+    Msg.Msg
 
 
 {-| -}
 update : Config msg -> Msg -> State -> State
-update (Config config) (Msg msg) (State state) =
-    State <|
-        Update.update config msg state
+update =
+    Update.update
 
 
 
@@ -121,8 +86,8 @@ update (Config config) (Msg msg) (State state) =
 
 {-| -}
 subscriptions : Config msg -> State -> Sub msg
-subscriptions (Config config) (State state) =
-    Subscriptions.subscriptions config state
+subscriptions =
+    Subscriptions.subscriptions
 
 
 
@@ -131,5 +96,5 @@ subscriptions (Config config) (State state) =
 
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
-view (Config config) (State state) =
-    View.view config state
+view =
+    View.view

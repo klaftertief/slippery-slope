@@ -5,6 +5,7 @@ module SlippyMap.Map.Types
         , Interaction(..)
         , Pinch
         , Scene
+        , Size
         , Transition(..)
         )
 
@@ -17,6 +18,12 @@ module SlippyMap.Map.Types
 import Mouse exposing (Position)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import Time exposing (Time)
+
+
+type alias Size =
+    { width : Int
+    , height : Int
+    }
 
 
 type alias Scene =

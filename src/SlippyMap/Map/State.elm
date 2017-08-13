@@ -2,7 +2,7 @@ module SlippyMap.Map.State
     exposing
         ( State(..)
         , around
-        , center
+        , at
         , defaultState
         , fitBounds
         , moveBy
@@ -22,7 +22,7 @@ module SlippyMap.Map.State
 
 {-|
 
-@docs State, center, getTransform, getCoordinateBounds, getTileCover
+@docs State, at, around, getTransform, getCoordinateBounds, getTileCover
 
 -}
 
@@ -52,6 +52,22 @@ defaultState =
         , interaction = NoInteraction
         , focus = HasNoFocus
         }
+
+
+
+-- CONSTRUCTORS
+
+
+{-| -}
+at : Config msg -> Scene -> State
+at config initialScene =
+    setScene initialScene defaultState
+
+
+{-| -}
+around : Config msg -> Location.Bounds -> State
+around config initialBounds =
+    fitBounds config initialBounds defaultState
 
 
 setScene : Scene -> State -> State
@@ -326,25 +342,6 @@ fitBounds ((Config.Config { crs, size, zoomSnap }) as config) { southWest, north
         , zoom = zoomSnapped
         }
         defaultState
-
-
-{-| -}
-center : Config msg -> Location -> Float -> State
-center config initialCenter initialZoom =
-    -- defaultState
-    --     |> setCenter config initialCenter
-    --     |> setZoom config initialZoom
-    setScene
-        { center = initialCenter
-        , zoom = initialZoom
-        }
-        defaultState
-
-
-{-| -}
-around : Config msg -> Location.Bounds -> State
-around config bounds =
-    fitBounds config bounds defaultState
 
 
 {-| -}

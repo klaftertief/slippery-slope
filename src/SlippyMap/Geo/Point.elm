@@ -1,10 +1,23 @@
-module SlippyMap.Geo.Point exposing (Bounds, Point, add, center, distance, divideBy, multiplyBy, subtract)
+module SlippyMap.Geo.Point
+    exposing
+        ( Bounds
+        , Point
+        , add
+        , center
+        , distance
+        , divideBy
+        , fromSize
+        , multiplyBy
+        , subtract
+        )
 
 {-|
 
-@docs Point, Bounds, add, subtract, multiplyBy, divideBy, center, distance
+@docs Point, fromSize, Bounds, add, subtract, multiplyBy, divideBy, center, distance
 
 -}
+
+import SlippyMap.Map.Types exposing (Size)
 
 
 {-| A point
@@ -12,6 +25,14 @@ module SlippyMap.Geo.Point exposing (Bounds, Point, add, center, distance, divid
 type alias Point =
     { x : Float
     , y : Float
+    }
+
+
+{-| -}
+fromSize : Size -> Point
+fromSize { width, height } =
+    { x = toFloat width
+    , y = toFloat height
     }
 
 

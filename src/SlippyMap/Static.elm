@@ -1,26 +1,40 @@
-module SlippyMap.Static exposing (view)
+module SlippyMap.Static exposing (around, at)
 
 {-| Just a static map.
 
-@docs view
+@docs at, around
 
 -}
 
 import Html exposing (Html)
-import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Location as Location
+import SlippyMap.Geo.Point as Point
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config
 import SlippyMap.Map.State as State
+import SlippyMap.Map.Types as Types exposing (Scene, Size)
 import SlippyMap.Map.View as View
 
 
-{-| Show a map, no interactions.
+{-| Render a map at a given center and zoom.
 -}
-view : { width : Int, height : Int } -> Location -> Float -> List (Layer msg) -> Html msg
-view { width, height } location zoom =
+at : Size -> Scene -> List (Layer msg) -> Html msg
+at size scene =
     let
         config =
-            Config.static { x = toFloat width, y = toFloat height }
+            Config.static (Point.fromSize size)
     in
     View.view config
-        (State.center config location zoom)
+        (State.at config scene)
+
+
+{-| Render a map around given bounds.
+-}
+around : Size -> Location.Bounds -> List (Layer msg) -> Html msg
+around size bounds =
+    let
+        config =
+            Config.static (Point.fromSize size)
+    in
+    View.view config
+        (State.around config bounds)

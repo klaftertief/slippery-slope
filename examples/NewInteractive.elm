@@ -7,7 +7,6 @@ import Html.Attributes
 import Html.Events
 import Json.Decode
 import Layer.Debug
-import SlippyMap.Geo.CRS.EPSG3857 as CRS
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer as Layer
@@ -39,9 +38,10 @@ type Msg
 init : Window.Size -> ( Model, Cmd Msg )
 init size =
     { mapState =
-        -- Map.center (mapConfig size)
-        --     { lon = 0, lat = 0 }
-        --     3
+        -- Map.at (mapConfig size)
+        --     { center = { lon = 0, lat = 0 }
+        --     , zoom = 3
+        --     }
         Map.around (mapConfig size)
             { southWest = Location -20 -30
             , northEast = Location 20 20
@@ -77,7 +77,6 @@ update msg model =
 mapConfig : Window.Size -> Map.Config Msg
 mapConfig size =
     Map.config size MapMsg
-        |> Map.withCRS CRS.crs
 
 
 view : Model -> Html Msg
