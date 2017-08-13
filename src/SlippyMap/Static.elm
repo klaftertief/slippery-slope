@@ -1,8 +1,13 @@
-module SlippyMap.Static exposing (around, at)
+module SlippyMap.Static
+    exposing
+        ( around
+        , at
+        , tileLayer
+        )
 
 {-| Just a static map.
 
-@docs at, around
+@docs at, around, tileLayer
 
 -}
 
@@ -46,11 +51,6 @@ around size bounds =
 
 
 -- LAYER
-
-
-{-| -}
-type alias Layer msg =
-    Layer.Layer msg
 
 
 {-| -}
