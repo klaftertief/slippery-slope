@@ -24,7 +24,6 @@ type Msg
     | SetFocus Focus
     | KeyboardNavigation KeyCode
     | Tick Time
-    | PanTo Time Location
 
 
 {-| -}

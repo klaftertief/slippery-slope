@@ -56,9 +56,6 @@ update config msg ((State { scene }) as state) =
         Tick diff ->
             State.tickTransition diff state
 
-        PanTo duration center ->
-            state
-
 
 type KeyboardNavigation
     = KeyboardMoveBy Point
