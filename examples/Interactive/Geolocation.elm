@@ -8,7 +8,7 @@ import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Layer.Circle as Circle
-import SlippyMap.Layer.Marker.Ngon as Marker
+import SlippyMap.Layer.Marker.Circle as Marker
 import SlippyMap.Map.State as MapState
 import Task
 
