@@ -3,12 +3,14 @@ module Interactive.Geolocation exposing (..)
 import Geolocation
 import Html exposing (Html)
 import Html.Attributes
+import Html.Events
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Layer.Circle as Circle
-import SlippyMap.Layer.Marker.Circle as CircleMarker
+import SlippyMap.Layer.Marker.Ngon as Marker
 import SlippyMap.Map.State as MapState
+import Task
 
 
 type alias Model =
@@ -20,6 +22,8 @@ type alias Model =
 type Msg
     = MapMsg Map.Msg
     | LocationChange Geolocation.Location
+    | RequestLocation
+    | RequestLocationResponse (Result Geolocation.Error Geolocation.Location)
 
 
 init : ( Model, Cmd Msg )
@@ -62,6 +66,34 @@ update msg model =
             }
                 ! []
 
+        RequestLocation ->
+            model ! [ Task.attempt RequestLocationResponse Geolocation.now ]
+
+        RequestLocationResponse response ->
+            case response of
+                Ok location ->
+                    let
+                        newMap =
+                            MapState.setScene
+                                --config
+                                { center = toLocation location
+                                , zoom = 15
+                                }
+                                model.map
+                    in
+                    { model
+                        | map = newMap
+                        , userLocation = Just location
+                    }
+                        ! []
+
+                Err err ->
+                    let
+                        _ =
+                            Debug.log "location error" err
+                    in
+                    model ! []
+
 
 config : Map.Config Msg
 config =
@@ -85,6 +117,11 @@ view model =
         [ Html.h1 []
             [ Html.text "Interactive map with user location" ]
         , viewMap model
+        , Html.p []
+            [ Html.button
+                [ Html.Events.onClick RequestLocation ]
+                [ Html.text "Where am I?" ]
+            ]
         ]
 
 
@@ -107,7 +144,7 @@ toUserLayer ({ accuracy } as geolocation) =
             toLocation geolocation
     in
     [ Circle.layer (Circle.config (accuracy / 1000)) location
-    , CircleMarker.layer [ location ]
+    , Marker.layer [ location ]
     ]
 
 
