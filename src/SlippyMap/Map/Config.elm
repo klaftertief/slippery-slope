@@ -3,6 +3,7 @@ module SlippyMap.Map.Config
         ( Config(Config)
         , Interactions
         , interactive
+        , onClick
         , size
         , static
         , withCRS
@@ -12,7 +13,7 @@ module SlippyMap.Map.Config
 
 {-|
 
-@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, Interactions
+@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, Interactions, onClick
 
 TODO: Add field for client position decoder
 
@@ -20,6 +21,7 @@ TODO: Add field for client position decoder
 
 import SlippyMap.Geo.CRS as CRS exposing (CRS)
 import SlippyMap.Geo.CRS.EPSG3857 as EPSG3857
+import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.Msg as Msg exposing (Msg)
 
@@ -40,6 +42,7 @@ type alias ConfigInternal msg =
     , toMsg : Maybe (Msg -> msg)
     , crs : CRS
     , interactions : Interactions
+    , onClick : Maybe (Location -> msg)
     }
 
 
@@ -54,6 +57,7 @@ defaultConfigInternal =
     , toMsg = Nothing
     , crs = EPSG3857.crs
     , interactions = interactiveInteractions
+    , onClick = Nothing
     }
 
 
@@ -106,6 +110,13 @@ withCRS : CRS -> Config msg -> Config msg
 withCRS crs (Config configInternal) =
     Config
         { configInternal | crs = crs }
+
+
+{-| -}
+onClick : (Location -> msg) -> Config msg -> Config msg
+onClick onClick (Config configInternal) =
+    Config
+        { configInternal | onClick = Just onClick }
 
 
 {-| -}

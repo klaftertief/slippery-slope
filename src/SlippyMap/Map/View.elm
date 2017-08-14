@@ -34,16 +34,28 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
         layers =
             Layer.flatten nestedLayers
 
-        -- TODO: only get attributions from currently visible layers, whatever that means or how it's implemented
         layerAttributions =
             List.concatMap Layer.getAttributions layers
 
-        interactionAttributes =
+        interactionAttributesInternal =
             case config.toMsg of
                 Just toMsg ->
                     List.map
                         (Html.Attributes.map toMsg)
                         (eventAttributes config.interactions)
+
+                Nothing ->
+                    []
+
+        interactionAttributesExternal =
+            case config.onClick of
+                Just onClick ->
+                    [ Html.Events.on "click"
+                        (Decode.map
+                            (Transform.screenPointToLocation transform >> onClick)
+                            clientPosition
+                        )
+                    ]
 
                 Nothing ->
                     []
@@ -58,25 +70,29 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
          , Html.Attributes.classList
             [ ( "with-interaction", interaction /= Types.NoInteraction ) ]
          ]
-            ++ interactionAttributes
+            ++ interactionAttributesInternal
+            ++ interactionAttributesExternal
         )
-        [ Html.div
-            [ -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
-              Html.Attributes.style
-                [ ( "position"
-                  , if interaction /= Types.NoInteraction then
-                        "fixed"
-                    else
-                        "absolute"
-                  )
-                , ( "left", "0" )
-                , ( "top", "0" )
-                , ( "right", "0" )
-                , ( "bottom", "0" )
-                ]
-            ]
-            []
-        , Svg.svg
+        [ -- TODO: Reactivate when working on event cleanup
+          {- Html.div
+                 [ -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
+                   Html.Attributes.style
+                     [ ( "position"
+                       , if interaction /= Types.NoInteraction then
+                             "fixed"
+                         else
+                             "absolute"
+                       )
+                     , ( "left", "0" )
+                     , ( "top", "0" )
+                     , ( "right", "0" )
+                     , ( "bottom", "0" )
+                     ]
+                 ]
+                 []
+             ,
+          -}
+          Svg.svg
             [ Svg.Attributes.class "esm__map"
 
             -- Important for touch pinching
