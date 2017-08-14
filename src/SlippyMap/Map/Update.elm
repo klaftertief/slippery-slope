@@ -148,18 +148,20 @@ updateDrag config dragMsg ((State { interaction }) as state) =
                                 identity
 
                             Dragging { last } ->
-                                let
-                                    speed =
-                                        5
-                                in
-                                State.moveByAnimated config
-                                    { x = -(xy.x - last.x) * speed |> toFloat
-                                    , y = -(xy.y - last.y) * speed |> toFloat
-                                    }
+                                if xy == last then
+                                    identity
+                                else
+                                    let
+                                        speed =
+                                            5
+                                    in
+                                    State.moveByAnimated config
+                                        { x = -(xy.x - last.x) * speed |> toFloat
+                                        , y = -(xy.y - last.y) * speed |> toFloat
+                                        }
 
-                            Pinching { current } ->
-                                State.moveByAnimated config
-                                    { x = 100, y = 20 }
+                            Pinching { last } ->
+                                identity
                 in
                 state
                     |> State.setInteraction NoInteraction
