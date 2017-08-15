@@ -6,8 +6,10 @@ module SlippyMap.Layer.Marker.Circle
         , individualMarker
         , marker
         , withFill
+        , withFillOpacity
         , withRadius
         , withStroke
+        , withStrokeOpacity
         , withStrokeWidth
         )
 
@@ -18,7 +20,7 @@ module SlippyMap.Layer.Marker.Circle
 
 ## Custom circles
 
-@docs customMarker, individualMarker, icon, withRadius, withFill, withStroke, withStrokeWidth, Config
+@docs customMarker, individualMarker, icon, withRadius, withFill, withFillOpacity, withStroke, withStrokeWidth, withStrokeOpacity, Config
 
 -}
 
@@ -35,8 +37,10 @@ type Config
     = Config
         { radius : Float
         , fill : String
+        , fillOpacity : Float
         , stroke : String
         , strokeWidth : Float
+        , strokeOpacity : Float
         }
 
 
@@ -45,8 +49,10 @@ defaultConfig =
     Config
         { radius = 8
         , fill = "#3388ff"
+        , fillOpacity = 1
         , stroke = "#ffffff"
         , strokeWidth = 3
+        , strokeOpacity = 1
         }
 
 
@@ -71,6 +77,13 @@ withFill fill (Config config) =
     Config { config | fill = fill }
 
 
+{-| Sets the stroke opacity of a cirle.
+-}
+withFillOpacity : Float -> Config -> Config
+withFillOpacity fillOpacity (Config config) =
+    Config { config | fillOpacity = clamp 0 1 fillOpacity }
+
+
 {-| Sets the stroke color of a cirle.
 -}
 withStroke : String -> Config -> Config
@@ -85,13 +98,28 @@ withStrokeWidth strokeWidth (Config config) =
     Config { config | strokeWidth = strokeWidth }
 
 
+{-| Sets the stroke opacity of a cirle.
+-}
+withStrokeOpacity : Float -> Config -> Config
+withStrokeOpacity strokeOpacity (Config config) =
+    Config { config | strokeOpacity = clamp 0 1 strokeOpacity }
+
+
 renderIcon : Config -> Svg msg
-renderIcon (Config { radius, fill, stroke, strokeWidth }) =
+renderIcon (Config config) =
     Svg.circle
-        [ Svg.Attributes.r (toString radius)
-        , Svg.Attributes.fill fill
-        , Svg.Attributes.stroke stroke
-        , Svg.Attributes.strokeWidth (toString strokeWidth)
+        [ Svg.Attributes.r
+            (toString config.radius)
+        , Svg.Attributes.fill
+            config.fill
+        , Svg.Attributes.fillOpacity
+            (toString config.fillOpacity)
+        , Svg.Attributes.stroke
+            config.stroke
+        , Svg.Attributes.strokeWidth
+            (toString config.strokeWidth)
+        , Svg.Attributes.strokeOpacity
+            (toString config.strokeOpacity)
         ]
         []
 
