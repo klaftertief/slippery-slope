@@ -52,7 +52,7 @@ defaultConfigInternal =
     , size = { x = 600, y = 400 }
     , minZoom = 0
     , maxZoom = 19
-    , zoomSnap = 0
+    , zoomSnap = 1
     , zoomDelta = 1
     , toMsg = Nothing
     , crs = EPSG3857.crs
