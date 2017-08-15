@@ -340,7 +340,7 @@ zoomByAround ((Config.Config { size, minZoom, maxZoom }) as config) delta around
 
 {-| -}
 fitBounds : Config msg -> Location.Bounds -> State -> State
-fitBounds ((Config.Config { crs, size, zoomSnap }) as config) { southWest, northEast } (State { scene }) =
+fitBounds ((Config.Config { crs, size, zoomSnap, minZoom, maxZoom }) as config) { southWest, northEast } (State { scene }) =
     let
         transform =
             Transform.transform config
@@ -369,10 +369,11 @@ fitBounds ((Config.Config { crs, size, zoomSnap }) as config) { southWest, north
             crs.zoom (crs.scale 0 * scale)
 
         zoomSnapped =
-            if zoomSnap == 0 then
-                zoom
-            else
-                toFloat (floor (zoom / zoomSnap)) * zoomSnap
+            clamp minZoom maxZoom <|
+                if zoomSnap == 0 then
+                    zoom
+                else
+                    toFloat (floor (zoom / zoomSnap)) * zoomSnap
 
         center =
             Point.center
