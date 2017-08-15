@@ -39,7 +39,8 @@
         "SlippyMap.Map.Config",
         "SlippyMap.Map.State",
         "SlippyMap.Map.Transform",
-        "SlippyMap.Map.Update"
+        "SlippyMap.Map.Update",
+        "SlippyMap.Map.View"
     ],
     "dependencies": {
         "elm-lang/animation-frame": "1.0.1 <= v < 2.0.0",
