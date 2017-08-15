@@ -1,8 +1,8 @@
-module SlippyMap.Geo.Location exposing (..)
+module SlippyMap.Geo.Location exposing (Bounds, Location, bounds, boundsAreOverlapping, center, isInsideBounds, maybeBounds, wrap)
 
 {-| Geographical coordinates
 
-@docs Location, Bounds, center, wrap, isInsideBounds, boundsAreOverlapping
+@docs Location, Bounds, center, wrap, bounds, maybeBounds, isInsideBounds, boundsAreOverlapping
 
 -}
 
@@ -33,6 +33,42 @@ center { southWest, northEast } =
 wrap : Location -> Location
 wrap ({ lon } as location) =
     { location | lon = clamp -180 180 lon }
+
+
+singletonBounds : Location -> Bounds
+singletonBounds location =
+    Bounds location location
+
+
+{-| -}
+maybeBounds : List Location -> Maybe Bounds
+maybeBounds locations =
+    case locations of
+        [] ->
+            Nothing
+
+        first :: rest ->
+            Just <| bounds first rest
+
+
+{-| -}
+bounds : Location -> List Location -> Bounds
+bounds first rest =
+    List.foldr extend (singletonBounds first) rest
+
+
+{-| -}
+extend : Location -> Bounds -> Bounds
+extend { lon, lat } { southWest, northEast } =
+    { southWest =
+        { lon = min southWest.lon lon
+        , lat = min southWest.lat lat
+        }
+    , northEast =
+        { lon = max northEast.lon lon
+        , lat = max northEast.lat lat
+        }
+    }
 
 
 {-| -}
