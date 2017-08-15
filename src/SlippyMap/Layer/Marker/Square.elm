@@ -18,9 +18,9 @@ import Svg.Attributes
 
 
 {-| -}
-config : Config marker msg
+config : Config Location msg
 config =
-    Marker.config (always icon)
+    Marker.config identity (always icon)
 
 
 icon : Svg msg
@@ -40,8 +40,5 @@ icon =
 {-| -}
 layer : List Location -> Layer msg
 layer locations =
-    let
-        locatedMarkers =
-            List.map (\location -> ( location, () )) locations
-    in
-    Layer.withRender Layer.marker (Marker.render config locatedMarkers)
+    Layer.withRender Layer.marker <|
+        Marker.render config locations

@@ -24,7 +24,7 @@ main =
             (Tuple.first >> flip Circle.withFill Circle.icon)
             [ ( "#115599", Location 11 47 )
             , ( "#559911", Location 8 37 )
-            , ( "#991155", Location 16 37 )
+            , ( "#991155", Location 15 38 )
             ]
         ]
 
