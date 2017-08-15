@@ -16,9 +16,16 @@ main =
         , Circle.customMarker
             (Circle.icon
                 |> Circle.withRadius 12
-                |> Circle.withFill "#987123"
+                |> Circle.withFill "#ff6633"
             )
             [ Location 12 44 ]
+        , Circle.individualMarker
+            Tuple.second
+            (Tuple.first >> flip Circle.withFill Circle.icon)
+            [ ( "#115599", Location 11 47 )
+            , ( "#559911", Location 8 37 )
+            , ( "#991155", Location 16 37 )
+            ]
         ]
 
 

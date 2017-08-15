@@ -25,27 +25,36 @@ import Svg.Attributes
 {-| Configuration for the layer.
 -}
 type Config marker msg
-    = Config { icon : marker -> Svg msg }
-
-
-{-| -}
-config : (marker -> Svg msg) -> Config marker msg
-config icon =
-    Config
-        { icon = icon
+    = Config
+        { location : marker -> Location
+        , icon : marker -> Svg msg
         }
 
 
 {-| -}
-layer : Config marker msg -> List ( Location, marker ) -> Layer msg
-layer config locatedMarkers =
-    Layer.withRender Layer.marker (render config locatedMarkers)
+config : (marker -> Location) -> (marker -> Svg msg) -> Config marker msg
+config toLocation toIcon =
+    Config
+        { location = toLocation
+        , icon = toIcon
+        }
 
 
 {-| -}
-render : Config marker msg -> List ( Location, marker ) -> Transform -> Svg msg
-render config locatedMarkers transform =
+layer : Config marker msg -> List marker -> Layer msg
+layer config markers =
+    Layer.withRender Layer.marker (render config markers)
+
+
+{-| -}
+render : Config marker msg -> List marker -> Transform -> Svg msg
+render ((Config { location }) as config) markers transform =
     let
+        locatedMarkers =
+            List.map
+                (\marker -> ( location marker, marker ))
+                markers
+
         -- centerPoint =
         --     renderState.centerPoint
         -- bounds =
