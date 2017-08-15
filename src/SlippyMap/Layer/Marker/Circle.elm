@@ -96,38 +96,31 @@ renderIcon (Config { radius, fill, stroke, strokeWidth }) =
         []
 
 
-markerConfig : Svg msg -> Marker.Config Location msg
-markerConfig iconSvg =
-    Marker.config identity (always iconSvg)
-
-
-individualMarkerConfig : (marker -> Location) -> (marker -> Config) -> Marker.Config marker msg
-individualMarkerConfig toLocation toConfig =
+markerConfig : (marker -> Location) -> (marker -> Config) -> Marker.Config marker msg
+markerConfig toLocation toConfig =
     Marker.config toLocation (toConfig >> renderIcon)
 
 
-{-| Renders a list of locations as default circle markers.
+{-| Renders a list of locations with default circle markers.
 -}
 marker : List Location -> Layer msg
 marker =
     customMarker defaultConfig
 
 
-{-| Renders a list of locations as default circle markers.
+{-| Renders a list of locations with with customised circle markers.
 -}
 customMarker : Config -> List Location -> Layer msg
 customMarker config locations =
-    Layer.withRender Layer.marker <|
-        Marker.render
-            (markerConfig <| renderIcon config)
-            locations
+    Marker.layer
+        (markerConfig identity (always config))
+        locations
 
 
-{-| Renders a list of markers with indivual icons.
+{-| Renders a list of markers with indivual circles.
 -}
 individualMarker : (marker -> Location) -> (marker -> Config) -> List marker -> Layer msg
 individualMarker toLocation toConfig markers =
-    Layer.withRender Layer.marker <|
-        Marker.render
-            (individualMarkerConfig toLocation toConfig)
-            markers
+    Marker.layer
+        (markerConfig toLocation toConfig)
+        markers
