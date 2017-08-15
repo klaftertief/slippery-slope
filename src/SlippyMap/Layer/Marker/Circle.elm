@@ -1,8 +1,8 @@
 module SlippyMap.Layer.Marker.Circle
     exposing
         ( Config
-        , circle
         , customMarker
+        , icon
         , marker
         , withFill
         , withRadius
@@ -12,7 +12,7 @@ module SlippyMap.Layer.Marker.Circle
 
 {-| A layer to display circle markers.
 
-@docs marker, customMarker, Config, circle, withRadius, withFill, withStroke, withStrokeWidth
+@docs marker, customMarker, Config, icon, withRadius, withFill, withStroke, withStrokeWidth
 
 -}
 
@@ -46,8 +46,8 @@ defaultConfig =
 
 {-| Creates a default circle.
 -}
-circle : Config
-circle =
+icon : Config
+icon =
     defaultConfig
 
 
@@ -79,8 +79,8 @@ withStrokeWidth strokeWidth (Config config) =
     Config { config | strokeWidth = strokeWidth }
 
 
-icon : Config -> Svg msg
-icon (Config { radius, fill, stroke, strokeWidth }) =
+renderIcon : Config -> Svg msg
+renderIcon (Config { radius, fill, stroke, strokeWidth }) =
     Svg.circle
         [ Svg.Attributes.r (toString radius)
         , Svg.Attributes.fill fill
@@ -91,8 +91,8 @@ icon (Config { radius, fill, stroke, strokeWidth }) =
 
 
 markerConfig : Svg msg -> Marker.Config () msg
-markerConfig icon =
-    Marker.config (always icon)
+markerConfig iconSvg =
+    Marker.config (always iconSvg)
 
 
 {-| Renders a list of locations as default circle markers.
@@ -111,4 +111,4 @@ customMarker config locations =
             List.map (\location -> ( location, () )) locations
     in
     Layer.withRender Layer.marker
-        (Marker.render (markerConfig (icon config)) locatedMarkers)
+        (Marker.render (markerConfig (renderIcon config)) locatedMarkers)

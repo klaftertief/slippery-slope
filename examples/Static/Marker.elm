@@ -14,7 +14,7 @@ main =
         [ Map.tileLayer
         , Circle.marker [ Location 14 42 ]
         , Circle.customMarker
-            (Circle.circle
+            (Circle.icon
                 |> Circle.withRadius 12
                 |> Circle.withFill "#987123"
             )
