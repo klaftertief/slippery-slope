@@ -39,6 +39,7 @@
         "SlippyMap.Map.Config",
         "SlippyMap.Map.State",
         "SlippyMap.Map.Transform",
+        "SlippyMap.Map.Types",
         "SlippyMap.Map.Update",
         "SlippyMap.Map.View"
     ],
