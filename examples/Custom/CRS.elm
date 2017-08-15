@@ -63,7 +63,7 @@ init =
 
 duration : Time
 duration =
-    2000
+    800
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
