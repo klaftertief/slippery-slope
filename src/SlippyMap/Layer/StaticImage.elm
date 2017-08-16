@@ -68,8 +68,8 @@ withAttribution attribution (Config config) =
 {-| -}
 layer : Config -> Layer msg
 layer config =
-    TileLayer.layer identity
-        (tile config)
+    TileLayer.config identity (tile config)
+        |> TileLayer.layer
 
 
 tile : Config -> Transform -> Tile -> Svg msg

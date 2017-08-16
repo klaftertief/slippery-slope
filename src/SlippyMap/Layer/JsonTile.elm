@@ -91,8 +91,9 @@ toUrl (Config { toUrl }) =
 {-| -}
 layer : Config msg -> Layer msg
 layer ((Config configInternal) as config) =
-    TileLayer.layer configInternal.fromTile
+    TileLayer.config configInternal.fromTile
         (tile config)
+        |> TileLayer.layer
 
 
 tile : Config msg -> Transform -> ( Tile, WebData Json.Value ) -> Svg msg

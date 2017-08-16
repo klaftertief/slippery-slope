@@ -1,8 +1,13 @@
-module SlippyMap.Layer.Tile exposing (layer)
+module SlippyMap.Layer.Tile
+    exposing
+        ( Config
+        , config
+        , layer
+        )
 
 {-| Base tile layer.
 
-@docs layer
+@docs Config, config, layer
 
 -}
 
@@ -15,22 +20,61 @@ import Svg.Attributes
 import Svg.Keyed
 
 
-{-| TODO: should the function params live in a/the config?
+{-| Configuration for the layer.
 -}
-layer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Layer msg
-layer fromTile renderTile =
-    Layer.withRender Layer.marker (render fromTile renderTile)
+type Config data msg
+    = Config
+        { toData : Tile -> data
+        , renderData : Transform -> data -> Svg msg
+        , attribution : Maybe String
+        }
 
 
-render : (Tile -> a) -> (Transform -> a -> Svg msg) -> Transform -> Svg msg
-render fromTile renderTile transform =
+{-| -}
+config : (Tile -> data) -> (Transform -> data -> Svg msg) -> Config data msg
+config toData renderData =
+    Config
+        { toData = toData
+        , renderData = renderData
+        , attribution = Nothing
+        }
+
+
+{-| Adds an attribution to the config.
+-}
+withAttribution : String -> Config data msg -> Config data msg
+withAttribution attribution (Config config) =
+    Config
+        { config
+            | attribution = Just attribution
+        }
+
+
+{-| -}
+layer : Config data msg -> Layer msg
+layer ((Config { attribution }) as config) =
+    let
+        layerConfig =
+            case attribution of
+                Just a ->
+                    Layer.withAttribution a Layer.base
+
+                Nothing ->
+                    Layer.base
+    in
+    Layer.withRender layerConfig
+        (render config)
+
+
+render : Config data msg -> Transform -> Svg msg
+render (Config { toData, renderData }) transform =
     let
         tiles =
             Transform.tileCover transform
 
         tilesRendered =
             List.map
-                (tile (fromTile >> renderTile transform) transform)
+                (tile (toData >> renderData transform) transform)
                 tiles
     in
     Svg.Keyed.node "g"
