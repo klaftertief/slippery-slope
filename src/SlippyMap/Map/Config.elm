@@ -7,13 +7,14 @@ module SlippyMap.Map.Config
         , size
         , static
         , withCRS
+        , withMinZoom
         , withZoomDelta
         , withZoomSnap
         )
 
 {-|
 
-@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, Interactions, onClick
+@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, withMinZoom, Interactions, onClick
 
 TODO: Add field for client position decoder
 
@@ -117,6 +118,13 @@ onClick : (Location -> msg) -> Config msg -> Config msg
 onClick onClick (Config configInternal) =
     Config
         { configInternal | onClick = Just onClick }
+
+
+{-| -}
+withMinZoom : Float -> Config msg -> Config msg
+withMinZoom minZoom (Config configInternal) =
+    Config
+        { configInternal | minZoom = minZoom }
 
 
 {-| -}
