@@ -17,7 +17,7 @@ module SlippyMap.Layer
         , withRender
         )
 
-{-| LowLevel Layer
+{-| A `Layer` usually renders geolocated contents on top of a map.
 
 @docs Config, Pane, marker, popup, overlay, base, withAttribution, Layer, group, flatten, withRender, getAttributions, getPane, panes, render
 
@@ -27,19 +27,26 @@ import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 
 
-{-| Base configuration for all layers.
+{-| Configuration for a layer..
 -}
-type Config
-    = Config ConfigInternal
+type Config msg
+    = Config (ConfigInternal msg)
 
 
-type alias ConfigInternal =
+type alias ConfigInternal msg =
     { attribution : Maybe String
     , pane : Pane
+    , render : Render msg
     }
 
 
 {-| -}
+type alias Render msg =
+    Transform -> Svg msg
+
+
+{-| Each `Layer` is placed on a `Pane` that defines the order of layers on top of the map.
+-}
 type Pane
     = BasePane
     | OverlayPane
@@ -48,7 +55,8 @@ type Pane
     | ControlPane
 
 
-{-| -}
+{-| List of all supported Panes.
+-}
 panes : List Pane
 panes =
     [ BasePane
@@ -59,44 +67,56 @@ panes =
     ]
 
 
-{-| -}
-base : Config
+{-| Create the `Config` for a `Layer` randered on the base `Pane`.
+-}
+base : Config msg
 base =
     Config
         { attribution = Nothing
         , pane = BasePane
+        , render = always (Svg.text "")
         }
 
 
-{-| -}
-overlay : Config
+{-| Create the `Config` for a `Layer` randered on the overlay `Pane`.
+-}
+overlay : Config msg
 overlay =
     Config
         { attribution = Nothing
         , pane = OverlayPane
+        , render = always (Svg.text "")
         }
 
 
-{-| -}
-marker : Config
+{-| Create the `Config` for a `Layer` randered on the marker `Pane`.
+-}
+marker : Config msg
 marker =
     Config
         { attribution = Nothing
         , pane = MarkerPane
+        , render = always (Svg.text "")
         }
 
 
-{-| -}
-popup : Config
+{-| Create the `Config` for a `Layer` randered on the popup `Pane`.
+-}
+popup : Config msg
 popup =
     Config
         { attribution = Nothing
         , pane = PopupPane
+        , render = always (Svg.text "")
         }
 
 
-{-| -}
-withAttribution : String -> Config -> Config
+{-| Adds an attribution to the layer config.
+
+The attributions for each layer are rendered in the attribution control.
+
+-}
+withAttribution : String -> Config msg -> Config msg
 withAttribution attribution (Config configInternal) =
     Config
         { configInternal
@@ -107,23 +127,15 @@ withAttribution attribution (Config configInternal) =
 {-| NOTE: It is important that the Layer depends only on `msg` so that different layers can be grouped together.
 -}
 type Layer msg
-    = Layer (LayerInternal msg)
+    = Layer (Config msg)
     | LayerGroup (List (Layer msg))
 
 
-type alias LayerInternal msg =
-    { config : ConfigInternal
-    , render : Render msg
-    }
-
-
 {-| -}
-withRender : Config -> Render msg -> Layer msg
+withRender : Config msg -> Render msg -> Layer msg
 withRender (Config configInternal) render =
-    Layer
-        { config = configInternal
-        , render = render
-        }
+    Layer <|
+        Config { configInternal | render = render }
 
 
 {-| -}
@@ -133,16 +145,11 @@ group layers =
 
 
 {-| -}
-type alias Render msg =
-    Transform -> Svg msg
-
-
-{-| -}
 getAttributions : Layer msg -> List String
 getAttributions layer =
     case layer of
-        Layer { config } ->
-            config.attribution
+        Layer (Config { attribution }) ->
+            attribution
                 |> Maybe.map List.singleton
                 |> Maybe.withDefault []
 
@@ -170,8 +177,8 @@ flattenHelp layer =
 getPane : Layer msg -> Maybe Pane
 getPane layer =
     case layer of
-        Layer { config } ->
-            Just config.pane
+        Layer (Config { pane }) ->
+            Just pane
 
         LayerGroup _ ->
             Nothing
@@ -182,7 +189,7 @@ getPane layer =
 render : Layer msg -> Render msg
 render layer =
     case layer of
-        Layer { render } ->
+        Layer (Config { render }) ->
             render
 
         LayerGroup _ ->
