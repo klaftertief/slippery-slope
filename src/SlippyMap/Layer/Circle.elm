@@ -55,7 +55,7 @@ config radius =
 {-| -}
 layer : Config msg -> Location -> Layer msg
 layer config location =
-    Layer.withRender Layer.overlay (render config location)
+    Layer.withRenderer Layer.overlay (render config location)
 
 
 render : Config msg -> Location -> Transform -> Svg msg

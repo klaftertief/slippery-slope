@@ -147,7 +147,7 @@ layerConfig tileCache =
                     |> Maybe.map (\v -> ( tile, v ))
                     |> Maybe.withDefault ( tile, RemoteData.NotAsked )
             )
-        |> JsonTileLayer.withRender
+        |> JsonTileLayer.withRenderer
             (\( { z, x, y } as tile, value ) renderState ->
                 let
                     features =

@@ -85,7 +85,7 @@ iframeOverlay ( width, height ) url =
 {-| -}
 layer : Config overlay msg -> List ( Location.Bounds, overlay ) -> Layer msg
 layer config boundedOverlays =
-    Layer.withRender Layer.overlay (render config boundedOverlays)
+    Layer.withRenderer Layer.overlay (render config boundedOverlays)
 
 
 render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Transform -> Svg msg

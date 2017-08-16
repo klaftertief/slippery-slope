@@ -14,12 +14,12 @@ module SlippyMap.Layer
         , popup
         , render
         , withAttribution
-        , withRender
+        , withRenderer
         )
 
 {-| A `Layer` usually renders geolocated contents on top of a map.
 
-@docs Config, Pane, marker, popup, overlay, base, withAttribution, Layer, group, flatten, withRender, getAttributions, getPane, panes, render
+@docs Config, Pane, marker, popup, overlay, base, withAttribution, Layer, group, flatten, withRenderer, getAttributions, getPane, panes, render
 
 -}
 
@@ -33,13 +33,14 @@ type Config msg
     = Config
         { attribution : Maybe String
         , pane : Pane
-        , render : Render msg
+        , renderer : Renderer msg
         }
 
 
 {-| -}
-type alias Render msg =
-    Transform -> Svg msg
+type Renderer msg
+    = NoRenderer
+    | CustomRenderer (Transform -> Svg msg)
 
 
 {-| Each `Layer` is placed on a `Pane` that defines the order of layers on top of the map.
@@ -71,7 +72,7 @@ base =
     Config
         { attribution = Nothing
         , pane = BasePane
-        , render = always (Svg.text "")
+        , renderer = NoRenderer
         }
 
 
@@ -82,7 +83,7 @@ overlay =
     Config
         { attribution = Nothing
         , pane = OverlayPane
-        , render = always (Svg.text "")
+        , renderer = NoRenderer
         }
 
 
@@ -93,7 +94,7 @@ marker =
     Config
         { attribution = Nothing
         , pane = MarkerPane
-        , render = always (Svg.text "")
+        , renderer = NoRenderer
         }
 
 
@@ -104,7 +105,7 @@ popup =
     Config
         { attribution = Nothing
         , pane = PopupPane
-        , render = always (Svg.text "")
+        , renderer = NoRenderer
         }
 
 
@@ -129,10 +130,10 @@ type Layer msg
 
 
 {-| -}
-withRender : Config msg -> Render msg -> Layer msg
-withRender (Config config) render =
+withRenderer : Config msg -> (Transform -> Svg msg) -> Layer msg
+withRenderer (Config config) render =
     Layer <|
-        Config { config | render = render }
+        Config { config | renderer = CustomRenderer render }
 
 
 {-| -}
@@ -181,13 +182,18 @@ getPane layer =
             Nothing
 
 
-{-| TODO: Layers should have general attributes like class name. Inject here.
+{-| TODO: Layers should have general attributes like class name. Add here.
 -}
-render : Layer msg -> Render msg
+render : Layer msg -> Transform -> Svg msg
 render layer =
     case layer of
-        Layer (Config { render }) ->
-            render
+        Layer (Config { renderer }) ->
+            case renderer of
+                NoRenderer ->
+                    always (Svg.text "")
+
+                CustomRenderer render ->
+                    render
 
         LayerGroup _ ->
             always (Svg.text "")

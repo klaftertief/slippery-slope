@@ -23,6 +23,9 @@ import Svg.Keyed
 
 
 {-| Configuration for the layer.
+
+TODO: add tileSize
+
 -}
 type Config data msg
     = Config
@@ -64,7 +67,7 @@ layer ((Config { attribution }) as config) =
                 Nothing ->
                     Layer.base
     in
-    Layer.withRender layerConfig
+    Layer.withRenderer layerConfig
         (render config)
 
 

@@ -24,7 +24,7 @@ import Svg.Attributes
 {-| -}
 layer : Layer msg
 layer =
-    Layer.withRender Layer.overlay render
+    Layer.withRenderer Layer.overlay render
 
 
 render : Transform -> Svg msg
