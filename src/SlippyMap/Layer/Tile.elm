@@ -3,14 +3,16 @@ module SlippyMap.Layer.Tile
         ( Config
         , config
         , layer
+        , toUrl
         )
 
 {-| Base tile layer.
 
-@docs Config, config, layer
+@docs Config, config, layer, toUrl
 
 -}
 
+import Regex
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer as Layer exposing (Layer)
@@ -119,3 +121,27 @@ tile render transform ({ z, x, y } as tile) =
         ]
         [ render tile ]
     )
+
+
+{-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
+-}
+toUrl : String -> List String -> Tile -> String
+toUrl urlTemplate subDomains { z, x, y } =
+    urlTemplate
+        |> replace "{z}" (toString (max 0 z))
+        |> replace "{x}" (toString (x % (2 ^ z)))
+        |> replace "{y}" (toString (y % (2 ^ z)))
+        |> replace "{s}"
+            ((abs (x + y) % (max 1 <| List.length subDomains))
+                |> flip List.drop subDomains
+                |> List.head
+                |> Maybe.withDefault ""
+            )
+
+
+replace : String -> String -> String -> String
+replace search substitution string =
+    string
+        |> Regex.replace Regex.All
+            (Regex.regex (Regex.escape search))
+            (\_ -> substitution)

@@ -32,26 +32,11 @@ type alias ConfigInternal msg =
     }
 
 
-{-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
--}
+{-| -}
 config : String -> List String -> Config msg
-config template subDomains =
-    let
-        toUrl : Tile -> String
-        toUrl { z, x, y } =
-            template
-                |> replace "{z}" (toString z)
-                |> replace "{x}" (toString (x % (2 ^ z)))
-                |> replace "{y}" (toString (y % (2 ^ z)))
-                |> replace "{s}"
-                    ((abs (x + y) % (max 1 <| List.length subDomains))
-                        |> flip List.drop subDomains
-                        |> List.head
-                        |> Maybe.withDefault ""
-                    )
-    in
+config urlTemplate subDomains =
     Config
-        { toUrl = toUrl
+        { toUrl = TileLayer.toUrl urlTemplate subDomains
         , fromTile = \tile -> ( tile, RemoteData.NotAsked )
         , render = \_ _ -> Svg.text ""
         }
@@ -110,15 +95,3 @@ tile (Config configInternal) transform ( tile, tileResponse ) =
 
         RemoteData.Success value ->
             configInternal.render ( tile, value ) transform
-
-
-
--- HELPERS
-
-
-replace : String -> String -> String -> String
-replace search substitution string =
-    string
-        |> Regex.replace Regex.All
-            (Regex.regex (Regex.escape search))
-            (\_ -> substitution)
