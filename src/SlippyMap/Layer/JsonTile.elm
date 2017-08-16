@@ -22,7 +22,7 @@ import Svg exposing (Svg)
 {-| Configuration for the layer.
 -}
 type Config msg
-    = Config TileLayer.Config (ConfigInternal msg)
+    = Config (ConfigInternal msg)
 
 
 type alias ConfigInternal msg =
@@ -51,7 +51,6 @@ config template subDomains =
                     )
     in
     Config
-        TileLayer.config
         { toUrl = toUrl
         , fromTile = \tile -> ( tile, RemoteData.NotAsked )
         , render = \_ _ -> Svg.text ""
@@ -60,31 +59,28 @@ config template subDomains =
 
 {-| -}
 withTile : (Tile -> ( Tile, WebData Json.Value )) -> Config msg -> Config msg
-withTile fromTile (Config tileLayerConfig configInternal) =
+withTile fromTile (Config configInternal) =
     Config
-        tileLayerConfig
         { configInternal | fromTile = fromTile }
 
 
 {-| -}
 withRender : (( Tile, Json.Value ) -> Transform -> Svg msg) -> Config msg -> Config msg
-withRender render (Config tileLayerConfig configInternal) =
+withRender render (Config configInternal) =
     Config
-        tileLayerConfig
         { configInternal | render = render }
 
 
 {-| -}
 withAttribution : String -> Config msg -> Config msg
-withAttribution attribution (Config tileLayerConfig configInternal) =
+withAttribution attribution (Config configInternal) =
     Config
-        (TileLayer.withAttribution attribution tileLayerConfig)
         configInternal
 
 
 {-| -}
 toUrl : Config msg -> Tile -> String
-toUrl (Config _ { toUrl }) =
+toUrl (Config { toUrl }) =
     toUrl
 
 
@@ -94,14 +90,13 @@ toUrl (Config _ { toUrl }) =
 
 {-| -}
 layer : Config msg -> Layer msg
-layer ((Config tileLayerConfig configInternal) as config) =
+layer ((Config configInternal) as config) =
     TileLayer.layer configInternal.fromTile
         (tile config)
-        tileLayerConfig
 
 
 tile : Config msg -> Transform -> ( Tile, WebData Json.Value ) -> Svg msg
-tile (Config _ configInternal) transform ( tile, tileResponse ) =
+tile (Config configInternal) transform ( tile, tileResponse ) =
     case tileResponse of
         RemoteData.NotAsked ->
             Svg.text_ [] [ Svg.text "Not Asked" ]

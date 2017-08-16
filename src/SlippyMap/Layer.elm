@@ -30,14 +30,11 @@ import Svg exposing (Svg)
 {-| Configuration for a layer..
 -}
 type Config msg
-    = Config (ConfigInternal msg)
-
-
-type alias ConfigInternal msg =
-    { attribution : Maybe String
-    , pane : Pane
-    , render : Render msg
-    }
+    = Config
+        { attribution : Maybe String
+        , pane : Pane
+        , render : Render msg
+        }
 
 
 {-| -}
@@ -117,9 +114,9 @@ The attributions for each layer are rendered in the attribution control.
 
 -}
 withAttribution : String -> Config msg -> Config msg
-withAttribution attribution (Config configInternal) =
+withAttribution attribution (Config config) =
     Config
-        { configInternal
+        { config
             | attribution = Just attribution
         }
 
@@ -133,9 +130,9 @@ type Layer msg
 
 {-| -}
 withRender : Config msg -> Render msg -> Layer msg
-withRender (Config configInternal) render =
+withRender (Config config) render =
     Layer <|
-        Config { configInternal | render = render }
+        Config { config | render = render }
 
 
 {-| -}

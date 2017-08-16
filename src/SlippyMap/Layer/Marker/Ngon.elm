@@ -58,5 +58,4 @@ ngon n o r =
 {-| -}
 layer : List Location -> Layer msg
 layer locations =
-    Layer.withRender Layer.marker <|
-        Marker.render config locations
+    Marker.layer config locations

@@ -3,12 +3,11 @@ module SlippyMap.Layer.Marker
         ( Config
         , config
         , layer
-        , render
         )
 
 {-| A layer to display markers.
 
-@docs Config, config, layer, render
+@docs Config, config, layer
 
 -}
 

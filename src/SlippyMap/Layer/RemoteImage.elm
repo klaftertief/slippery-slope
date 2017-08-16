@@ -33,13 +33,10 @@ TODO: add type alias for internal config
 
 -}
 type Config
-    = Config TileLayer.Config ConfigInternal
-
-
-type alias ConfigInternal =
-    { toUrl : Tile -> String
-    , fromTile : Tile -> WebData Tile
-    }
+    = Config
+        { toUrl : Tile -> String
+        , fromTile : Tile -> WebData Tile
+        }
 
 
 {-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
@@ -61,7 +58,6 @@ config template subDomains =
                     )
     in
     Config
-        TileLayer.config
         { toUrl = toUrl
         , fromTile = always RemoteData.NotAsked
         }
@@ -69,23 +65,21 @@ config template subDomains =
 
 {-| -}
 withTile : (Tile -> WebData Tile) -> Config -> Config
-withTile fromTile (Config tileLayerConfig configInternal) =
+withTile fromTile (Config configInternal) =
     Config
-        tileLayerConfig
         { configInternal | fromTile = fromTile }
 
 
 {-| -}
 withAttribution : String -> Config -> Config
-withAttribution attribution (Config tileLayerConfig configInternal) =
+withAttribution attribution (Config configInternal) =
     Config
-        (TileLayer.withAttribution attribution tileLayerConfig)
         configInternal
 
 
 {-| -}
 toUrl : Config -> Tile -> String
-toUrl (Config _ { toUrl }) =
+toUrl (Config { toUrl }) =
     toUrl
 
 
@@ -95,14 +89,13 @@ toUrl (Config _ { toUrl }) =
 
 {-| -}
 layer : Config -> Layer msg
-layer ((Config tileLayerConfig configInternal) as config) =
+layer ((Config configInternal) as config) =
     TileLayer.layer configInternal.fromTile
         (tile config)
-        tileLayerConfig
 
 
 tile : Config -> Transform -> WebData Tile -> Svg msg
-tile (Config _ configInternal) transform tileResponse =
+tile (Config configInternal) transform tileResponse =
     let
         scale =
             transform.crs.scale

@@ -1,14 +1,8 @@
-module SlippyMap.Layer.Tile
-    exposing
-        ( Config
-        , config
-        , layer
-        , withAttribution
-        )
+module SlippyMap.Layer.Tile exposing (layer)
 
-{-| Prototype for tile layers.
+{-| Base tile layer.
 
-@docs Config, config, withAttribution, layer
+@docs layer
 
 -}
 
@@ -21,41 +15,11 @@ import Svg.Attributes
 import Svg.Keyed
 
 
-{-| -}
-type Config
-    = Config ConfigInternal
-
-
-type alias ConfigInternal =
-    { layerConfig : Layer.Config
-    }
-
-
-{-| -}
-config : Config
-config =
-    Config
-        { layerConfig = Layer.base
-        }
-
-
-{-| -}
-withAttribution : String -> Config -> Config
-withAttribution attribution (Config configInternal) =
-    Config
-        { configInternal
-            | layerConfig =
-                Layer.withAttribution
-                    attribution
-                    configInternal.layerConfig
-        }
-
-
 {-| TODO: should the function params live in a/the config?
 -}
-layer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Config -> Layer msg
-layer fromTile renderTile (Config configInternal) =
-    Layer.withRender configInternal.layerConfig (render fromTile renderTile)
+layer : (Tile -> a) -> (Transform -> a -> Svg msg) -> Layer msg
+layer fromTile renderTile =
+    Layer.withRender Layer.marker (render fromTile renderTile)
 
 
 render : (Tile -> a) -> (Transform -> a -> Svg msg) -> Transform -> Svg msg

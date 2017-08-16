@@ -27,12 +27,9 @@ import Svg.Attributes
 {-| Configuration for the layer.
 -}
 type Config
-    = Config TileLayer.Config ConfigInternal
-
-
-type alias ConfigInternal =
-    { toUrl : Tile -> String
-    }
+    = Config
+        { toUrl : Tile -> String
+        }
 
 
 {-| Turn an url template like `https://{s}.domain.com/{z}/{x}/{y}.png` into a `Config` by replacing placeholders with actual tile data.
@@ -54,16 +51,14 @@ config urlTemplate subDomains =
                     )
     in
     Config
-        TileLayer.config
         { toUrl = toUrl }
 
 
 {-| -}
 withAttribution : String -> Config -> Config
-withAttribution attribution (Config tileLayerConfig configInternal) =
+withAttribution attribution (Config config) =
     Config
-        (TileLayer.withAttribution attribution tileLayerConfig)
-        configInternal
+        config
 
 
 
@@ -72,14 +67,13 @@ withAttribution attribution (Config tileLayerConfig configInternal) =
 
 {-| -}
 layer : Config -> Layer msg
-layer ((Config tileLayerConfig _) as config) =
+layer config =
     TileLayer.layer identity
         (tile config)
-        tileLayerConfig
 
 
 tile : Config -> Transform -> Tile -> Svg msg
-tile (Config _ configInternal) transform ({ z, x, y } as tile) =
+tile (Config config) transform ({ z, x, y } as tile) =
     let
         scale =
             transform.crs.scale transform.zoom / transform.crs.scale (toFloat z)
@@ -91,7 +85,7 @@ tile (Config _ configInternal) transform ({ z, x, y } as tile) =
         , Svg.Attributes.height
             -- (toString renderState.transform.tileSize)
             "256"
-        , Svg.Attributes.xlinkHref (configInternal.toUrl tile)
+        , Svg.Attributes.xlinkHref (config.toUrl tile)
         , Svg.Attributes.transform
             ("scale("
                 ++ toString scale
