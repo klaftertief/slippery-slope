@@ -8,18 +8,20 @@ module SlippyMap.Layer
         , getAttributions
         , getPane
         , group
+        , layer
         , marker
         , overlay
         , panes
         , popup
         , render
         , withAttribution
+        , withCustomRenderer
         , withRenderer
         )
 
 {-| A `Layer` usually renders geolocated contents on top of a map.
 
-@docs Config, Pane, marker, popup, overlay, base, withAttribution, Layer, group, flatten, withRenderer, getAttributions, getPane, panes, render
+@docs Config, Pane, marker, popup, overlay, base, withAttribution, Layer, layer, group, flatten, withRenderer, withCustomRenderer, getAttributions, getPane, panes, render
 
 -}
 
@@ -41,6 +43,11 @@ type Config msg
 type Renderer msg
     = NoRenderer
     | CustomRenderer (Transform -> Svg msg)
+
+
+
+-- | GeneralRenderer ({generalConfig} -> Svg msg)
+-- | TileRenderer ({generalConfig} -> {tileConfig} -> Svg msg)
 
 
 {-| Each `Layer` is placed on a `Pane` that defines the order of layers on top of the map.
@@ -122,6 +129,12 @@ withAttribution attribution (Config config) =
         }
 
 
+{-| -}
+withCustomRenderer : (Transform -> Svg msg) -> Config msg -> Config msg
+withCustomRenderer render (Config config) =
+    Config { config | renderer = CustomRenderer render }
+
+
 {-| NOTE: It is important that the Layer depends only on `msg` so that different layers can be grouped together.
 -}
 type Layer msg
@@ -140,6 +153,23 @@ withRenderer (Config config) render =
 group : List (Layer msg) -> Layer msg
 group layers =
     LayerGroup layers
+
+
+{-| -}
+layer : Config msg -> Layer msg
+layer config =
+    Layer config
+
+
+layerWithAttribution : String -> Layer msg -> Layer msg
+layerWithAttribution attribution layer =
+    case layer of
+        Layer config ->
+            Layer <|
+                withAttribution attribution config
+
+        LayerGroup layers ->
+            LayerGroup layers
 
 
 {-| -}
