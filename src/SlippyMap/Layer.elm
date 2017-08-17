@@ -30,7 +30,7 @@ import Svg exposing (Svg)
 type Config msg
     = Config
         { attribution : Maybe String
-        , pane : Pane
+        , level : Float
         , renderer : Renderer msg
         }
 
@@ -44,28 +44,7 @@ type Renderer msg
 
 -- | GeneralRenderer ({generalConfig} -> Svg msg)
 -- | TileRenderer ({generalConfig} -> {tileConfig} -> Svg msg)
-
-
-{-| Each `Layer` is placed on a `Pane` that defines the order of layers on top of the map.
--}
-type Pane
-    = BasePane
-    | OverlayPane
-    | MarkerPane
-    | PopupPane
-    | ControlPane
-
-
-{-| List of all supported Panes, sorted by z-index.
--}
-panes : List Pane
-panes =
-    [ BasePane
-    , OverlayPane
-    , MarkerPane
-    , PopupPane
-    , ControlPane
-    ]
+-- | StaticRenderer (Svg msg)
 
 
 {-| Create the `Config` for a `Layer` randered on the base `Pane`.
@@ -74,7 +53,7 @@ base : Config msg
 base =
     Config
         { attribution = Nothing
-        , pane = BasePane
+        , level = 0
         , renderer = NoRenderer
         }
 
@@ -85,7 +64,7 @@ overlay : Config msg
 overlay =
     Config
         { attribution = Nothing
-        , pane = OverlayPane
+        , level = 10
         , renderer = NoRenderer
         }
 
@@ -96,7 +75,7 @@ marker : Config msg
 marker =
     Config
         { attribution = Nothing
-        , pane = MarkerPane
+        , level = 20
         , renderer = NoRenderer
         }
 
@@ -107,7 +86,7 @@ popup : Config msg
 popup =
     Config
         { attribution = Nothing
-        , pane = PopupPane
+        , level = 30
         , renderer = NoRenderer
         }
 
@@ -187,7 +166,7 @@ flatten : List (Layer msg) -> List (Layer msg)
 flatten layers =
     layers
         |> List.concatMap flattenHelp
-        |> sortByPane
+        |> List.sortBy level
 
 
 flattenHelp : Layer msg -> List (Layer msg)
@@ -200,40 +179,28 @@ flattenHelp layer =
             List.concatMap flattenHelp layers
 
 
-{-| TODO: Maybe use List.sortWith
--}
-sortByPane : List (Layer msg) -> List (Layer msg)
-sortByPane layers =
-    List.concatMap (filterByPane layers) panes
-
-
-filterByPane : List (Layer msg) -> Pane -> List (Layer msg)
-filterByPane layers pane =
-    List.filter (getPane >> (==) (Just pane)) layers
-
-
-getPane : Layer msg -> Maybe Pane
-getPane layer =
+level : Layer msg -> Float
+level layer =
     case layer of
-        Layer (Config { pane }) ->
-            Just pane
+        Layer (Config { level }) ->
+            level
 
         LayerGroup _ ->
-            Nothing
+            0
 
 
 {-| TODO: Layers should have general attributes like class name. Add here.
 -}
-render : Layer msg -> Transform -> Svg msg
-render layer =
+render : Transform -> Layer msg -> Svg msg
+render transform layer =
     case layer of
         Layer (Config { renderer }) ->
             case renderer of
                 NoRenderer ->
-                    always (Svg.text "")
+                    Svg.text ""
 
                 CustomRenderer render ->
-                    render
+                    render transform
 
         LayerGroup _ ->
-            always (Svg.text "")
+            Svg.text ""

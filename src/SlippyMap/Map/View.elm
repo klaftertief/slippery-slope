@@ -104,7 +104,7 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
             [ Svg.g
                 [ Svg.Attributes.class "esm__layers" ]
                 (List.map
-                    (\layer -> Layer.render layer transform)
+                    (Layer.render transform)
                     layers
                 )
             ]
