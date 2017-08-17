@@ -30,7 +30,7 @@ import Svg exposing (Svg)
 type Config msg
     = Config
         { attribution : Maybe String
-        , level : Float
+        , level : Int
         , renderer : Renderer msg
         }
 
@@ -179,7 +179,7 @@ flattenHelp layer =
             List.concatMap flattenHelp layers
 
 
-level : Layer msg -> Float
+level : Layer msg -> Int
 level layer =
     case layer of
         Layer (Config { level }) ->
