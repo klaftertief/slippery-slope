@@ -200,6 +200,8 @@ flattenHelp layer =
             List.concatMap flattenHelp layers
 
 
+{-| TODO: Maybe use List.sortWith
+-}
 sortByPane : List (Layer msg) -> List (Layer msg)
 sortByPane layers =
     List.concatMap (filterByPane layers) panes
