@@ -103,9 +103,9 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
             ]
             [ Svg.g
                 [ Svg.Attributes.class "esm__layers" ]
-                (List.concatMap
-                    (viewPane (Config config) transform layers)
-                    Layer.panes
+                (List.map
+                    (\layer -> Layer.render layer transform)
+                    layers
                 )
             ]
         , Html.div
@@ -177,13 +177,6 @@ eventAttributes interactions =
                 (Decode.map touchesEndMsg (Decode.succeed (Tap (Position 0 0))))
           ]
         ]
-
-
-viewPane : Config msg -> Transform -> List (Layer msg) -> Layer.Pane -> List (Svg msg)
-viewPane (Config config) transform layers pane =
-    layers
-        |> List.filter (Layer.getPane >> (==) (Just pane))
-        |> List.map (\layer -> Layer.render layer transform)
 
 
 clientPosition : Decoder Point

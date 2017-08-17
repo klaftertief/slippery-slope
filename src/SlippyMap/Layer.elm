@@ -1,17 +1,13 @@
 module SlippyMap.Layer
     exposing
-        ( Config
-        , Layer
-        , Pane(..)
+        ( Layer
         , base
         , flatten
         , getAttributions
-        , getPane
         , group
         , layer
         , marker
         , overlay
-        , panes
         , popup
         , render
         , withAttribution
@@ -21,7 +17,7 @@ module SlippyMap.Layer
 
 {-| A `Layer` usually renders geolocated contents on top of a map.
 
-@docs Config, Pane, marker, popup, overlay, base, withAttribution, Layer, layer, group, flatten, withRenderer, withCustomRenderer, getAttributions, getPane, panes, render
+@docs marker, popup, overlay, base, withAttribution, Layer, layer, group, flatten, withRenderer, withCustomRenderer, getAttributions, render
 
 -}
 
@@ -60,7 +56,7 @@ type Pane
     | ControlPane
 
 
-{-| List of all supported Panes.
+{-| List of all supported Panes, sorted by z-index.
 -}
 panes : List Pane
 panes =
@@ -185,10 +181,13 @@ getAttributions layer =
             List.concatMap getAttributions layers
 
 
-{-| -}
+{-| Flat list of possibly nested layers, sorted by Pane
+-}
 flatten : List (Layer msg) -> List (Layer msg)
 flatten layers =
-    List.concatMap flattenHelp layers
+    layers
+        |> List.concatMap flattenHelp
+        |> sortByPane
 
 
 flattenHelp : Layer msg -> List (Layer msg)
@@ -201,7 +200,16 @@ flattenHelp layer =
             List.concatMap flattenHelp layers
 
 
-{-| -}
+sortByPane : List (Layer msg) -> List (Layer msg)
+sortByPane layers =
+    List.concatMap (filterByPane layers) panes
+
+
+filterByPane : List (Layer msg) -> Pane -> List (Layer msg)
+filterByPane layers pane =
+    List.filter (getPane >> (==) (Just pane)) layers
+
+
 getPane : Layer msg -> Maybe Pane
 getPane layer =
     case layer of
