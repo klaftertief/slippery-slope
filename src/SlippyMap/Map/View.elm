@@ -20,8 +20,6 @@ import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (State(..))
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import SlippyMap.Map.Types as Types exposing (Focus(..))
-import Svg exposing (Svg)
-import Svg.Attributes
 
 
 {-| -}
@@ -31,11 +29,32 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
         transform =
             Transform.transform (Config config) scene
 
-        layers =
-            Layer.flatten nestedLayers
+        attributions =
+            List.concatMap Layer.attributions nestedLayers
 
-        layerAttributions =
-            List.concatMap Layer.attributions layers
+        attributionControl =
+            [ Attribution.control
+                config.attributionPrefix
+                attributions
+            ]
+
+        zoomControl =
+            case config.toMsg of
+                Just toMsg ->
+                    [ Zoom.control (Zoom.config toMsg) ]
+
+                Nothing ->
+                    []
+
+        layersWithControls =
+            List.concat
+                [ nestedLayers
+                , attributionControl
+                , zoomControl
+                ]
+
+        layers =
+            Layer.flatten layersWithControls
 
         interactionAttributesInternal =
             case config.toMsg of
@@ -92,34 +111,30 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
                  []
              ,
           -}
-          Svg.svg
-            [ Svg.Attributes.class "esm__map"
-
-            -- Important for touch pinching
-            , Svg.Attributes.pointerEvents "none"
-            , Svg.Attributes.height (toString config.size.y)
-            , Svg.Attributes.width (toString config.size.x)
-            , Svg.Attributes.style "position: absolute;"
+          Html.div
+            [ Html.Attributes.class "esm__map"
+            , Html.Attributes.style
+                [ ( "position", "absolute" )
+                , ( "width", toString config.size.x ++ "px" )
+                , ( "Height", toString config.size.y ++ "px" )
+                ]
             ]
-            [ Svg.g
-                [ Svg.Attributes.class "esm__layers" ]
-                (List.map
-                    (Layer.render transform)
-                    layers
+            (List.map
+                (\layer ->
+                    Html.div
+                        [ Html.Attributes.class "esm__layer"
+                        , Html.Attributes.style
+                            [ ( "position", "absolute" )
+                            , ( "left", "0" )
+                            , ( "top", "0" )
+                            , ( "width", toString config.size.x ++ "px" )
+                            , ( "height", toString config.size.y ++ "px" )
+                            ]
+                        ]
+                        [ Layer.render transform layer ]
                 )
-            ]
-        , Html.div
-            [ Html.Attributes.class "esm__controls" ]
-            [ Attribution.control config.attributionPrefix
-                layerAttributions
-            , case config.toMsg of
-                Just toMsg ->
-                    Layer.render transform Zoom.control
-                        |> Html.map toMsg
-
-                Nothing ->
-                    Html.text ""
-            ]
+                layers
+            )
         ]
 
 

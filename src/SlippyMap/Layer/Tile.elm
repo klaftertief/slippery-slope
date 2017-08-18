@@ -60,8 +60,12 @@ render (Config { toData, renderData }) transform =
                 (tile (toData >> renderData transform) transform)
                 tiles
     in
-    Svg.Keyed.node "g"
-        []
+    Svg.Keyed.node "svg"
+        [ -- Important for touch pinching
+          Svg.Attributes.pointerEvents "none"
+        , Svg.Attributes.width (toString transform.size.x)
+        , Svg.Attributes.height (toString transform.size.y)
+        ]
         tilesRendered
 
 

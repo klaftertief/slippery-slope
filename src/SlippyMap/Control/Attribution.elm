@@ -5,10 +5,18 @@ module SlippyMap.Control.Attribution exposing (control)
 
 import Html exposing (Html)
 import Html.Attributes
+import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 
 
-control : Maybe String -> List String -> Html msg
+{-| -}
+control : Maybe String -> List String -> Layer msg
 control prefix attributions =
+    Layer.custom (render prefix attributions) Layer.control
+
+
+render : Maybe String -> List String -> Transform -> Html msg
+render prefix attributions _ =
     let
         prefixText =
             prefix

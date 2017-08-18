@@ -1,4 +1,4 @@
-module SlippyMap.Control.Zoom exposing (control)
+module SlippyMap.Control.Zoom exposing (Config, config, control)
 
 {-| Zoom control for a map.
 -}
@@ -14,65 +14,79 @@ import Svg.Attributes
 
 
 {-| -}
-control : Layer Msg
-control =
-    Layer.custom render Layer.control
+type Config msg
+    = Config { toMsg : Msg -> msg }
+
+
+{-| -}
+config : (Msg -> msg) -> Config msg
+config toMsg =
+    Config
+        { toMsg = toMsg
+        }
+
+
+{-| -}
+control : Config msg -> Layer msg
+control config =
+    Layer.custom (render config) Layer.control
 
 
 {-| TODO: This also needs the general map config, or at least its min- and maxZoom
 -}
-render : Transform -> Html Msg
-render transform =
-    Html.div
-        [ Html.Attributes.style
-            [ ( "position", "absolute" )
-            , ( "top", "0" )
-            , ( "left", "0" )
-            ]
-        ]
-        [ Html.button
+render : Config msg -> Transform -> Html msg
+render (Config { toMsg }) transform =
+    Html.map toMsg <|
+        Html.div
             [ Html.Attributes.style
-                (buttonStyleProperties
-                    ++ [ ( "top", "12px" )
-                       , ( "border-radius", "2px 2px 0 0" )
-                       ]
-                )
-            , Html.Events.onClick ZoomIn
-            ]
-            [ Svg.svg
-                [ Svg.Attributes.width "24"
-                , Svg.Attributes.height "24"
+                [ ( "position", "absolute" )
+                , ( "top", "0" )
+                , ( "left", "0" )
                 ]
-                [ Svg.path
-                    [ Svg.Attributes.d "M6,12L18,12M12,6L12,18"
-                    , Svg.Attributes.strokeWidth "2"
-                    , Svg.Attributes.stroke "#444"
+            ]
+            [ Html.button
+                [ Html.Attributes.style
+                    (buttonStyleProperties
+                        ++ [ ( "top", "12px" )
+                           , ( "border-radius", "2px 2px 0 0" )
+                           ]
+                    )
+                , Html.Events.onClick ZoomIn
+                ]
+                [ Svg.svg
+                    [ Svg.Attributes.width "24"
+                    , Svg.Attributes.height "24"
                     ]
-                    []
-                ]
-            ]
-        , Html.button
-            [ Html.Attributes.style
-                (buttonStyleProperties
-                    ++ [ ( "top", "37px" )
-                       , ( "border-radius", "0 0 2px 2px" )
-                       ]
-                )
-            , Html.Events.onClick ZoomOut
-            ]
-            [ Svg.svg
-                [ Svg.Attributes.width "24"
-                , Svg.Attributes.height "24"
-                ]
-                [ Svg.path
-                    [ Svg.Attributes.d "M6,12L18,12"
-                    , Svg.Attributes.strokeWidth "2"
-                    , Svg.Attributes.stroke "#444"
+                    [ Svg.path
+                        [ Svg.Attributes.d "M6,12L18,12M12,6L12,18"
+                        , Svg.Attributes.strokeWidth "2"
+                        , Svg.Attributes.stroke "#444"
+                        ]
+                        []
                     ]
-                    []
+                ]
+            , Html.button
+                [ Html.Attributes.style
+                    (buttonStyleProperties
+                        ++ [ ( "top", "37px" )
+                           , ( "border-radius", "0 0 2px 2px" )
+                           ]
+                    )
+                , Html.Events.onClick ZoomOut
+                ]
+                [ Svg.svg
+                    [ Svg.Attributes.width "24"
+                    , Svg.Attributes.height "24"
+                    ]
+                    [ Svg.path
+                        [ Svg.Attributes.d "M6,12L18,12"
+                        , Svg.Attributes.strokeWidth "2"
+                        , Svg.Attributes.stroke "#444"
+                        ]
+                        []
+                    ]
                 ]
             ]
-        ]
 
 
 buttonStyleProperties : List ( String, String )
