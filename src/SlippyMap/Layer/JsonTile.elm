@@ -1,13 +1,20 @@
-module SlippyMap.Layer.JsonTile exposing (Config, config, layer, toUrl, withAttribution, withRender, withTile)
+module SlippyMap.Layer.JsonTile
+    exposing
+        ( Config
+        , config
+        , layer
+        , toUrl
+        , withRender
+        , withTile
+        )
 
 {-| A layer to display generic JSON tiles.
 
-@docs Config, layer, toUrl, withTile, withRender, withAttribution, config
+@docs Config, layer, toUrl, withTile, withRender, config
 
 -}
 
 import Json.Decode as Json
-import Regex
 import RemoteData exposing (WebData)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer as Layer exposing (Layer)
@@ -54,13 +61,6 @@ withRender : (( Tile, Json.Value ) -> Transform -> Svg msg) -> Config msg -> Con
 withRender render (Config configInternal) =
     Config
         { configInternal | render = render }
-
-
-{-| -}
-withAttribution : String -> Config msg -> Config msg
-withAttribution attribution (Config configInternal) =
-    Config
-        configInternal
 
 
 {-| -}

@@ -116,6 +116,5 @@ type alias Layer msg =
 tileLayer : Layer msg
 tileLayer =
     StaticImageLayer.layer
-        (StaticImageLayer.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
-            |> StaticImageLayer.withAttribution "© OpenStreetMap contributors"
-        )
+        (StaticImageLayer.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
+        |> Layer.withAttribution "© OpenStreetMap contributors"

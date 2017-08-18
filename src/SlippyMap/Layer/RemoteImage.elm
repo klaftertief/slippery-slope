@@ -4,13 +4,12 @@ module SlippyMap.Layer.RemoteImage
         , config
         , layer
         , toUrl
-        , withAttribution
         , withTile
         )
 
 {-| A layer to display remote image tiles.
 
-@docs Config, layer, toUrl, withTile, withAttribution, config
+@docs Config, layer, toUrl, withTile, config
 
 -}
 
@@ -52,13 +51,6 @@ withTile : (Tile -> WebData Tile) -> Config -> Config
 withTile fromTile (Config configInternal) =
     Config
         { configInternal | fromTile = fromTile }
-
-
-{-| -}
-withAttribution : String -> Config -> Config
-withAttribution attribution (Config configInternal) =
-    Config
-        configInternal
 
 
 {-| -}

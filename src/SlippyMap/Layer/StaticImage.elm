@@ -3,12 +3,11 @@ module SlippyMap.Layer.StaticImage
         ( Config
         , config
         , layer
-        , withAttribution
         )
 
 {-| A layer to display static image tiles.
 
-@docs Config, config, withAttribution, layer
+@docs Config, config, layer
 
 -}
 
@@ -36,13 +35,6 @@ config : String -> List String -> Config
 config urlTemplate subDomains =
     Config
         { toUrl = TileLayer.toUrl urlTemplate subDomains }
-
-
-{-| -}
-withAttribution : String -> Config -> Config
-withAttribution attribution (Config config) =
-    Config
-        config
 
 
 
