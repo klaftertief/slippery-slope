@@ -18,7 +18,7 @@ module SlippyMap.Layer
 
 TODO: Should setting the attribution wor on the config or on the layer? On the layer makes it so that all layers can just use it, on the config makes it so that one can not set an attribution to a group (wich does not make any sense.)
 
-@docs Config, marker, popup, overlay, base, withAttribution, Layer, group, custom, flatten, attributions, render
+@docs Config, marker, popup, overlay, base, Layer, group, custom, withAttribution, attributions, flatten, render
 
 -}
 
