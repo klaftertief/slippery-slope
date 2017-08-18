@@ -2,10 +2,10 @@ module SlippyMap.Layer
     exposing
         ( Config
         , Layer
+        , attributions
         , base
         , custom
         , flatten
-        , getAttributions
         , group
         , marker
         , overlay
@@ -18,7 +18,7 @@ module SlippyMap.Layer
 
 TODO: Should setting the attribution wor on the config or on the layer? On the layer makes it so that all layers can just use it, on the config makes it so that one can not set an attribution to a group (wich does not make any sense.)
 
-@docs Config, marker, popup, overlay, base, withAttribution, Layer, group, custom, flatten, getAttributions, render
+@docs Config, marker, popup, overlay, base, withAttribution, Layer, group, custom, flatten, attributions, render
 
 -}
 
@@ -166,8 +166,8 @@ group layers =
 
 
 {-| -}
-getAttributions : Layer msg -> List String
-getAttributions layer =
+attributions : Layer msg -> List String
+attributions layer =
     case layer of
         Layer attribution _ ->
             attributionToList attribution
@@ -175,7 +175,7 @@ getAttributions layer =
         LayerGroup attribution layers ->
             List.append
                 (attributionToList attribution)
-                (List.concatMap getAttributions layers)
+                (List.concatMap attributions layers)
 
 
 attributionToList : Attribution -> List String

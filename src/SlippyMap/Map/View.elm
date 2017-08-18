@@ -35,7 +35,7 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
             Layer.flatten nestedLayers
 
         layerAttributions =
-            List.concatMap Layer.getAttributions layers
+            List.concatMap Layer.attributions layers
 
         interactionAttributesInternal =
             case config.toMsg of
