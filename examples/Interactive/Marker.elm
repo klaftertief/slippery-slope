@@ -143,7 +143,7 @@ viewMap model =
     Map.view config
         model.map
         [ Map.tileLayer
-        , Marker.layer (List.map .location model.pois)
+        , Marker.marker (List.map .location model.pois)
         ]
 
 
