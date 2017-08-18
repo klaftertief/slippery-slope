@@ -12,11 +12,12 @@ import Svg exposing (Svg)
 import Svg.Attributes
 
 
+{-| TODO: This also needs the general map config, or at least its min- and maxZoom
+-}
 control : Transform -> Html Msg
 control transform =
     Html.div
-        [ Html.Attributes.class "esm__zoom"
-        , Html.Attributes.style
+        [ Html.Attributes.style
             [ ( "position", "absolute" )
             , ( "top", "0" )
             , ( "left", "0" )
