@@ -54,6 +54,8 @@ imageOverlay ( width, height ) url =
         [ Html.Attributes.width (round width)
         , Html.Attributes.height (round height)
         , Html.Attributes.src url
+
+        -- , Html.Attributes.style [ ( "pointer-events", "none" ) ]
         ]
         []
 

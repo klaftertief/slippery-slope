@@ -128,8 +128,10 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
                             [ ( "position", "absolute" )
                             , ( "left", "0" )
                             , ( "top", "0" )
-                            , ( "width", toString config.size.x ++ "px" )
-                            , ( "height", toString config.size.y ++ "px" )
+
+                            -- , ( "width", toString config.size.x ++ "px" )
+                            -- , ( "height", toString config.size.y ++ "px" )
+                            , ( "overflow", "visible" )
                             ]
                         ]
                         [ Layer.render transform layer ]
