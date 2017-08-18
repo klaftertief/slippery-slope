@@ -33,7 +33,7 @@ TODO: should the attribution be a proper type?
 -}
 type Config msg
     = Config
-        { level : Int
+        { pane : Pane
         , renderer : Renderer msg
         }
 
@@ -42,6 +42,39 @@ type Config msg
 type Renderer msg
     = NoRenderer
     | CustomRenderer (Transform -> Svg msg)
+
+
+{-| Each `Layer` is placed on a `Pane` that defines the order of layers on top of the map.
+-}
+type Pane
+    = BasePane
+    | OverlayPane
+    | MarkerPane
+    | PopupPane
+    | ControlPane
+    | CustomPane Int
+
+
+paneToLevel : Pane -> Int
+paneToLevel pane =
+    case pane of
+        BasePane ->
+            0
+
+        OverlayPane ->
+            10
+
+        MarkerPane ->
+            20
+
+        PopupPane ->
+            30
+
+        ControlPane ->
+            40
+
+        CustomPane level ->
+            level
 
 
 
@@ -55,7 +88,7 @@ type Renderer msg
 base : Config msg
 base =
     Config
-        { level = 0
+        { pane = BasePane
         , renderer = NoRenderer
         }
 
@@ -65,7 +98,7 @@ base =
 overlay : Config msg
 overlay =
     Config
-        { level = 10
+        { pane = OverlayPane
         , renderer = NoRenderer
         }
 
@@ -75,7 +108,7 @@ overlay =
 marker : Config msg
 marker =
     Config
-        { level = 20
+        { pane = MarkerPane
         , renderer = NoRenderer
         }
 
@@ -85,7 +118,7 @@ marker =
 popup : Config msg
 popup =
     Config
-        { level = 30
+        { pane = PopupPane
         , renderer = NoRenderer
         }
 
@@ -174,8 +207,8 @@ flattenHelp layer =
 level : Layer msg -> Int
 level layer =
     case layer of
-        Layer _ (Config { level }) ->
-            level
+        Layer _ (Config { pane }) ->
+            paneToLevel pane
 
         LayerGroup _ _ ->
             0
