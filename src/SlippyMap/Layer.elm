@@ -33,8 +33,7 @@ TODO: should the attribution be a proper type?
 -}
 type Config msg
     = Config
-        { attribution : Maybe String
-        , level : Int
+        { level : Int
         , renderer : Renderer msg
         }
 
@@ -56,8 +55,7 @@ type Renderer msg
 base : Config msg
 base =
     Config
-        { attribution = Nothing
-        , level = 0
+        { level = 0
         , renderer = NoRenderer
         }
 
@@ -67,8 +65,7 @@ base =
 overlay : Config msg
 overlay =
     Config
-        { attribution = Nothing
-        , level = 10
+        { level = 10
         , renderer = NoRenderer
         }
 
@@ -78,8 +75,7 @@ overlay =
 marker : Config msg
 marker =
     Config
-        { attribution = Nothing
-        , level = 20
+        { level = 20
         , renderer = NoRenderer
         }
 
@@ -89,8 +85,7 @@ marker =
 popup : Config msg
 popup =
     Config
-        { attribution = Nothing
-        , level = 30
+        { level = 30
         , renderer = NoRenderer
         }
 
@@ -100,36 +95,31 @@ popup =
 The attributions for each layer are rendered in the attribution control.
 
 -}
-withAttribution : String -> Config msg -> Config msg
-withAttribution attribution (Config config) =
-    Config
-        { config
-            | attribution = Just attribution
-        }
+withAttribution : String -> Layer msg -> Layer msg
+withAttribution attribution layer =
+    case layer of
+        Layer _ config ->
+            Layer (Just attribution) config
+
+        LayerGroup _ layers ->
+            LayerGroup (Just attribution) layers
 
 
-
--- layerWithAttribution : String -> Layer msg -> Layer msg
--- layerWithAttribution attribution layer =
---     case layer of
---         Layer config ->
---             Layer <|
---                 withAttribution attribution config
---         LayerGroup layers ->
---             LayerGroup layers
+type alias Attribution =
+    Maybe String
 
 
 {-| NOTE: It is important that the Layer depends only on `msg` so that different layers can be grouped together.
 -}
 type Layer msg
-    = Layer (Config msg)
-    | LayerGroup (List (Layer msg))
+    = Layer Attribution (Config msg)
+    | LayerGroup Attribution (List (Layer msg))
 
 
 {-| -}
 custom : (Transform -> Svg msg) -> Config msg -> Layer msg
 custom render (Config config) =
-    Layer <|
+    Layer Nothing <|
         Config
             { config
                 | renderer = CustomRenderer render
@@ -139,20 +129,27 @@ custom render (Config config) =
 {-| -}
 group : List (Layer msg) -> Layer msg
 group layers =
-    LayerGroup layers
+    LayerGroup Nothing layers
 
 
 {-| -}
 getAttributions : Layer msg -> List String
 getAttributions layer =
     case layer of
-        Layer (Config { attribution }) ->
-            attribution
-                |> Maybe.map List.singleton
-                |> Maybe.withDefault []
+        Layer attribution _ ->
+            attributionToList attribution
 
-        LayerGroup layers ->
-            List.concatMap getAttributions layers
+        LayerGroup attribution layers ->
+            List.append
+                (attributionToList attribution)
+                (List.concatMap getAttributions layers)
+
+
+attributionToList : Attribution -> List String
+attributionToList attribution =
+    attribution
+        |> Maybe.map List.singleton
+        |> Maybe.withDefault []
 
 
 {-| Flat list of possibly nested layers, sorted by Pane
@@ -167,20 +164,20 @@ flatten layers =
 flattenHelp : Layer msg -> List (Layer msg)
 flattenHelp layer =
     case layer of
-        Layer layer ->
-            [ Layer layer ]
+        Layer attribution config ->
+            [ Layer attribution config ]
 
-        LayerGroup layers ->
+        LayerGroup _ layers ->
             List.concatMap flattenHelp layers
 
 
 level : Layer msg -> Int
 level layer =
     case layer of
-        Layer (Config { level }) ->
+        Layer _ (Config { level }) ->
             level
 
-        LayerGroup _ ->
+        LayerGroup _ _ ->
             0
 
 
@@ -189,7 +186,7 @@ level layer =
 render : Transform -> Layer msg -> Svg msg
 render transform layer =
     case layer of
-        Layer (Config { renderer }) ->
+        Layer _ (Config { renderer }) ->
             case renderer of
                 NoRenderer ->
                     Svg.text ""
@@ -197,5 +194,5 @@ render transform layer =
                 CustomRenderer render ->
                     render transform
 
-        LayerGroup _ ->
+        LayerGroup _ _ ->
             Svg.text ""

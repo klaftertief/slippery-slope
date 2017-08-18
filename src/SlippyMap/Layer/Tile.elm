@@ -31,7 +31,6 @@ type Config data msg
     = Config
         { toData : Tile -> data
         , renderData : Transform -> data -> Svg msg
-        , attribution : Maybe String
         }
 
 
@@ -41,33 +40,13 @@ config toData renderData =
     Config
         { toData = toData
         , renderData = renderData
-        , attribution = Nothing
-        }
-
-
-{-| Adds an attribution to the config.
--}
-withAttribution : String -> Config data msg -> Config data msg
-withAttribution attribution (Config config) =
-    Config
-        { config
-            | attribution = Just attribution
         }
 
 
 {-| -}
 layer : Config data msg -> Layer msg
-layer ((Config { attribution }) as config) =
-    let
-        layerConfig =
-            case attribution of
-                Just a ->
-                    Layer.withAttribution a Layer.base
-
-                Nothing ->
-                    Layer.base
-    in
-    Layer.custom (render config) layerConfig
+layer config =
+    Layer.custom (render config) Layer.base
 
 
 render : Config data msg -> Transform -> Svg msg
