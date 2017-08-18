@@ -6,16 +6,23 @@ module SlippyMap.Control.Zoom exposing (control)
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
+import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Msg as Msg exposing (Msg(ZoomIn, ZoomOut))
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
 
+{-| -}
+control : Layer Msg
+control =
+    Layer.custom render Layer.control
+
+
 {-| TODO: This also needs the general map config, or at least its min- and maxZoom
 -}
-control : Transform -> Html Msg
-control transform =
+render : Transform -> Html Msg
+render transform =
     Html.div
         [ Html.Attributes.style
             [ ( "position", "absolute" )

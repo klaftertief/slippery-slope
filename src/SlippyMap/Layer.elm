@@ -4,6 +4,7 @@ module SlippyMap.Layer
         , Layer
         , attributions
         , base
+        , control
         , custom
         , flatten
         , group
@@ -18,7 +19,7 @@ module SlippyMap.Layer
 
 TODO: Should setting the attribution wor on the config or on the layer? On the layer makes it so that all layers can just use it, on the config makes it so that one can not set an attribution to a group (wich does not make any sense.)
 
-@docs Config, marker, popup, overlay, base, Layer, group, custom, withAttribution, attributions, flatten, render
+@docs Config, marker, popup, overlay, base, control, Layer, group, custom, withAttribution, attributions, flatten, render
 
 -}
 
@@ -52,7 +53,7 @@ type Pane
     | MarkerPane
     | PopupPane
     | ControlPane
-    | CustomPane Int
+    | CustomLevel Int
 
 
 paneToLevel : Pane -> Int
@@ -73,7 +74,7 @@ paneToLevel pane =
         ControlPane ->
             40
 
-        CustomPane level ->
+        CustomLevel level ->
             level
 
 
@@ -93,7 +94,7 @@ base =
         }
 
 
-{-| Create the `Config` for a `Layer` randered on the overlay `Pane`.
+{-| Create the `Config` for a `Layer` rendered on the overlay `Pane`.
 -}
 overlay : Config msg
 overlay =
@@ -103,7 +104,7 @@ overlay =
         }
 
 
-{-| Create the `Config` for a `Layer` randered on the marker `Pane`.
+{-| Create the `Config` for a `Layer` rendered on the marker `Pane`.
 -}
 marker : Config msg
 marker =
@@ -113,12 +114,22 @@ marker =
         }
 
 
-{-| Create the `Config` for a `Layer` randered on the popup `Pane`.
+{-| Create the `Config` for a `Layer` rendered on the popup `Pane`.
 -}
 popup : Config msg
 popup =
     Config
         { pane = PopupPane
+        , renderer = NoRenderer
+        }
+
+
+{-| Create the `Config` for a `Layer` rendered on the control `Pane`.
+-}
+control : Config msg
+control =
+    Config
+        { pane = ControlPane
         , renderer = NoRenderer
         }
 

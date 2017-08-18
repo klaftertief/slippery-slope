@@ -114,7 +114,8 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
                 layerAttributions
             , case config.toMsg of
                 Just toMsg ->
-                    Html.map toMsg <| Zoom.control transform
+                    Layer.render transform Zoom.control
+                        |> Html.map toMsg
 
                 Nothing ->
                     Html.text ""
