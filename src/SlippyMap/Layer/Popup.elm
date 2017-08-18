@@ -63,7 +63,7 @@ simplePopup content =
 {-| -}
 layer : Config popup msg -> List ( Location, popup ) -> Layer msg
 layer config locatedPopups =
-    Layer.withRenderer Layer.popup (render config locatedPopups)
+    Layer.custom (render config locatedPopups) Layer.popup
 
 
 render : Config popup msg -> List ( Location, popup ) -> Transform -> Svg msg

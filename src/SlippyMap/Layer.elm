@@ -1,23 +1,24 @@
 module SlippyMap.Layer
     exposing
-        ( Layer
+        ( Config
+        , Layer
         , base
+        , custom
         , flatten
         , getAttributions
         , group
-        , layer
         , marker
         , overlay
         , popup
         , render
         , withAttribution
-        , withCustomRenderer
-        , withRenderer
         )
 
 {-| A `Layer` usually renders geolocated contents on top of a map.
 
-@docs marker, popup, overlay, base, withAttribution, Layer, layer, group, flatten, withRenderer, withCustomRenderer, getAttributions, render
+TODO: Should setting the attribution wor on the config or on the layer? On the layer makes it so that all layers can just use it, on the config makes it so that one can not set an attribution to a group (wich does not make any sense.)
+
+@docs Config, marker, popup, overlay, base, withAttribution, Layer, group, custom, flatten, getAttributions, render
 
 -}
 
@@ -25,7 +26,10 @@ import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 
 
-{-| Configuration for a layer..
+{-| Configuration for a layer.
+
+TODO: should the attribution be a proper type?
+
 -}
 type Config msg
     = Config
@@ -104,10 +108,15 @@ withAttribution attribution (Config config) =
         }
 
 
-{-| -}
-withCustomRenderer : (Transform -> Svg msg) -> Config msg -> Config msg
-withCustomRenderer render (Config config) =
-    Config { config | renderer = CustomRenderer render }
+
+-- layerWithAttribution : String -> Layer msg -> Layer msg
+-- layerWithAttribution attribution layer =
+--     case layer of
+--         Layer config ->
+--             Layer <|
+--                 withAttribution attribution config
+--         LayerGroup layers ->
+--             LayerGroup layers
 
 
 {-| NOTE: It is important that the Layer depends only on `msg` so that different layers can be grouped together.
@@ -118,33 +127,19 @@ type Layer msg
 
 
 {-| -}
-withRenderer : Config msg -> (Transform -> Svg msg) -> Layer msg
-withRenderer (Config config) render =
+custom : (Transform -> Svg msg) -> Config msg -> Layer msg
+custom render (Config config) =
     Layer <|
-        Config { config | renderer = CustomRenderer render }
+        Config
+            { config
+                | renderer = CustomRenderer render
+            }
 
 
 {-| -}
 group : List (Layer msg) -> Layer msg
 group layers =
     LayerGroup layers
-
-
-{-| -}
-layer : Config msg -> Layer msg
-layer config =
-    Layer config
-
-
-layerWithAttribution : String -> Layer msg -> Layer msg
-layerWithAttribution attribution layer =
-    case layer of
-        Layer config ->
-            Layer <|
-                withAttribution attribution config
-
-        LayerGroup layers ->
-            LayerGroup layers
 
 
 {-| -}

@@ -43,8 +43,7 @@ config toLocation toIcon =
 layer : Config marker msg -> List marker -> Layer msg
 layer config markers =
     Layer.marker
-        |> Layer.withCustomRenderer (render config markers)
-        |> Layer.layer
+        |> Layer.custom (render config markers)
 
 
 {-| -}

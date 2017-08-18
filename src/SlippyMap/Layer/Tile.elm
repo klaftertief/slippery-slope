@@ -67,8 +67,7 @@ layer ((Config { attribution }) as config) =
                 Nothing ->
                     Layer.base
     in
-    Layer.withRenderer layerConfig
-        (render config)
+    Layer.custom (render config) layerConfig
 
 
 render : Config data msg -> Transform -> Svg msg

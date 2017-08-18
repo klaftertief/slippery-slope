@@ -55,7 +55,7 @@ defaultConfig events =
 {-| -}
 layer : Config msg -> GeoJson -> Layer msg
 layer config geoJson =
-    Layer.withRenderer Layer.overlay (render config geoJson)
+    Layer.custom (render config geoJson) Layer.overlay
 
 
 render : Config msg -> GeoJson -> Transform -> Svg msg
