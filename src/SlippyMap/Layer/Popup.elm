@@ -68,7 +68,13 @@ layer config locatedPopups =
 
 render : Config popup msg -> List ( Location, popup ) -> Transform -> Svg msg
 render config locatedPopups transform =
-    Svg.g []
+    Svg.svg
+        [ -- Important for touch pinching
+          Svg.Attributes.pointerEvents "none"
+        , Svg.Attributes.width (toString transform.size.x)
+        , Svg.Attributes.height (toString transform.size.y)
+        , Svg.Attributes.style "position: absolute;"
+        ]
         (List.map (renderPopup config transform) locatedPopups)
 
 

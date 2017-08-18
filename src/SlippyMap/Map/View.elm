@@ -115,8 +115,9 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
             [ Html.Attributes.class "esm__map"
             , Html.Attributes.style
                 [ ( "position", "absolute" )
+                , ( "overflow", "hidden" )
                 , ( "width", toString config.size.x ++ "px" )
-                , ( "Height", toString config.size.y ++ "px" )
+                , ( "height", toString config.size.y ++ "px" )
                 ]
             ]
             (List.map

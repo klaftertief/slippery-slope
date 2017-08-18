@@ -70,7 +70,13 @@ render ((Config internalConfig) as config) location transform =
                 , style = always internalConfig.style
                 }
     in
-    Svg.g []
+    Svg.svg
+        [ -- Important for touch pinching
+          Svg.Attributes.pointerEvents "none"
+        , Svg.Attributes.width (toString transform.size.x)
+        , Svg.Attributes.height (toString transform.size.y)
+        , Svg.Attributes.style "position: absolute;"
+        ]
         [ Render.renderGeoJson renderConfig (circle config location)
         ]
 

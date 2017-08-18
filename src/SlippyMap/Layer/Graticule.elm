@@ -33,7 +33,13 @@ render transform =
         project ( lon, lat, _ ) =
             Transform.locationToScreenPoint transform (Location lon lat)
     in
-    Svg.g []
+    Svg.svg
+        [ -- Important for touch pinching
+          Svg.Attributes.pointerEvents "none"
+        , Svg.Attributes.width (toString transform.size.x)
+        , Svg.Attributes.height (toString transform.size.y)
+        , Svg.Attributes.style "position: absolute;"
+        ]
         [ Render.renderGeoJson (renderConfig project) graticule
         ]
 
