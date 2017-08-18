@@ -22,8 +22,8 @@ TODO: Should setting the attribution wor on the config or on the layer? On the l
 
 -}
 
+import Html exposing (Html)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
-import Svg exposing (Svg)
 
 
 {-| Configuration for a layer.
@@ -41,7 +41,7 @@ type Config msg
 {-| -}
 type Renderer msg
     = NoRenderer
-    | CustomRenderer (Transform -> Svg msg)
+    | CustomRenderer (Transform -> Html msg)
 
 
 {-| Each `Layer` is placed on a `Pane` that defines the order of layers on top of the map.
@@ -78,12 +78,12 @@ paneToLevel pane =
 
 
 
--- | GeneralRenderer ({generalConfig} -> Svg msg)
--- | TileRenderer ({generalConfig} -> {tileConfig} -> Svg msg)
--- | StaticRenderer (Svg msg)
+-- | GeneralRenderer ({generalConfig} -> Html msg)
+-- | TileRenderer ({generalConfig} -> {tileConfig} -> Html msg)
+-- | StaticRenderer (Html msg)
 
 
-{-| Create the `Config` for a `Layer` randered on the base `Pane`.
+{-| Create the `Config` for a `Layer` rendered on the base `Pane`.
 -}
 base : Config msg
 base =
@@ -150,7 +150,7 @@ type Layer msg
 
 
 {-| -}
-custom : (Transform -> Svg msg) -> Config msg -> Layer msg
+custom : (Transform -> Html msg) -> Config msg -> Layer msg
 custom render (Config config) =
     Layer Nothing <|
         Config
@@ -216,16 +216,16 @@ level layer =
 
 {-| TODO: Layers should have general attributes like class name. Add here.
 -}
-render : Transform -> Layer msg -> Svg msg
+render : Transform -> Layer msg -> Html msg
 render transform layer =
     case layer of
         Layer _ (Config { renderer }) ->
             case renderer of
                 NoRenderer ->
-                    Svg.text ""
+                    Html.text ""
 
                 CustomRenderer render ->
                     render transform
 
         LayerGroup _ _ ->
-            Svg.text ""
+            Html.text ""
