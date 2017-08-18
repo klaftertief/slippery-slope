@@ -12,14 +12,12 @@ module SlippyMap.Layer.Overlay
 
 -}
 
-import Html
+import Html exposing (Html)
 import Html.Attributes
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
-import Svg exposing (Svg)
-import Svg.Attributes
 
 
 -- CONFIG
@@ -28,7 +26,10 @@ import Svg.Attributes
 {-| Configuration for the layer.
 -}
 type Config overlay msg
-    = Config { renderOverlay : ( Float, Float ) -> overlay -> Svg msg }
+    = Config
+        { renderOverlay :
+            ( Float, Float ) -> overlay -> Html msg
+        }
 
 
 {-| -}
@@ -47,35 +48,33 @@ iframeConfig =
         }
 
 
-imageOverlay : ( Float, Float ) -> String -> Svg msg
+imageOverlay : ( Float, Float ) -> String -> Html msg
 imageOverlay ( width, height ) url =
-    Svg.image
-        [ Svg.Attributes.width (toString width)
-        , Svg.Attributes.height (toString height)
-        , Svg.Attributes.xlinkHref url
+    Html.img
+        [ Html.Attributes.width (round width)
+        , Html.Attributes.height (round height)
+        , Html.Attributes.src url
         ]
         []
 
 
-iframeOverlay : ( Float, Float ) -> String -> Svg msg
+iframeOverlay : ( Float, Float ) -> String -> Html msg
 iframeOverlay ( width, height ) url =
-    Svg.foreignObject
-        [ Svg.Attributes.width (toString width)
-        , Svg.Attributes.height (toString height)
-        ]
-        [ Html.node "body"
-            []
-            [ Html.iframe
-                [ Html.Attributes.src url
-                , Svg.Attributes.x "0"
-                , Svg.Attributes.y "0"
-                , Svg.Attributes.width (toString width)
-                , Svg.Attributes.height (toString height)
-                , Html.Attributes.attribute "frameBorder" "0"
-                ]
-                []
+    let
+        scale =
+            width / 1024
+    in
+    Html.iframe
+        [ Html.Attributes.src url
+        , Html.Attributes.attribute "frameBorder" "0"
+        , Html.Attributes.width 1024
+        , Html.Attributes.height 576
+        , Html.Attributes.style
+            [ ( "transform", "scale(" ++ toString scale ++ ")" )
+            , ( "transform-origin", "0 0" )
             ]
         ]
+        []
 
 
 
@@ -88,13 +87,13 @@ layer config boundedOverlays =
     Layer.custom (render config boundedOverlays) Layer.overlay
 
 
-render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Transform -> Svg msg
+render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Transform -> Html msg
 render config boundedOverlays transform =
-    Svg.g []
+    Html.div []
         (List.map (renderOverlay config transform) boundedOverlays)
 
 
-renderOverlay : Config overlay msg -> Transform -> ( Location.Bounds, overlay ) -> Svg msg
+renderOverlay : Config overlay msg -> Transform -> ( Location.Bounds, overlay ) -> Html msg
 renderOverlay (Config config) transform ( bounds, overlay ) =
     let
         origin =
@@ -116,16 +115,15 @@ renderOverlay (Config config) transform ( bounds, overlay ) =
         translate =
             Point.subtract origin southWestPoint
     in
-    Svg.g
-        [ Svg.Attributes.transform
-            ("translate("
-                ++ toString translate.x
-                ++ " "
-                ++ toString (translate.y - southWestPoint.y + northEastPoint.y)
-                ++ ")"
-            )
+    Html.div
+        [ Html.Attributes.style
+            [ ( "transform"
+              , "translate("
+                    ++ toString translate.x
+                    ++ "px, "
+                    ++ toString (translate.y - southWestPoint.y + northEastPoint.y)
+                    ++ "px)"
+              )
+            ]
         ]
-        [ config.renderOverlay
-            overlaySize
-            overlay
-        ]
+        [ config.renderOverlay overlaySize overlay ]
