@@ -11,11 +11,11 @@ module SlippyMap.Layer.Popup
 
 -}
 
+import Html exposing (Html)
+import Html.Attributes
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
-import Svg exposing (Svg)
-import Svg.Attributes
 
 
 -- CONFIG
@@ -24,7 +24,7 @@ import Svg.Attributes
 {-| Configuration for the layer.
 -}
 type Config popup msg
-    = Config { renderPopup : popup -> Svg msg }
+    = Config { renderPopup : popup -> Html msg }
 
 
 {-| -}
@@ -35,24 +35,42 @@ config =
         }
 
 
-simplePopup : String -> Svg msg
+simplePopup : String -> Html msg
 simplePopup content =
-    Svg.g
-        [ Svg.Attributes.transform "translate(-60 -45)" ]
-        [ Svg.rect
-            [ Svg.Attributes.width "120"
-            , Svg.Attributes.height "30"
-            , Svg.Attributes.rx "5"
-            , Svg.Attributes.ry "5"
-            , Svg.Attributes.fill "#fff"
+    Html.div
+        [ Html.Attributes.class "popup--simple"
+        , Html.Attributes.style
+            [ ( "filter"
+              , "drop-shadow(rgba(0,0,0,0.2) 0px 2px 4px)"
+              )
+            , ( "transform", "translate(6px, -50%)" )
+            , ( "display", "flex" )
+            , ( "align-items", "center" )
+            ]
+        ]
+        [ Html.div
+            [ Html.Attributes.style
+                [ ( "position", "relative" )
+                , ( "left", "6px" )
+                , ( "background", "#fff" )
+                , ( "border-radius", "0 0 0 2px" )
+                , ( "width", "12px" )
+                , ( "height", "12px" )
+                , ( "transform", "rotate(45deg)" )
+                ]
             ]
             []
-        , Svg.text_
-            [ Svg.Attributes.x "60"
-            , Svg.Attributes.y "20"
-            , Svg.Attributes.textAnchor "middle"
+        , Html.div
+            [ Html.Attributes.style
+                [ ( "position", "relative" )
+                , ( "background", "#fff" )
+                , ( "border-radius", "4px" )
+                , ( "padding", "0.5em 1em" )
+                , ( "min-width", "180px" )
+                , ( "max-width", "240px" )
+                ]
             ]
-            [ Svg.text content ]
+            [ Html.text content ]
         ]
 
 
@@ -66,31 +84,30 @@ layer config locatedPopups =
     Layer.custom (render config locatedPopups) Layer.popup
 
 
-render : Config popup msg -> List ( Location, popup ) -> Transform -> Svg msg
+render : Config popup msg -> List ( Location, popup ) -> Transform -> Html msg
 render config locatedPopups transform =
-    Svg.svg
-        [ -- Important for touch pinching
-          Svg.Attributes.pointerEvents "none"
-        , Svg.Attributes.width (toString transform.size.x)
-        , Svg.Attributes.height (toString transform.size.y)
-        , Svg.Attributes.style "position: absolute;"
-        ]
+    Html.div [ Html.Attributes.class "layer--popup" ]
         (List.map (renderPopup config transform) locatedPopups)
 
 
-renderPopup : Config popup msg -> Transform -> ( Location, popup ) -> Svg msg
+renderPopup : Config popup msg -> Transform -> ( Location, popup ) -> Html msg
 renderPopup (Config config) transform ( location, popup ) =
     let
         popupPoint =
             Transform.locationToScreenPoint transform location
     in
-    Svg.g
-        [ Svg.Attributes.transform
-            ("translate("
-                ++ toString popupPoint.x
-                ++ " "
-                ++ toString popupPoint.y
-                ++ ")"
-            )
+    Html.div
+        [ Html.Attributes.class "popup__positioner"
+        , Html.Attributes.style
+            [ ( "position", "relative" )
+            , ( "pointer-events", "none" )
+            , ( "transform"
+              , "translate("
+                    ++ toString popupPoint.x
+                    ++ "px, "
+                    ++ toString popupPoint.y
+                    ++ "px)"
+              )
+            ]
         ]
         [ config.renderPopup popup ]

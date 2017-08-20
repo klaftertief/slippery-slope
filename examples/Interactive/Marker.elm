@@ -7,6 +7,7 @@ import Set exposing (Set)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer.Marker.Circle as Marker
+import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Map.State as MapState
 
 
@@ -144,6 +145,7 @@ viewMap model =
         model.map
         [ Map.tileLayer
         , Marker.marker (List.map .location model.pois)
+        , Popup.layer Popup.config [ ( Location -3.716667 40.383333, "I popped up, merry poppin!" ) ]
         ]
 
 

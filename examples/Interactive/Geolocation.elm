@@ -144,7 +144,7 @@ toUserLayer ({ accuracy } as geolocation) =
             toLocation geolocation
     in
     [ Circle.layer (Circle.config (accuracy / 1000)) location
-    , Marker.layer [ location ]
+    , Marker.marker [ location ]
     ]
 
 
