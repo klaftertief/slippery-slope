@@ -106,8 +106,10 @@ updateSelection updater index model =
             updater index model.poiSelection
 
         newMap =
-            MapState.fitBounds config
-                (selectionBounds newSelection model.pois)
+            Map.setMapState config
+                (flip MapState.fitBounds
+                    (selectionBounds newSelection model.pois)
+                )
                 model.map
     in
     { model
@@ -144,8 +146,10 @@ viewMap model =
     Map.view config
         model.map
         [ Map.tileLayer
-        , Marker.marker (List.map .location model.pois)
-        , Popup.layer Popup.config [ ( Location -3.716667 40.383333, "I popped up, merry poppin!" ) ]
+
+        -- , Marker.marker (List.map .location model.pois)
+        -- , Popup.layer Popup.config [ ( Location -3.716667 40.383333, "I popped up, merry poppin!" ) ]
+        , Map.markerLayer MapMsg (List.map .location model.pois)
         ]
 
 

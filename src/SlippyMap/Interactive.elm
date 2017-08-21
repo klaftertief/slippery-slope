@@ -7,6 +7,8 @@ module SlippyMap.Interactive
         , around
         , at
         , config
+        , markerLayer
+        , setMapState
         , subscriptions
         , tileLayer
         , update
@@ -15,7 +17,7 @@ module SlippyMap.Interactive
 
 {-| A convenience module re-exposing various specialised functions and types to quickly create a basic interactive map with a default configuration.
 
-@docs Config, config, State, at, around, Msg, update, view, subscriptions, Layer, tileLayer
+@docs Config, config, State, at, around, Msg, update, view, subscriptions, Layer, tileLayer, markerLayer, setMapState
 
 -}
 
@@ -23,10 +25,12 @@ import Html exposing (Html)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer
+import SlippyMap.Layer.Marker.Pin as Marker
+import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImageLayer
 import SlippyMap.Map.Config as Config
-import SlippyMap.Map.Msg as Msg
-import SlippyMap.Map.State as State
+import SlippyMap.Map.Msg as MapMsg
+import SlippyMap.Map.State as MapState
 import SlippyMap.Map.Subscriptions as Subscriptions
 import SlippyMap.Map.Types as Types exposing (Scene, Size)
 import SlippyMap.Map.Update as Update
@@ -43,8 +47,9 @@ type alias Config msg =
 
 {-| -}
 config : Size -> (Msg -> msg) -> Config msg
-config size =
+config size msg =
     Config.interactive (Point.fromSize size)
+        (MapMsg >> msg)
 
 
 
@@ -52,20 +57,36 @@ config size =
 
 
 {-| -}
-type alias State =
-    State.State
+type State
+    = State
+        { mapState : MapState.State
+        , popup : Maybe ( Location, String )
+        }
 
 
 {-| -}
 at : Config msg -> Scene -> State
-at =
-    State.at
+at config scene =
+    State
+        { mapState = MapState.at config scene
+        , popup = Nothing
+        }
 
 
 {-| -}
 around : Config msg -> Location.Bounds -> State
-around =
-    State.around
+around config bounds =
+    State
+        { mapState = MapState.around config bounds
+        , popup = Nothing
+        }
+
+
+{-| -}
+setMapState : Config msg -> (Config msg -> MapState.State -> MapState.State) -> State -> State
+setMapState config f (State state) =
+    State
+        { state | mapState = f config state.mapState }
 
 
 
@@ -73,14 +94,30 @@ around =
 
 
 {-| -}
-type alias Msg =
-    Msg.Msg
+type Msg
+    = MapMsg MapMsg.Msg
+    | ShowPopup ( Location, String )
+    | HidePopup
 
 
 {-| -}
 update : Config msg -> Msg -> State -> State
-update =
-    Update.update
+update config msg (State state) =
+    case msg of
+        MapMsg mapMsg ->
+            State
+                { state
+                    | mapState =
+                        Update.update config
+                            mapMsg
+                            state.mapState
+                }
+
+        ShowPopup popup ->
+            State { state | popup = Just popup }
+
+        HidePopup ->
+            State { state | popup = Nothing }
 
 
 
@@ -89,8 +126,8 @@ update =
 
 {-| -}
 subscriptions : Config msg -> State -> Sub msg
-subscriptions =
-    Subscriptions.subscriptions
+subscriptions config (State { mapState }) =
+    Subscriptions.subscriptions config mapState
 
 
 
@@ -99,8 +136,19 @@ subscriptions =
 
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
-view =
-    View.view
+view config (State { mapState, popup }) layers =
+    let
+        popupLayers =
+            popup
+                |> Maybe.map
+                    (\p ->
+                        [ Popup.layer Popup.config
+                            [ p ]
+                        ]
+                    )
+                |> Maybe.withDefault []
+    in
+    View.view config mapState (layers ++ popupLayers)
 
 
 
@@ -118,3 +166,15 @@ tileLayer =
     StaticImageLayer.layer
         (StaticImageLayer.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
         |> Layer.withAttribution "© OpenStreetMap contributors"
+
+
+{-| -}
+markerLayer : (Msg -> msg) -> List Location -> Layer msg
+markerLayer toMsg locations =
+    Marker.individualMarker identity
+        (\location ->
+            Marker.icon
+                |> Marker.onClick
+                    (toMsg <| ShowPopup ( location, toString location ))
+        )
+        locations
