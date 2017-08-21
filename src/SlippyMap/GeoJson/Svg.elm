@@ -1,6 +1,6 @@
-module SlippyMap.Layer.GeoJson.Render exposing (Config(Config), renderGeoJson)
+module SlippyMap.GeoJson.Svg exposing (Config(Config), renderGeoJson)
 
-{-| GeoJson renderer.
+{-| GeoJson SVG renderer.
 
 TODO: Move out of layer namespace
 

@@ -13,8 +13,8 @@ module SlippyMap.Layer.Circle
 
 import GeoJson exposing (GeoJson)
 import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.GeoJson.Svg as Render
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Layer.GeoJson.Render as Render
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes

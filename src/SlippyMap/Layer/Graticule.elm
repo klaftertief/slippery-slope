@@ -14,8 +14,8 @@ import GeoJson exposing (GeoJson)
 import Json.Encode as Json
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.GeoJson.Svg as Render
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Layer.GeoJson.Render as Render
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes

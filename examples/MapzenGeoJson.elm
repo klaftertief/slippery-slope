@@ -9,8 +9,8 @@ import Json.Decode as Json
 import RemoteData exposing (WebData)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
+import SlippyMap.GeoJson.Svg as RenderGeoJson
 import SlippyMap.Interactive as Map
-import SlippyMap.Layer.GeoJson.Render as RenderGeoJson
 import SlippyMap.Layer.JsonTile as JsonTileLayer
 import Svg exposing (Svg)
 import Svg.Attributes
