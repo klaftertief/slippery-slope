@@ -12,6 +12,7 @@ module SlippyMap.Map.State
         , setFocus
         , setInteraction
         , setScene
+        , setTransition
         , setZoom
         , tickTransition
         , withInteraction
@@ -23,7 +24,7 @@ module SlippyMap.Map.State
 
 {-|
 
-@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, moveByAnimated
+@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setTransition, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, moveByAnimated
 
 -}
 

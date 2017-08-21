@@ -11,7 +11,7 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (State(..))
-import SlippyMap.Map.Types as Types exposing (Drag, Focus, Interaction(..), Pinch)
+import SlippyMap.Map.Types as Types exposing (Drag, Focus, Interaction(..), Pinch, Transition(..))
 
 
 {-| -}
@@ -120,9 +120,11 @@ updateDrag config dragMsg ((State { interaction }) as state) =
     State.withInteraction config <|
         case dragMsg of
             DragStart xy ->
-                State.setInteraction
-                    (Dragging (Drag xy xy))
-                    state
+                state
+                    |> State.setTransition
+                        NoTransition
+                    |> State.setInteraction
+                        (Dragging (Drag xy xy))
 
             DragAt xy ->
                 let
@@ -147,7 +149,7 @@ updateDrag config dragMsg ((State { interaction }) as state) =
                             NoInteraction ->
                                 identity
 
-                            Dragging { last } ->
+                            Dragging { current, last } ->
                                 if xy == last then
                                     identity
                                 else
@@ -156,8 +158,8 @@ updateDrag config dragMsg ((State { interaction }) as state) =
                                             5
                                     in
                                     State.moveByAnimated config
-                                        { x = -(xy.x - last.x) * speed |> toFloat
-                                        , y = -(xy.y - last.y) * speed |> toFloat
+                                        { x = (last.x - current.x) * speed |> toFloat
+                                        , y = (last.y - current.y) * speed |> toFloat
                                         }
 
                             Pinching { last } ->
