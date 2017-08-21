@@ -3,16 +3,18 @@ module SlippyMap.Layer.Popup
         ( Config
         , config
         , layer
+        , withCloseMsg
         )
 
 {-| A layer to display popups.
 
-@docs Config, config, layer
+@docs Config, config, withCloseMsg, layer
 
 -}
 
 import Html exposing (Html)
 import Html.Attributes
+import Html.Events
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
@@ -24,7 +26,10 @@ import SlippyMap.Map.Transform as Transform exposing (Transform)
 {-| Configuration for the layer.
 -}
 type Config popup msg
-    = Config { renderPopup : popup -> Html msg }
+    = Config
+        { renderPopup : popup -> Html msg
+        , closeMsg : Maybe msg
+        }
 
 
 {-| -}
@@ -32,7 +37,15 @@ config : Config String msg
 config =
     Config
         { renderPopup = simplePopup
+        , closeMsg = Nothing
         }
+
+
+{-| -}
+withCloseMsg : msg -> Config popup msg -> Config popup msg
+withCloseMsg closeMsg (Config config) =
+    Config
+        { config | closeMsg = Just closeMsg }
 
 
 simplePopup : String -> Html msg
@@ -66,7 +79,7 @@ simplePopup content =
                 , ( "background", "#fff" )
                 , ( "border-radius", "4px" )
                 , ( "padding", "0.5em 1em" )
-                , ( "min-width", "180px" )
+                , ( "min-width", "60px" )
                 , ( "max-width", "240px" )
                 ]
             ]
@@ -95,12 +108,17 @@ renderPopup (Config config) transform ( location, popup ) =
     let
         popupPoint =
             Transform.locationToScreenPoint transform location
+
+        closeAttributes =
+            config.closeMsg
+                |> Maybe.map (Html.Events.onClick >> List.singleton)
+                |> Maybe.withDefault []
     in
     Html.div
-        [ Html.Attributes.class "popup__positioner"
-        , Html.Attributes.style
+        ([ Html.Attributes.class "popup__positioner"
+         , Html.Attributes.style
             [ ( "position", "relative" )
-            , ( "pointer-events", "none" )
+            , ( "pointer-events", "auto" )
             , ( "transform"
               , "translate("
                     ++ toString popupPoint.x
@@ -109,5 +127,7 @@ renderPopup (Config config) transform ( location, popup ) =
                     ++ "px)"
               )
             ]
-        ]
+         ]
+            ++ closeAttributes
+        )
         [ config.renderPopup popup ]

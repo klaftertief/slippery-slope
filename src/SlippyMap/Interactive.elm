@@ -96,8 +96,8 @@ setMapState config f (State state) =
 {-| -}
 type Msg
     = MapMsg MapMsg.Msg
-    | ShowPopup ( Location, String )
-    | HidePopup
+    | OpenPopup ( Location, String )
+    | ClosePopup
 
 
 {-| -}
@@ -113,10 +113,10 @@ update config msg (State state) =
                             state.mapState
                 }
 
-        ShowPopup popup ->
+        OpenPopup popup ->
             State { state | popup = Just popup }
 
-        HidePopup ->
+        ClosePopup ->
             State { state | popup = Nothing }
 
 
@@ -134,15 +134,19 @@ subscriptions config (State { mapState }) =
 -- VIEW
 
 
-{-| -}
-view : Config msg -> State -> List (Layer msg) -> Html msg
-view config (State { mapState, popup }) layers =
+{-| TODO: Do not depend on `toMsg`, this should go into a wrapped Config.
+-}
+view : (Msg -> msg) -> Config msg -> State -> List (Layer msg) -> Html msg
+view toMsg config (State { mapState, popup }) layers =
     let
         popupLayers =
             popup
                 |> Maybe.map
                     (\p ->
-                        [ Popup.layer Popup.config
+                        [ Popup.layer
+                            (Popup.withCloseMsg (toMsg ClosePopup)
+                                Popup.config
+                            )
                             [ p ]
                         ]
                     )
@@ -169,12 +173,12 @@ tileLayer =
 
 
 {-| -}
-markerLayer : (Msg -> msg) -> List Location -> Layer msg
+markerLayer : (Msg -> msg) -> List ( Location, String ) -> Layer msg
 markerLayer toMsg locations =
-    Marker.individualMarker identity
-        (\location ->
+    Marker.individualMarker Tuple.first
+        (\( location, title ) ->
             Marker.icon
                 |> Marker.onClick
-                    (toMsg <| ShowPopup ( location, toString location ))
+                    (toMsg <| OpenPopup ( location, title ))
         )
         locations

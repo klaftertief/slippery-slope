@@ -143,13 +143,18 @@ view model =
 
 viewMap : Model -> Html Msg
 viewMap model =
-    Map.view config
+    Map.view MapMsg
+        config
         model.map
         [ Map.tileLayer
 
         -- , Marker.marker (List.map .location model.pois)
         -- , Popup.layer Popup.config [ ( Location -3.716667 40.383333, "I popped up, merry poppin!" ) ]
-        , Map.markerLayer MapMsg (List.map .location model.pois)
+        , Map.markerLayer MapMsg
+            (List.map
+                (\p -> ( p.location, p.name ))
+                model.pois
+            )
         ]
 
 
