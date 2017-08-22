@@ -25,22 +25,18 @@ type alias Model =
 
 
 type alias TileCache =
-    Dict Tile.Comparable (WebData Features)
+    Dict Tile.Comparable (WebData (List Feature))
 
 
 type Msg
     = MapMsg Map.Msg
-    | TileResponse Tile.Comparable (WebData Features)
+    | TileResponse Tile.Comparable (WebData (List Feature))
 
 
 type alias Feature =
     { properties : Maybe FeatureProperties
     , geometry : GeoJson.Geometry
     }
-
-
-type alias Features =
-    List Feature
 
 
 type alias FeatureProperties =
@@ -59,8 +55,8 @@ init =
         initialModel =
             Model
                 (Map.at mapConfig
-                    { center = { lon = 0, lat = 0 }
-                    , zoom = 2
+                    { center = { lon = 7, lat = 51 }
+                    , zoom = 7
                     }
                 )
                 Dict.empty
@@ -124,7 +120,7 @@ newTilesToLoad model =
     tilesToLoad
 
 
-getTile : RemoteTile.Config Features Msg -> Tile -> Cmd Msg
+getTile : RemoteTile.Config (List Feature) Msg -> Tile -> Cmd Msg
 getTile config ({ z, x, y } as tile) =
     let
         comparable =
@@ -151,7 +147,7 @@ mapConfig =
     Map.config { width = 600, height = 400 } MapMsg
 
 
-layerConfig : TileCache -> RemoteTile.Config Features Msg
+layerConfig : TileCache -> RemoteTile.Config (List Feature) Msg
 layerConfig tileCache =
     RemoteTile.config
         "https://tile.mapzen.com/mapzen/vector/v1/all/{z}/{x}/{y}.json?api_key=mapzen-A4166oq"
@@ -191,15 +187,6 @@ layerConfig tileCache =
                                     Just props ->
                                         not props.labelPlacement
                              -- && (props.minZoom < transform.zoom)
-                            )
-                        |> List.sortBy
-                            (\{ properties } ->
-                                case properties of
-                                    Nothing ->
-                                        0
-
-                                    Just props ->
-                                        props.sortRank
                             )
                         |> List.concatMap
                             (renderFeature
@@ -242,7 +229,7 @@ main =
         }
 
 
-vectorTileDecoder : Json.Decoder Features
+vectorTileDecoder : Json.Decoder (List Feature)
 vectorTileDecoder =
     Json.keyValuePairs GeoJson.decoder
         |> Json.map toFeatures
@@ -296,19 +283,36 @@ renderFeature project { properties, geometry } =
 
 isInteresting : ( String, GeoJson ) -> Maybe ( String, GeoJson )
 isInteresting ( groupName, geojson ) =
-    if groupName == "earth" || groupName == "water" then
+    if groupName == "earth" || groupName /= "water" then
         Just ( groupName, geojson )
     else
         Nothing
 
 
 toFeatures : List ( String, GeoJson ) -> List Feature
-toFeatures =
-    List.concatMap (uncurry namedGeoJsonToFeatures)
+toFeatures namedGeoJson =
+    namedGeoJson
+        |> List.filterMap isInteresting
+        |> List.concatMap namedGeoJsonToFeatures
+        |> sortFeatures
 
 
-namedGeoJsonToFeatures : String -> GeoJson -> List Feature
-namedGeoJsonToFeatures layerName ( geoJsonObject, _ ) =
+sortFeatures : List Feature -> List Feature
+sortFeatures features =
+    List.sortBy
+        (\{ properties } ->
+            case properties of
+                Nothing ->
+                    0
+
+                Just props ->
+                    props.sortRank
+        )
+        features
+
+
+namedGeoJsonToFeatures : ( String, GeoJson ) -> List Feature
+namedGeoJsonToFeatures ( layerName, ( geoJsonObject, _ ) ) =
     namedGeoJsonObjectToFeatures layerName geoJsonObject
 
 
