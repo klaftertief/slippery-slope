@@ -68,6 +68,9 @@ render ((Config internalConfig) as config) location transform =
             Render.Config
                 { project = project
                 , style = always internalConfig.style
+                , renderPoint =
+                    \attrs ->
+                        Svg.circle (attrs ++ [ Svg.Attributes.r "8" ]) []
                 }
     in
     Svg.svg

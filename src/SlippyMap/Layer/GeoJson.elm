@@ -68,6 +68,9 @@ render (Config internalConfig) geoJson transform =
             Render.Config
                 { project = project
                 , style = internalConfig.style
+                , renderPoint =
+                    \attrs ->
+                        Svg.circle (attrs ++ [ Svg.Attributes.r "8" ]) []
                 }
     in
     Svg.svg

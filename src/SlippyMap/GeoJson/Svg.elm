@@ -1,10 +1,16 @@
-module SlippyMap.GeoJson.Svg exposing (Config(Config), renderGeoJson)
+module SlippyMap.GeoJson.Svg
+    exposing
+        ( Config(Config)
+        , renderGeoJson
+        , renderGeoJsonGeometry
+        , renderGeoJsonLineString
+        , renderGeoJsonPoint
+        , renderGeoJsonPolygon
+        )
 
 {-| GeoJson SVG renderer.
 
-TODO: Move out of layer namespace
-
-@docs Config, renderGeoJson
+@docs Config, renderGeoJson, renderGeoJsonPoint, renderGeoJsonLineString, renderGeoJsonPolygon, renderGeoJsonGeometry
 
 -}
 
@@ -16,12 +22,12 @@ import Svg exposing (Svg)
 import Svg.Attributes
 
 
-{-| TODO: support custom point rendering, see leaflet
--}
+{-| -}
 type Config msg
     = Config
         { project : GeoJson.Position -> Point
         , style : GeoJson.FeatureObject -> List (Svg.Attribute msg)
+        , renderPoint : List (Svg.Attribute msg) -> Svg msg
         }
 
 
@@ -92,13 +98,16 @@ renderGeoJsonPoint (Config internalConfig) attributes position =
         { x, y } =
             internalConfig.project position
     in
-    [ Svg.circle
-        (attributes
-            ++ [ Svg.Attributes.cx (toString x)
-               , Svg.Attributes.cy (toString y)
-               ]
-        )
-        []
+    [ Svg.g
+        [ Svg.Attributes.transform
+            ("translate("
+                ++ toString x
+                ++ " "
+                ++ toString y
+                ++ ")"
+            )
+        ]
+        [ internalConfig.renderPoint attributes ]
     ]
 
 

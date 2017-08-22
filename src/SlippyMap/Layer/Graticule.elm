@@ -61,6 +61,9 @@ renderConfig project =
     Render.Config
         { project = project
         , style = style
+        , renderPoint =
+            \attrs ->
+                Svg.circle (attrs ++ [ Svg.Attributes.r "8" ]) []
         }
 
 
