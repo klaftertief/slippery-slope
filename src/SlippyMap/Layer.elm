@@ -12,6 +12,7 @@ module SlippyMap.Layer
         , overlay
         , popup
         , render
+        , simple
         , withAttribution
         )
 
@@ -19,18 +20,17 @@ module SlippyMap.Layer
 
 TODO: Should setting the attribution wor on the config or on the layer? On the layer makes it so that all layers can just use it, on the config makes it so that one can not set an attribution to a group (wich does not make any sense.)
 
-@docs Config, marker, popup, overlay, base, control, Layer, group, custom, withAttribution, attributions, flatten, render
+@docs Config, marker, popup, overlay, base, control, Layer, simple, custom, group, withAttribution, attributions, flatten, render
 
 -}
 
 import Html exposing (Html)
+import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 
 
 {-| Configuration for a layer.
-
-TODO: should the attribution be a proper type?
-
 -}
 type Config msg
     = Config
@@ -42,6 +42,7 @@ type Config msg
 {-| -}
 type Renderer msg
     = NoRenderer
+    | SimpleRenderer ((Location -> Point) -> Html msg)
     | CustomRenderer (Transform -> Html msg)
 
 
@@ -149,6 +150,8 @@ withAttribution attribution layer =
             LayerGroup (Just attribution) layers
 
 
+{-| TODO: should the attribution be a proper type?
+-}
 type alias Attribution =
     Maybe String
 
@@ -158,6 +161,16 @@ type alias Attribution =
 type Layer msg
     = Layer Attribution (Config msg)
     | LayerGroup Attribution (List (Layer msg))
+
+
+{-| -}
+simple : ((Location -> Point) -> Html msg) -> Config msg -> Layer msg
+simple render (Config config) =
+    Layer Nothing <|
+        Config
+            { config
+                | renderer = SimpleRenderer render
+            }
 
 
 {-| -}
@@ -234,6 +247,9 @@ render transform layer =
             case renderer of
                 NoRenderer ->
                     Html.text ""
+
+                SimpleRenderer render ->
+                    render (Transform.locationToScreenPoint transform)
 
                 CustomRenderer render ->
                     render transform

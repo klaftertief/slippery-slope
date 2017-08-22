@@ -12,8 +12,8 @@ module SlippyMap.Layer.Marker
 -}
 
 import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -43,12 +43,12 @@ config toLocation toIcon =
 layer : Config marker msg -> List marker -> Layer msg
 layer config markers =
     Layer.marker
-        |> Layer.custom (render config markers)
+        |> Layer.simple (render config markers)
 
 
 {-| -}
-render : Config marker msg -> List marker -> Transform -> Svg msg
-render ((Config { location }) as config) markers transform =
+render : Config marker msg -> List marker -> (Location -> Point) -> Svg msg
+render ((Config { location }) as config) markers locationToScreenPoint =
     let
         locatedMarkers =
             List.map
@@ -69,18 +69,21 @@ render ((Config { location }) as config) markers transform =
     Svg.svg
         [ -- Important for touch pinching
           Svg.Attributes.pointerEvents "none"
-        , Svg.Attributes.width (toString transform.size.x)
-        , Svg.Attributes.height (toString transform.size.y)
+
+        -- , Svg.Attributes.width (toString transform.size.x)
+        -- , Svg.Attributes.height (toString transform.size.y)
+        , Svg.Attributes.width "100%"
+        , Svg.Attributes.height "100%"
         , Svg.Attributes.style "position: absolute;"
         ]
-        (List.map (marker config transform) locatedMarkersFiltered)
+        (List.map (marker config locationToScreenPoint) locatedMarkersFiltered)
 
 
-marker : Config marker msg -> Transform -> ( Location, marker ) -> Svg msg
-marker (Config config) transform ( location, marker ) =
+marker : Config marker msg -> (Location -> Point) -> ( Location, marker ) -> Svg msg
+marker (Config config) locationToScreenPoint ( location, marker ) =
     let
         markerPoint =
-            Transform.locationToScreenPoint transform location
+            locationToScreenPoint location
     in
     Svg.g
         [ Svg.Attributes.transform
