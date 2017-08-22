@@ -7,6 +7,7 @@ module SlippyMap.Interactive
         , around
         , at
         , config
+        , getScene
         , markerLayer
         , setMapState
         , subscriptions
@@ -17,7 +18,7 @@ module SlippyMap.Interactive
 
 {-| A convenience module re-exposing various specialised functions and types to quickly create a basic interactive map with a default configuration.
 
-@docs Config, config, State, at, around, Msg, update, view, subscriptions, Layer, tileLayer, markerLayer, setMapState
+@docs Config, config, State, at, around, Msg, update, view, subscriptions, Layer, tileLayer, markerLayer, setMapState, getScene
 
 -}
 
@@ -80,6 +81,12 @@ around config bounds =
         { mapState = MapState.around config bounds
         , popup = Nothing
         }
+
+
+{-| -}
+getScene : State -> Scene
+getScene (State { mapState }) =
+    MapState.getScene mapState
 
 
 {-| -}
