@@ -1,4 +1,4 @@
-module SlippyMap.Layer.JsonTile
+module SlippyMap.Layer.RemoteTile
     exposing
         ( Config
         , config
@@ -14,7 +14,6 @@ module SlippyMap.Layer.JsonTile
 
 -}
 
-import Json.Decode as Json
 import RemoteData exposing (WebData)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer as Layer exposing (Layer)
@@ -28,19 +27,19 @@ import Svg exposing (Svg)
 
 {-| Configuration for the layer.
 -}
-type Config msg
-    = Config (ConfigInternal msg)
+type Config data msg
+    = Config (ConfigInternal data msg)
 
 
-type alias ConfigInternal msg =
+type alias ConfigInternal data msg =
     { toUrl : Tile -> String
-    , fromTile : Tile -> ( Tile, WebData Json.Value )
-    , render : ( Tile, Json.Value ) -> Transform -> Svg msg
+    , fromTile : Tile -> ( Tile, WebData data )
+    , render : ( Tile, data ) -> Transform -> Svg msg
     }
 
 
 {-| -}
-config : String -> List String -> Config msg
+config : String -> List String -> Config data msg
 config urlTemplate subDomains =
     Config
         { toUrl = TileLayer.toUrl urlTemplate subDomains
@@ -50,21 +49,21 @@ config urlTemplate subDomains =
 
 
 {-| -}
-withTile : (Tile -> ( Tile, WebData Json.Value )) -> Config msg -> Config msg
+withTile : (Tile -> ( Tile, WebData data )) -> Config data msg -> Config data msg
 withTile fromTile (Config configInternal) =
     Config
         { configInternal | fromTile = fromTile }
 
 
 {-| -}
-withRender : (( Tile, Json.Value ) -> Transform -> Svg msg) -> Config msg -> Config msg
+withRender : (( Tile, data ) -> Transform -> Svg msg) -> Config data msg -> Config data msg
 withRender render (Config configInternal) =
     Config
         { configInternal | render = render }
 
 
 {-| -}
-toUrl : Config msg -> Tile -> String
+toUrl : Config data msg -> Tile -> String
 toUrl (Config { toUrl }) =
     toUrl
 
@@ -74,14 +73,14 @@ toUrl (Config { toUrl }) =
 
 
 {-| -}
-layer : Config msg -> Layer msg
+layer : Config data msg -> Layer msg
 layer ((Config configInternal) as config) =
     TileLayer.config configInternal.fromTile
         (tile config)
         |> TileLayer.layer
 
 
-tile : Config msg -> Transform -> ( Tile, WebData Json.Value ) -> Svg msg
+tile : Config data msg -> Transform -> ( Tile, WebData data ) -> Svg msg
 tile (Config configInternal) transform ( tile, tileResponse ) =
     case tileResponse of
         RemoteData.NotAsked ->
