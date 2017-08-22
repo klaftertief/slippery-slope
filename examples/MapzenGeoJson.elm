@@ -11,7 +11,9 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.GeoJson.Svg as RenderGeoJson
 import SlippyMap.Interactive as Map
-import SlippyMap.Layer.JsonTile as JsonTileLayer
+import SlippyMap.Layer as Layer
+import SlippyMap.Layer.RemoteTile as RemoteTile
+import SlippyMap.Map.Transform as Transform
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -23,18 +25,22 @@ type alias Model =
 
 
 type alias TileCache =
-    Dict Tile.Comparable (WebData Json.Value)
+    Dict Tile.Comparable (WebData Features)
 
 
 type Msg
     = MapMsg Map.Msg
-    | TileResponse Tile.Comparable (WebData Json.Value)
+    | TileResponse Tile.Comparable (WebData Features)
 
 
 type alias Feature =
     { properties : Maybe FeatureProperties
     , geometry : GeoJson.Geometry
     }
+
+
+type alias Features =
+    List Feature
 
 
 type alias FeatureProperties =
@@ -52,14 +58,20 @@ init =
     let
         initialModel =
             Model
-                (Map.center { lon = -5, lat = 53 } 5)
+                (Map.at mapConfig
+                    { center = { lon = 0, lat = 0 }
+                    , zoom = 2
+                    }
+                )
                 Dict.empty
 
         tilesToLoad =
             newTilesToLoad initialModel
     in
     initialModel
-        ! List.map (getTile <| layerConfig initialModel.tiles) tilesToLoad
+        ! List.map
+            (getTile <| layerConfig initialModel.tiles)
+            tilesToLoad
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -87,9 +99,12 @@ update msg model =
 newTilesToLoad : Model -> List Tile
 newTilesToLoad model =
     let
+        transform =
+            Transform.transform mapConfig
+                (Map.getScene model.mapState)
+
         tiles =
-            Map.renderState model.mapState
-                |> .tileCover
+            Transform.tileCover transform
 
         tilesToLoad =
             Dict.diff
@@ -109,21 +124,21 @@ newTilesToLoad model =
     tilesToLoad
 
 
-getTile : JsonTileLayer.Config Msg -> Tile -> Cmd Msg
+getTile : RemoteTile.Config Features Msg -> Tile -> Cmd Msg
 getTile config ({ z, x, y } as tile) =
     let
         comparable =
             Tile.toComparable tile
 
         url =
-            JsonTileLayer.toUrl config tile
+            RemoteTile.toUrl config tile
     in
     Http.request
         { method = "GET"
         , headers = []
         , url = url
         , body = Http.emptyBody
-        , expect = Http.expectJson Json.value
+        , expect = Http.expectJson vectorTileDecoder
         , timeout = Nothing
         , withCredentials = False
         }
@@ -133,28 +148,37 @@ getTile config ({ z, x, y } as tile) =
 
 mapConfig : Map.Config Msg
 mapConfig =
-    Map.config MapMsg
+    Map.config { width = 600, height = 400 } MapMsg
 
 
-layerConfig : TileCache -> JsonTileLayer.Config Msg
+layerConfig : TileCache -> RemoteTile.Config Features Msg
 layerConfig tileCache =
-    JsonTileLayer.config
+    RemoteTile.config
         "https://tile.mapzen.com/mapzen/vector/v1/all/{z}/{x}/{y}.json?api_key=mapzen-A4166oq"
         []
-        |> JsonTileLayer.withTile
+        |> RemoteTile.withTile
             (\tile ->
                 Dict.get (Tile.toComparable tile) tileCache
                     |> Maybe.map (\v -> ( tile, v ))
                     |> Maybe.withDefault ( tile, RemoteData.NotAsked )
             )
-        |> JsonTileLayer.withRenderer
-            (\( { z, x, y } as tile, value ) renderState ->
+        |> RemoteTile.withRender
+            (\( { z, x, y } as tile, features ) transform ->
                 let
-                    features =
-                        Json.decodeValue vectorTileDecoder value
-                            --|> Result.map ((List.filterMap isInteresting) >> toFeatures)
-                            |> Result.map toFeatures
-                            |> Result.withDefault []
+                    scale =
+                        transform.crs.scale
+                            (transform.zoom - toFloat z)
+
+                    origin =
+                        Transform.origin transform
+
+                    point =
+                        { x = toFloat x
+                        , y = toFloat y
+                        }
+                            |> Point.multiplyBy scale
+
+                    -- |> Point.subtract origin
                 in
                 Svg.g []
                     (features
@@ -166,7 +190,7 @@ layerConfig tileCache =
 
                                     Just props ->
                                         not props.labelPlacement
-                                            && (props.minZoom < renderState.zoom)
+                             -- && (props.minZoom < transform.zoom)
                             )
                         |> List.sortBy
                             (\{ properties } ->
@@ -180,32 +204,24 @@ layerConfig tileCache =
                         |> List.concatMap
                             (renderFeature
                                 (\( lon, lat, _ ) ->
-                                    let
-                                        tileCoordinate =
-                                            { column = toFloat x
-                                            , row = toFloat y
-                                            , zoom = toFloat z
-                                            }
-
-                                        tilePoint =
-                                            renderState.coordinateToContainerPoint tileCoordinate
-                                    in
-                                    renderState.locationToContainerPoint { lon = lon, lat = lat }
-                                        |> Point.subtract tilePoint
+                                    Transform.locationToPoint transform { lon = lon, lat = lat }
+                                        |> Point.subtract point
                                 )
                             )
                     )
             )
-        |> JsonTileLayer.withAttribution "Mapzen"
 
 
 view : Model -> Html Msg
 view model =
     Html.div [ Html.Attributes.style [ ( "padding", "50px" ) ] ]
         [ Html.node "style" [] [ Html.text layerStyles ]
-        , Map.view mapConfig
+        , Map.view MapMsg
+            mapConfig
             model.mapState
-            [ JsonTileLayer.layer (layerConfig model.tiles) ]
+            [ RemoteTile.layer (layerConfig model.tiles)
+                |> Layer.withAttribution "Mapzen"
+            ]
         , Html.div []
             [ Html.text (toString model.mapState) ]
         ]
@@ -226,9 +242,10 @@ main =
         }
 
 
-vectorTileDecoder : Json.Decoder (List ( String, GeoJson ))
+vectorTileDecoder : Json.Decoder Features
 vectorTileDecoder =
     Json.keyValuePairs GeoJson.decoder
+        |> Json.map toFeatures
 
 
 renderFeature : (GeoJson.Position -> Point) -> Feature -> List (Svg msg)
@@ -246,6 +263,9 @@ renderFeature project { properties, geometry } =
             RenderGeoJson.Config
                 { project = project
                 , style = always []
+                , renderPoint =
+                    \attrs ->
+                        Svg.circle (attrs ++ [ Svg.Attributes.r "8" ]) []
                 }
 
         children =
@@ -373,10 +393,10 @@ layerStyles =
   stroke-linecap: round;
 }
 
-.tile .earth { fill: #cccccc; stroke: none; }
-.tile .water-layer, .tile .river, .tile .stream, .tile .canal { fill: none; stroke: #9DD9D2; stroke-width: 1.5px; }
-.tile .water, .tile .ocean { fill: #9DD9D2; }
-.tile .riverbank { fill: #9DD9D2; }
+.tile .earth { fill: #607d8b; stroke: none; }
+.tile .water-layer, .tile .river, .tile .stream, .tile .canal { fill: none; stroke: #ffeb3b; stroke-width: 1.5px; }
+.tile .water, .tile .ocean { fill: #2196f3; }
+.tile .riverbank { fill: #2196f3; }
 .tile .water_boundary, .tile .ocean_boundary, .tile .riverbank_boundary { fill: none; stroke: #93cbc4; stroke-width: 0.5px; }
 .tile .major_road { stroke: #fb7b7a; stroke-width: 1px; }
 .tile .minor_road { stroke: #999; stroke-width: 0.5px; }
