@@ -16,7 +16,7 @@ module SlippyMap.Interactive
         , view
         )
 
-{-| A convenience module re-exposing various specialised functions and types to quickly create a basic interactive map with a default configuration.
+{-| A convenience module wrapping or re-exposing various specialised functions and types to quickly create a basic interactive map with a default configuration.
 
 @docs Config, config, State, at, around, Msg, update, view, subscriptions, Layer, tileLayer, markerLayer, setMapState, getScene
 
