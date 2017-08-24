@@ -7,12 +7,15 @@ import Html.Attributes
 import Http
 import Json.Decode as Json
 import RemoteData exposing (WebData)
+import Set exposing (Set)
+import SlippyMap.Geo.CRS.Stereographic as CRS
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.GeoJson.Svg as RenderGeoJson
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer as Layer
 import SlippyMap.Layer.RemoteTile as RemoteTile
+import SlippyMap.Map.Config as MapConfig
 import SlippyMap.Map.Transform as Transform
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -56,18 +59,20 @@ init =
             Model
                 (Map.at mapConfig
                     { center = { lon = 7, lat = 51 }
-                    , zoom = 7
+                    , zoom = 3
                     }
                 )
                 Dict.empty
 
         tilesToLoad =
             newTilesToLoad initialModel
+
+        loadTiles =
+            List.map
+                (getTile <| layerConfig initialModel.tiles)
+                tilesToLoad
     in
-    initialModel
-        ! List.map
-            (getTile <| layerConfig initialModel.tiles)
-            tilesToLoad
+    initialModel ! loadTiles
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -75,14 +80,37 @@ update msg model =
     case msg of
         MapMsg mapMsg ->
             let
-                newModel =
-                    { model | mapState = Map.update mapConfig mapMsg model.mapState }
-
                 tilesToLoad =
-                    newTilesToLoad newModel
+                    newTilesToLoad model
+
+                loadTiles =
+                    List.map
+                        (getTile <| layerConfig model.tiles)
+                        tilesToLoad
+
+                newMapState =
+                    Map.update mapConfig
+                        mapMsg
+                        model.mapState
+
+                newTileCache =
+                    tilesToLoad
+                        |> List.map
+                            (\tile ->
+                                ( Tile.toComparable tile
+                                , RemoteData.Loading
+                                )
+                            )
+                        |> Dict.fromList
+                        |> Dict.union model.tiles
+
+                newModel =
+                    { model
+                        | mapState = newMapState
+                        , tiles = newTileCache
+                    }
             in
-            newModel
-                ! List.map (getTile <| layerConfig model.tiles) tilesToLoad
+            newModel ! loadTiles
 
         TileResponse key data ->
             { model
@@ -102,22 +130,19 @@ newTilesToLoad model =
         tiles =
             Transform.tileCover transform
 
-        tilesToLoad =
-            Dict.diff
-                (List.map
-                    (\tile ->
-                        ( Tile.toComparable tile
-                        , RemoteData.NotAsked
-                        )
-                    )
-                    tiles
-                    |> Dict.fromList
-                )
-                model.tiles
+        newTileSet =
+            tiles
+                |> List.map Tile.toComparable
+                |> Set.fromList
+
+        existingTileSet =
+            model.tiles
                 |> Dict.keys
-                |> List.map Tile.fromComparable
+                |> Set.fromList
     in
-    tilesToLoad
+    Set.diff newTileSet existingTileSet
+        |> Set.toList
+        |> List.map Tile.fromComparable
 
 
 getTile : RemoteTile.Config (List Feature) Msg -> Tile -> Cmd Msg
@@ -147,17 +172,15 @@ mapConfig =
     Map.config { width = 600, height = 400 } MapMsg
 
 
-layerConfig : TileCache -> RemoteTile.Config (List Feature) Msg
-layerConfig tileCache =
+
+-- |> MapConfig.withCRS CRS.crs
+
+
+initialLayerConfig : RemoteTile.Config (List Feature) Msg
+initialLayerConfig =
     RemoteTile.config
         "https://tile.mapzen.com/mapzen/vector/v1/all/{z}/{x}/{y}.json?api_key=mapzen-A4166oq"
         []
-        |> RemoteTile.withTile
-            (\tile ->
-                Dict.get (Tile.toComparable tile) tileCache
-                    |> Maybe.map (\v -> ( tile, v ))
-                    |> Maybe.withDefault ( tile, RemoteData.NotAsked )
-            )
         |> RemoteTile.withRender
             (\( { z, x, y } as tile, features ) transform ->
                 let
@@ -186,7 +209,7 @@ layerConfig tileCache =
 
                                     Just props ->
                                         not props.labelPlacement
-                             -- && (props.minZoom < transform.zoom)
+                                            && (props.minZoom < transform.zoom)
                             )
                         |> List.concatMap
                             (renderFeature
@@ -199,9 +222,20 @@ layerConfig tileCache =
             )
 
 
+layerConfig : TileCache -> RemoteTile.Config (List Feature) Msg
+layerConfig tileCache =
+    RemoteTile.withTile
+        (\tile ->
+            Dict.get (Tile.toComparable tile) tileCache
+                |> Maybe.map (\v -> ( tile, v ))
+                |> Maybe.withDefault ( tile, RemoteData.NotAsked )
+        )
+        initialLayerConfig
+
+
 view : Model -> Html Msg
 view model =
-    Html.div [ Html.Attributes.style [ ( "padding", "50px" ) ] ]
+    Html.div [ Html.Attributes.style [ ( "padding", "10px" ) ] ]
         [ Html.node "style" [] [ Html.text layerStyles ]
         , Map.view MapMsg
             mapConfig
@@ -284,6 +318,7 @@ renderFeature project { properties, geometry } =
 isInteresting : ( String, GeoJson ) -> Maybe ( String, GeoJson )
 isInteresting ( groupName, geojson ) =
     if groupName == "earth" || groupName /= "water" then
+        -- if groupName == "roads" then
         Just ( groupName, geojson )
     else
         Nothing
