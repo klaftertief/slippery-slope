@@ -56,7 +56,8 @@ view model =
         ]
         [ Html.h1 []
             [ Html.text "Simple interactive map" ]
-        , Map.view config
+        , Map.view MapMsg
+            config
             model.map
             [ Map.tileLayer ]
         ]
