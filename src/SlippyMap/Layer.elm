@@ -12,7 +12,6 @@ module SlippyMap.Layer
         , overlay
         , popup
         , render
-        , simple
         , withAttribution
         )
 
@@ -20,7 +19,7 @@ module SlippyMap.Layer
 
 TODO: Should setting the attribution wor on the config or on the layer? On the layer makes it so that all layers can just use it, on the config makes it so that one can not set an attribution to a group (wich does not make any sense.)
 
-@docs Config, marker, popup, overlay, base, control, Layer, simple, custom, group, withAttribution, attributions, flatten, render
+@docs Config, marker, popup, overlay, base, control, Layer, custom, group, withAttribution, attributions, flatten, render
 
 -}
 
@@ -42,7 +41,6 @@ type Config msg
 {-| -}
 type Renderer msg
     = NoRenderer
-    | SimpleRenderer ((Location -> Point) -> Html msg)
     | CustomRenderer (Transform -> Html msg)
 
 
@@ -164,16 +162,6 @@ type Layer msg
 
 
 {-| -}
-simple : ((Location -> Point) -> Html msg) -> Config msg -> Layer msg
-simple render (Config config) =
-    Layer Nothing <|
-        Config
-            { config
-                | renderer = SimpleRenderer render
-            }
-
-
-{-| -}
 custom : (Transform -> Html msg) -> Config msg -> Layer msg
 custom render (Config config) =
     Layer Nothing <|
@@ -247,9 +235,6 @@ render transform layer =
             case renderer of
                 NoRenderer ->
                     Html.text ""
-
-                SimpleRenderer render ->
-                    render (Transform.locationToScreenPoint transform)
 
                 CustomRenderer render ->
                     render transform

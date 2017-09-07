@@ -14,6 +14,7 @@ module SlippyMap.Layer.Marker
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -43,12 +44,12 @@ config toLocation toIcon =
 layer : Config marker msg -> List marker -> Layer msg
 layer config markers =
     Layer.marker
-        |> Layer.simple (render config markers)
+        |> Layer.custom (render config markers)
 
 
 {-| -}
-render : Config marker msg -> List marker -> (Location -> Point) -> Svg msg
-render ((Config { location }) as config) markers locationToScreenPoint =
+render : Config marker msg -> List marker -> Transform -> Svg msg
+render ((Config { location }) as config) markers transform =
     let
         locatedMarkers =
             List.map
@@ -76,14 +77,14 @@ render ((Config { location }) as config) markers locationToScreenPoint =
         , Svg.Attributes.height "100%"
         , Svg.Attributes.style "position: absolute;"
         ]
-        (List.map (marker config locationToScreenPoint) locatedMarkersFiltered)
+        (List.map (marker config transform) locatedMarkersFiltered)
 
 
-marker : Config marker msg -> (Location -> Point) -> ( Location, marker ) -> Svg msg
-marker (Config config) locationToScreenPoint ( location, marker ) =
+marker : Config marker msg -> Transform -> ( Location, marker ) -> Svg msg
+marker (Config config) transform ( location, marker ) =
     let
         markerPoint =
-            locationToScreenPoint location
+            Transform.locationToScreenPoint transform location
     in
     Svg.g
         [ Svg.Attributes.transform
