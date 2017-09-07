@@ -27,7 +27,8 @@ type alias Size =
     }
 
 
-{-| -}
+{-| TODO: Rename to Detail, Sector, View, Clipping or something similar
+-}
 type alias Scene =
     { center : Location
     , zoom : Float
@@ -45,7 +46,10 @@ type Transition
         }
 
 
-{-| -}
+{-| Supported interactions
+TODO: add Zooming
+TODO: keep track of time to allow speed/acceleration calculation
+-}
 type Interaction
     = NoInteraction
     | Dragging Drag
