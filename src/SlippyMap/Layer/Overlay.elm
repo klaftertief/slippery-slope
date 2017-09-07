@@ -1,6 +1,7 @@
 module SlippyMap.Layer.Overlay
     exposing
         ( Config
+        , customConfig
         , defaultConfig
         , iframeConfig
         , layer
@@ -8,7 +9,7 @@ module SlippyMap.Layer.Overlay
 
 {-| A layer to show something at specific bounds.
 
-@docs Config, defaultConfig, iframeConfig, layer
+@docs Config, defaultConfig, iframeConfig, customConfig, layer
 
 -}
 
@@ -48,6 +49,14 @@ iframeConfig =
         }
 
 
+{-| -}
+customConfig : Config (Html msg) msg
+customConfig =
+    Config
+        { renderOverlay = customOverlay
+        }
+
+
 imageOverlay : ( Float, Float ) -> String -> Html msg
 imageOverlay ( width, height ) url =
     Html.img
@@ -77,6 +86,23 @@ iframeOverlay ( width, height ) url =
             ]
         ]
         []
+
+
+customOverlay : ( Float, Float ) -> Html msg -> Html msg
+customOverlay ( width, height ) content =
+    let
+        scale =
+            width / 1024
+    in
+    Html.div
+        [ Html.Attributes.style
+            [ ( "width", "1024px" )
+            , ( "height", "576px" )
+            , ( "transform", "scale(" ++ toString scale ++ ")" )
+            , ( "transform-origin", "0 0" )
+            ]
+        ]
+        [ content ]
 
 
 
