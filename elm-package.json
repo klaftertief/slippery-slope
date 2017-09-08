@@ -34,6 +34,7 @@
     "SlippyMap.Layer.StaticImage",
     "SlippyMap.Layer.Tile",
     "SlippyMap.Map.Config",
+    "SlippyMap.Map.Events",
     "SlippyMap.Map.State",
     "SlippyMap.Map.Transform",
     "SlippyMap.Map.Types",
