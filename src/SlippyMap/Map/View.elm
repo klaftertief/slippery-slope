@@ -87,19 +87,6 @@ viewWithEvents config state events nestedLayers =
                 Nothing ->
                     []
 
-        interactionAttributesExternal =
-            case Config.getOnClick config of
-                Just onClick ->
-                    [ Html.Events.on "click"
-                        (Decode.map
-                            (Transform.screenPointToLocation transform >> onClick)
-                            clientPosition
-                        )
-                    ]
-
-                Nothing ->
-                    []
-
         userEventAttributes =
             List.map
                 (\{ name, toDecoder } ->
@@ -125,7 +112,7 @@ viewWithEvents config state events nestedLayers =
             [ ( "with-interaction", interaction /= Types.NoInteraction ) ]
          ]
             ++ interactionAttributesInternal
-            ++ interactionAttributesExternal
+            -- TODO: Mover user events into separate DOM element so that those won't override internal ones
             ++ userEventAttributes
         )
         [ -- TODO: Reactivate when working on event cleanup

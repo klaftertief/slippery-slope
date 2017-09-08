@@ -66,7 +66,6 @@ update msg model =
 config : Map.Config Msg
 config =
     Map.config { width = 600, height = 400 } MapMsg
-        |> MapConfig.onClick (Poi "Custom" >> AddPoi)
 
 
 subscriptions : Model -> Sub Msg
