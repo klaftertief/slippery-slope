@@ -49,8 +49,8 @@ layer config =
     Layer.custom (render config) Layer.base
 
 
-render : Config data msg -> Transform -> Svg msg
-render (Config { toData, renderData }) transform =
+render : Config data msg -> Layer.RenderParameters msg -> Svg msg
+render (Config { toData, renderData }) { transform } =
     let
         tiles =
             Transform.tileCover transform

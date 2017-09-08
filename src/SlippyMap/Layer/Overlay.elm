@@ -115,8 +115,8 @@ layer config boundedOverlays =
     Layer.custom (render config boundedOverlays) Layer.overlay
 
 
-render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Transform -> Html msg
-render config boundedOverlays transform =
+render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Layer.RenderParameters msg -> Html msg
+render config boundedOverlays { transform } =
     Html.div []
         (List.map (renderOverlay config transform) boundedOverlays)
 

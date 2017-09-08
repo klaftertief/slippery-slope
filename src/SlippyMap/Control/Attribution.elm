@@ -15,7 +15,7 @@ control prefix attributions =
     Layer.custom (render prefix attributions) Layer.control
 
 
-render : Maybe String -> List String -> Transform -> Html msg
+render : Maybe String -> List String -> Layer.RenderParameters msg -> Html msg
 render prefix attributions _ =
     let
         prefixText =

@@ -12,7 +12,6 @@ module SlippyMap.Layer.Marker
 -}
 
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
@@ -48,8 +47,8 @@ layer config markers =
 
 
 {-| -}
-render : Config marker msg -> List marker -> Transform -> Svg msg
-render ((Config { location }) as config) markers transform =
+render : Config marker msg -> List marker -> Layer.RenderParameters msg -> Svg msg
+render ((Config { location }) as config) markers renderParameters =
     let
         locatedMarkers =
             List.map
@@ -77,11 +76,11 @@ render ((Config { location }) as config) markers transform =
         , Svg.Attributes.height "100%"
         , Svg.Attributes.style "position: absolute;"
         ]
-        (List.map (marker config transform) locatedMarkersFiltered)
+        (List.map (marker config renderParameters) locatedMarkersFiltered)
 
 
-marker : Config marker msg -> Transform -> ( Location, marker ) -> Svg msg
-marker (Config config) transform ( location, marker ) =
+marker : Config marker msg -> Layer.RenderParameters msg -> ( Location, marker ) -> Svg msg
+marker (Config config) { transform } ( location, marker ) =
     let
         markerPoint =
             Transform.locationToScreenPoint transform location

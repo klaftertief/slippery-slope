@@ -58,8 +58,8 @@ layer config location =
     Layer.custom (render config location) Layer.overlay
 
 
-render : Config msg -> Location -> Transform -> Svg msg
-render ((Config internalConfig) as config) location transform =
+render : Config msg -> Location -> Layer.RenderParameters msg -> Svg msg
+render ((Config internalConfig) as config) location { transform } =
     let
         project ( lon, lat, _ ) =
             Transform.locationToScreenPoint transform (Location lon lat)

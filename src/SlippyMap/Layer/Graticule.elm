@@ -27,8 +27,8 @@ layer =
     Layer.custom render Layer.overlay
 
 
-render : Transform -> Svg msg
-render transform =
+render : Layer.RenderParameters msg -> Svg msg
+render { transform } =
     let
         project ( lon, lat, _ ) =
             Transform.locationToScreenPoint transform (Location lon lat)

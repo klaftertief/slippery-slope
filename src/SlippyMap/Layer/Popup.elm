@@ -97,8 +97,8 @@ layer config locatedPopups =
     Layer.custom (render config locatedPopups) Layer.popup
 
 
-render : Config popup msg -> List ( Location, popup ) -> Transform -> Html msg
-render config locatedPopups transform =
+render : Config popup msg -> List ( Location, popup ) -> Layer.RenderParameters msg -> Html msg
+render config locatedPopups { transform } =
     Html.div [ Html.Attributes.class "layer--popup" ]
         (List.map (renderPopup config transform) locatedPopups)
 

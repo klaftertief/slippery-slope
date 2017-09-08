@@ -133,7 +133,13 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
                             , ( "pointer-events", "none" )
                             ]
                         ]
-                        [ Layer.render transform layer ]
+                        [ Layer.render
+                            { mapConfig = Config config
+                            , mapState = state
+                            , transform = transform
+                            }
+                            layer
+                        ]
                 )
                 layers
             )

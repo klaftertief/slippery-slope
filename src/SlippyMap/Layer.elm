@@ -2,6 +2,7 @@ module SlippyMap.Layer
     exposing
         ( Config
         , Layer
+        , RenderParameters
         , attributions
         , base
         , control
@@ -19,13 +20,13 @@ module SlippyMap.Layer
 
 TODO: Should setting the attribution wor on the config or on the layer? On the layer makes it so that all layers can just use it, on the config makes it so that one can not set an attribution to a group (wich does not make any sense.)
 
-@docs Config, marker, popup, overlay, base, control, Layer, custom, group, withAttribution, attributions, flatten, render
+@docs Config, marker, popup, overlay, base, control, Layer, RenderParameters, custom, group, withAttribution, attributions, flatten, render
 
 -}
 
 import Html exposing (Html)
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Map.Config as Map
+import SlippyMap.Map.State as Map
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 
 
@@ -41,7 +42,15 @@ type Config msg
 {-| -}
 type Renderer msg
     = NoRenderer
-    | CustomRenderer (Transform -> Html msg)
+    | CustomRenderer (RenderParameters msg -> Html msg)
+
+
+{-| -}
+type alias RenderParameters msg =
+    { mapConfig : Map.Config msg
+    , mapState : Map.State
+    , transform : Transform
+    }
 
 
 {-| Each `Layer` is placed on a `Pane` that defines the order of layers on top of the map.
@@ -75,12 +84,6 @@ paneToLevel pane =
 
         CustomLevel level ->
             level
-
-
-
--- | GeneralRenderer ({generalConfig} -> Html msg)
--- | TileRenderer ({generalConfig} -> {tileConfig} -> Html msg)
--- | StaticRenderer (Html msg)
 
 
 {-| Create the `Config` for a `Layer` rendered on the base `Pane`.
@@ -162,7 +165,7 @@ type Layer msg
 
 
 {-| -}
-custom : (Transform -> Html msg) -> Config msg -> Layer msg
+custom : (RenderParameters msg -> Html msg) -> Config msg -> Layer msg
 custom render (Config config) =
     Layer Nothing <|
         Config
@@ -228,8 +231,8 @@ level layer =
 
 {-| TODO: Layers should have general attributes like class name. Add here.
 -}
-render : Transform -> Layer msg -> Html msg
-render transform layer =
+render : RenderParameters msg -> Layer msg -> Html msg
+render renderParams layer =
     case layer of
         Layer _ (Config { renderer }) ->
             case renderer of
@@ -237,7 +240,7 @@ render transform layer =
                     Html.text ""
 
                 CustomRenderer render ->
-                    render transform
+                    render renderParams
 
         LayerGroup _ _ ->
             Html.text ""

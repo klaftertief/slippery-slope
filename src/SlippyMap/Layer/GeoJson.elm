@@ -58,8 +58,8 @@ layer config geoJson =
     Layer.custom (render config geoJson) Layer.overlay
 
 
-render : Config msg -> GeoJson -> Transform -> Svg msg
-render (Config internalConfig) geoJson transform =
+render : Config msg -> GeoJson -> Layer.RenderParameters msg -> Svg msg
+render (Config internalConfig) geoJson { transform } =
     let
         project ( lon, lat, _ ) =
             Transform.locationToScreenPoint transform (Location lon lat)

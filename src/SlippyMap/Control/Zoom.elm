@@ -34,8 +34,8 @@ control config =
 
 {-| TODO: This also needs the general map config, or at least its min- and maxZoom
 -}
-render : Config msg -> Transform -> Html msg
-render (Config { toMsg }) transform =
+render : Config msg -> Layer.RenderParameters msg -> Html msg
+render (Config { toMsg }) { transform } =
     Html.map toMsg <|
         Html.div
             [ Html.Attributes.style
