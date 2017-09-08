@@ -18,8 +18,6 @@ module SlippyMap.Layer
 
 {-| A `Layer` usually renders geolocated contents on top of a map.
 
-TODO: Should setting the attribution wor on the config or on the layer? On the layer makes it so that all layers can just use it, on the config makes it so that one can not set an attribution to a group (wich does not make any sense.)
-
 @docs Config, marker, popup, overlay, base, control, Layer, RenderParameters, custom, group, withAttribution, attributions, flatten, render
 
 -}

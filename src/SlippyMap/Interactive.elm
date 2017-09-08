@@ -30,6 +30,7 @@ import SlippyMap.Layer.Marker.Pin as Marker
 import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImageLayer
 import SlippyMap.Map.Config as Config
+import SlippyMap.Map.Events as Events exposing (Event)
 import SlippyMap.Map.Msg as MapMsg
 import SlippyMap.Map.State as MapState
 import SlippyMap.Map.Subscriptions as Subscriptions
@@ -143,8 +144,8 @@ subscriptions config (State { mapState }) =
 
 {-| TODO: Do not depend on `toMsg`, this should go into a wrapped Config.
 -}
-view : (Msg -> msg) -> Config msg -> State -> List (Layer msg) -> Html msg
-view toMsg config (State { mapState, popup }) layers =
+view : (Msg -> msg) -> Config msg -> State -> List (Event msg) -> List (Layer msg) -> Html msg
+view toMsg config (State { mapState, popup }) events layers =
     let
         popupLayers =
             popup
@@ -159,7 +160,7 @@ view toMsg config (State { mapState, popup }) layers =
                     )
                 |> Maybe.withDefault []
     in
-    View.view config mapState (layers ++ popupLayers)
+    View.viewWithEvents config mapState events (layers ++ popupLayers)
 
 
 

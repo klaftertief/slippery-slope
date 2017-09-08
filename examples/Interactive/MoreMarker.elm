@@ -2,10 +2,12 @@ module Interactive.MoreMarker exposing (..)
 
 import Html exposing (Html)
 import Html.Attributes
+import Json.Decode
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer.Marker.Circle as Marker
 import SlippyMap.Map.Config as MapConfig
+import SlippyMap.Map.Events as Events
 
 
 type alias Model =
@@ -80,8 +82,16 @@ view model =
         ]
         [ Html.h1 []
             [ Html.text "Interactive map with marker playground" ]
-        , Map.view config
+        , Map.view MapMsg
+            config
             model.map
+            [ Events.on "click"
+                (\( _, location ) ->
+                    Poi "Custom" location
+                        |> AddPoi
+                        |> Json.Decode.succeed
+                )
+            ]
             [ Map.tileLayer
             , Marker.marker (List.map .location model.pois)
             ]

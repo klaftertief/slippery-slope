@@ -1,8 +1,8 @@
-module SlippyMap.Map.View exposing (view)
+module SlippyMap.Map.View exposing (view, viewWithEvents)
 
 {-|
 
-@docs view
+@docs view, viewWithEvents
 
 -}
 
@@ -16,6 +16,7 @@ import SlippyMap.Control.Zoom as Zoom
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config exposing (Config(..))
+import SlippyMap.Map.Events as Events exposing (Event)
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (State(..))
 import SlippyMap.Map.Transform as Transform exposing (Transform)
@@ -25,6 +26,12 @@ import SlippyMap.Map.Types as Types exposing (Focus(..))
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
 view config state nestedLayers =
+    viewWithEvents config state [] nestedLayers
+
+
+{-| -}
+viewWithEvents : Config msg -> State -> List (Event msg) -> List (Layer msg) -> Html msg
+viewWithEvents config state events nestedLayers =
     let
         ( crs, size ) =
             ( Config.crs config, Config.size config )
@@ -92,6 +99,20 @@ view config state nestedLayers =
 
                 Nothing ->
                     []
+
+        userEventAttributes =
+            List.map
+                (\{ name, toDecoder } ->
+                    Html.Events.on name
+                        (clientPosition
+                            |> Decode.map
+                                (\point ->
+                                    ( point, Transform.screenPointToLocation transform point )
+                                )
+                            |> Decode.andThen toDecoder
+                        )
+                )
+                events
     in
     Html.div
         ([ Html.Attributes.style
@@ -105,6 +126,7 @@ view config state nestedLayers =
          ]
             ++ interactionAttributesInternal
             ++ interactionAttributesExternal
+            ++ userEventAttributes
         )
         [ -- TODO: Reactivate when working on event cleanup
           {- Html.div
