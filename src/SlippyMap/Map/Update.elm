@@ -16,7 +16,7 @@ import SlippyMap.Map.Types as Types exposing (Drag, Focus, Interaction(..), Pinc
 
 {-| -}
 update : Config msg -> Msg -> State -> State
-update config msg ((State { scene }) as state) =
+update config msg state =
     case msg of
         ZoomIn ->
             State.zoomIn config state
@@ -116,7 +116,11 @@ keyboardNavigation keyCode =
 
 
 updateDrag : Config msg -> DragMsg -> State -> State
-updateDrag config dragMsg ((State { interaction }) as state) =
+updateDrag config dragMsg state =
+    let
+        interaction =
+            State.interaction state
+    in
     State.withInteraction config <|
         case dragMsg of
             DragStart xy ->
@@ -171,7 +175,11 @@ updateDrag config dragMsg ((State { interaction }) as state) =
 
 
 updatePinch : Config msg -> PinchMsg -> State -> State
-updatePinch config pinchMsg ((State { interaction }) as state) =
+updatePinch config pinchMsg state =
+    let
+        interaction =
+            State.interaction state
+    in
     State.withInteraction config <|
         case pinchMsg of
             PinchStart touches ->

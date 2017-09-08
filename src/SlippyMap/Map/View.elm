@@ -24,22 +24,36 @@ import SlippyMap.Map.Types as Types exposing (Focus(..))
 
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
-view (Config config) ((State { scene, interaction }) as state) nestedLayers =
+view config state nestedLayers =
     let
+        ( crs, size ) =
+            ( Config.crs config, Config.size config )
+
+        ( scene, interaction ) =
+            ( State.getScene state
+            , State.interaction state
+            )
+
         transform =
-            Transform.transform (Config config) scene
+            Transform.transform crs size scene
+
+        layerParameters =
+            { mapConfig = config
+            , mapState = state
+            , transform = transform
+            }
 
         attributions =
             List.concatMap Layer.attributions nestedLayers
 
         attributionControl =
-            [ Attribution.control
-                config.attributionPrefix
-                attributions
-            ]
+            [ Attribution.control attributions ]
+
+        tagger =
+            Config.tagger config
 
         zoomControl =
-            case config.toMsg of
+            case tagger of
                 Just toMsg ->
                     [ Zoom.control (Zoom.config toMsg) ]
 
@@ -57,17 +71,17 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
             Layer.flatten layersWithControls
 
         interactionAttributesInternal =
-            case config.toMsg of
+            case tagger of
                 Just toMsg ->
                     List.map
                         (Html.Attributes.map toMsg)
-                        (eventAttributes config.interactions)
+                        (eventAttributes <| Config.interactions config)
 
                 Nothing ->
                     []
 
         interactionAttributesExternal =
-            case config.onClick of
+            case Config.getOnClick config of
                 Just onClick ->
                     [ Html.Events.on "click"
                         (Decode.map
@@ -82,8 +96,8 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
     Html.div
         ([ Html.Attributes.style
             [ ( "position", "relative" )
-            , ( "width", toString config.size.x ++ "px" )
-            , ( "height", toString config.size.y ++ "px" )
+            , ( "width", toString size.x ++ "px" )
+            , ( "height", toString size.y ++ "px" )
             , ( "background", "#eee" )
             ]
          , Html.Attributes.classList
@@ -116,8 +130,8 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
             , Html.Attributes.style
                 [ ( "position", "absolute" )
                 , ( "overflow", "hidden" )
-                , ( "width", toString config.size.x ++ "px" )
-                , ( "height", toString config.size.y ++ "px" )
+                , ( "width", toString size.x ++ "px" )
+                , ( "height", toString size.y ++ "px" )
                 ]
             ]
             (List.map
@@ -128,18 +142,12 @@ view (Config config) ((State { scene, interaction }) as state) nestedLayers =
                             [ ( "position", "absolute" )
                             , ( "left", "0" )
                             , ( "top", "0" )
-                            , ( "width", toString config.size.x ++ "px" )
-                            , ( "height", toString config.size.y ++ "px" )
+                            , ( "width", toString size.x ++ "px" )
+                            , ( "height", toString size.y ++ "px" )
                             , ( "pointer-events", "none" )
                             ]
                         ]
-                        [ Layer.render
-                            { mapConfig = Config config
-                            , mapState = state
-                            , transform = transform
-                            }
-                            layer
-                        ]
+                        [ Layer.render layerParameters layer ]
                 )
                 layers
             )

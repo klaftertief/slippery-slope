@@ -17,10 +17,16 @@ import SlippyMap.Map.Types as Types exposing (Drag, Focus(..), Interaction(..), 
 
 {-| -}
 subscriptions : Config msg -> State -> Sub msg
-subscriptions (Config config) ((State { interaction, focus, transition }) as state) =
-    case config.toMsg of
+subscriptions config state =
+    case Config.tagger config of
         Just toMsg ->
             let
+                ( interaction, focus, transition ) =
+                    ( State.interaction state
+                    , State.focus state
+                    , State.transition state
+                    )
+
                 dragSubscriptions =
                     case interaction of
                         NoInteraction ->

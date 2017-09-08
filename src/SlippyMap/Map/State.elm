@@ -1,11 +1,13 @@
 module SlippyMap.Map.State
     exposing
-        ( State(..)
+        ( State
         , around
         , at
         , defaultState
         , fitBounds
+        , focus
         , getScene
+        , interaction
         , moveBy
         , moveByAnimated
         , moveTo
@@ -16,6 +18,7 @@ module SlippyMap.Map.State
         , setTransition
         , setZoom
         , tickTransition
+        , transition
         , withInteraction
         , zoomByAround
         , zoomIn
@@ -23,9 +26,9 @@ module SlippyMap.Map.State
         , zoomOut
         )
 
-{-|
+{-| TODO: Should the functions expect a Transform directly combined with the Config?
 
-@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setTransition, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, moveByAnimated, getScene
+@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setTransition, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, moveByAnimated, getScene, interaction, focus, transition
 
 -}
 
@@ -124,8 +127,11 @@ withInteraction config ((State { interaction }) as state) =
 
 
 withDrag : Config msg -> Drag -> State -> State
-withDrag ((Config.Config { size }) as config) { last, current } state =
+withDrag config { last, current } state =
     let
+        size =
+            Config.size config
+
         newCenterPoint =
             size
                 |> Point.divideBy 2
@@ -138,8 +144,11 @@ withDrag ((Config.Config { size }) as config) { last, current } state =
 
 
 withPinch : Config msg -> Pinch -> State -> State
-withPinch ((Config.Config { crs, size }) as config) { last, current } ((State { scene }) as state) =
+withPinch config { last, current } ((State { scene }) as state) =
     let
+        ( crs, size ) =
+            ( Config.crs config, Config.size config )
+
         toPoint position =
             { x = toFloat position.x
             , y = toFloat position.y
@@ -186,8 +195,11 @@ withPinch ((Config.Config { crs, size }) as config) { last, current } ((State { 
 moveTo : Config msg -> Point -> State -> State
 moveTo config newCenterPoint ((State { scene }) as state) =
     let
+        ( crs, size ) =
+            ( Config.crs config, Config.size config )
+
         transform =
-            Transform.transform config scene
+            Transform.transform crs size scene
 
         newCenter =
             Transform.screenPointToLocation transform
@@ -198,8 +210,11 @@ moveTo config newCenterPoint ((State { scene }) as state) =
 
 {-| -}
 moveBy : Config msg -> Point -> State -> State
-moveBy ((Config.Config { size }) as config) offset state =
+moveBy config offset state =
     let
+        size =
+            Config.size config
+
         newCenterPoint =
             size
                 |> Point.divideBy 2
@@ -210,15 +225,20 @@ moveBy ((Config.Config { size }) as config) offset state =
 
 {-| -}
 moveByAnimated : Config msg -> Point -> State -> State
-moveByAnimated ((Config.Config { size }) as config) offset ((State { scene }) as state) =
+moveByAnimated config offset ((State { scene }) as state) =
     let
+        ( crs, size ) =
+            ( Config.crs config
+            , Config.size config
+            )
+
         newCenterPoint =
             size
                 |> Point.divideBy 2
                 |> Point.add offset
 
         transform =
-            Transform.transform config scene
+            Transform.transform crs size scene
 
         newCenter =
             Transform.screenPointToLocation transform
@@ -256,10 +276,16 @@ setCenter config newCenter ((State { scene }) as state) =
 
 {-| -}
 setZoom : Config msg -> Float -> State -> State
-setZoom (Config.Config { minZoom, maxZoom }) newZoom ((State { scene }) as state) =
+setZoom config newZoom ((State { scene }) as state) =
     if isNaN newZoom || isInfinite newZoom then
         state
     else
+        let
+            ( minZoom, maxZoom ) =
+                ( Config.minZoom config
+                , Config.maxZoom config
+                )
+        in
         -- setScene
         --     { scene | zoom = clamp minZoom maxZoom newZoom }
         --     state
@@ -280,26 +306,37 @@ setZoom (Config.Config { minZoom, maxZoom }) newZoom ((State { scene }) as state
 
 {-| -}
 zoomIn : Config msg -> State -> State
-zoomIn ((Config.Config { zoomDelta }) as config) ((State { scene }) as state) =
-    setZoom config (scene.zoom + zoomDelta) state
+zoomIn config ((State { scene }) as state) =
+    setZoom config
+        (scene.zoom + Config.zoomDelta config)
+        state
 
 
 {-| -}
 zoomOut : Config msg -> State -> State
-zoomOut ((Config.Config { zoomDelta }) as config) ((State { scene }) as state) =
-    setZoom config (scene.zoom - zoomDelta) state
+zoomOut config ((State { scene }) as state) =
+    setZoom config
+        (scene.zoom - Config.zoomDelta config)
+        state
 
 
 {-| -}
 zoomInAround : Config msg -> Point -> State -> State
-zoomInAround ((Config.Config { zoomDelta }) as config) =
-    zoomByAround config zoomDelta
+zoomInAround config =
+    zoomByAround config (Config.zoomDelta config)
 
 
 {-| -}
 zoomByAround : Config msg -> Float -> Point -> State -> State
-zoomByAround ((Config.Config { size, minZoom, maxZoom }) as config) delta around ((State { scene }) as state) =
+zoomByAround config delta around ((State { scene }) as state) =
     let
+        ( crs, size, minZoom, maxZoom ) =
+            ( Config.crs config
+            , Config.size config
+            , Config.minZoom config
+            , Config.maxZoom config
+            )
+
         newZoom =
             if isNaN delta || isInfinite delta then
                 scene.zoom
@@ -307,10 +344,10 @@ zoomByAround ((Config.Config { size, minZoom, maxZoom }) as config) delta around
                 clamp minZoom maxZoom (scene.zoom + delta)
 
         transform =
-            Transform.transform config scene
+            Transform.transform crs size scene
 
         transformZoomed =
-            Transform.transform config { scene | zoom = newZoom }
+            Transform.transform crs size { scene | zoom = newZoom }
 
         currentCenterPoint =
             Transform.locationToPoint transform scene.center
@@ -342,10 +379,19 @@ zoomByAround ((Config.Config { size, minZoom, maxZoom }) as config) delta around
 
 {-| -}
 fitBounds : Config msg -> Location.Bounds -> State -> State
-fitBounds ((Config.Config { crs, size, zoomSnap, minZoom, maxZoom }) as config) { southWest, northEast } (State { scene }) =
+fitBounds config { southWest, northEast } (State { scene }) =
     let
+        ( crs, size, zoomSnap, minZoom, maxZoom ) =
+            ( Config.crs config
+            , Config.size config
+            , Config.zoomSnap config
+            , Config.minZoom config
+            , Config.maxZoom config
+            )
+
         transform =
-            Transform.transform config
+            Transform.transform crs
+                size
                 -- scene
                 { center = Location 0 0
                 , zoom = 0
@@ -394,6 +440,24 @@ fitBounds ((Config.Config { crs, size, zoomSnap, minZoom, maxZoom }) as config) 
 getScene : State -> Scene
 getScene (State { scene }) =
     scene
+
+
+{-| -}
+interaction : State -> Interaction
+interaction (State { interaction }) =
+    interaction
+
+
+{-| -}
+focus : State -> Focus
+focus (State { focus }) =
+    focus
+
+
+{-| -}
+transition : State -> Transition
+transition (State { transition }) =
+    transition
 
 
 {-| -}

@@ -1,21 +1,30 @@
 module SlippyMap.Map.Config
     exposing
-        ( Config(Config)
+        ( Config
         , Interactions
+        , attributionPrefix
+        , crs
+        , getOnClick
+        , interactions
         , interactive
+        , maxZoom
+        , minZoom
         , onClick
         , size
         , static
+        , tagger
         , withCRS
         , withMaxZoom
         , withMinZoom
         , withZoomDelta
         , withZoomSnap
+        , zoomDelta
+        , zoomSnap
         )
 
 {-|
 
-@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, withMaxZoom, withMinZoom, Interactions, onClick
+@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, withMaxZoom, withMinZoom, Interactions, onClick, crs, minZoom, maxZoom, zoomDelta, zoomSnap, tagger, interactions, attributionPrefix, getOnClick
 
 TODO: Add field for client position decoder
 
@@ -63,7 +72,8 @@ defaultConfigInternal =
     }
 
 
-{-| -}
+{-| TODO: make opaque
+-}
 type alias Interactions =
     { scrollWheelZoom : Bool
     , doubleClickZoom : Bool
@@ -153,3 +163,57 @@ withZoomDelta zoomDelta (Config configInternal) =
 size : Config msg -> Point
 size (Config { size }) =
     size
+
+
+{-| -}
+crs : Config msg -> CRS
+crs (Config { crs }) =
+    crs
+
+
+{-| -}
+minZoom : Config msg -> Float
+minZoom (Config { minZoom }) =
+    minZoom
+
+
+{-| -}
+maxZoom : Config msg -> Float
+maxZoom (Config { maxZoom }) =
+    maxZoom
+
+
+{-| -}
+zoomDelta : Config msg -> Float
+zoomDelta (Config { zoomDelta }) =
+    zoomDelta
+
+
+{-| -}
+zoomSnap : Config msg -> Float
+zoomSnap (Config { zoomSnap }) =
+    zoomSnap
+
+
+{-| -}
+tagger : Config msg -> Maybe (Msg -> msg)
+tagger (Config { toMsg }) =
+    toMsg
+
+
+{-| -}
+getOnClick : Config msg -> Maybe (Location -> msg)
+getOnClick (Config { onClick }) =
+    onClick
+
+
+{-| -}
+interactions : Config msg -> Interactions
+interactions (Config { interactions }) =
+    interactions
+
+
+{-| -}
+attributionPrefix : Config msg -> Maybe String
+attributionPrefix (Config { attributionPrefix }) =
+    attributionPrefix

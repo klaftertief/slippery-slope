@@ -34,8 +34,8 @@ type alias Transform =
 
 
 {-| -}
-transform : Config msg -> Scene -> Transform
-transform (Config.Config { crs, size }) { center, zoom } =
+transform : CRS -> Point -> Scene -> Transform
+transform crs size { center, zoom } =
     { size = size
     , crs = crs
     , center = center
