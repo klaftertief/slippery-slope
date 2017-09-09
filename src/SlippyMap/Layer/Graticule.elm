@@ -12,12 +12,8 @@ module SlippyMap.Layer.Graticule
 
 import GeoJson exposing (GeoJson)
 import Json.Encode as Json
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.GeoJson.Svg as Render
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Config as Map
-import SlippyMap.Map.Transform as Transform exposing (Transform)
+import SlippyMap.Layer.GeoJson as GeoJsonLayer
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -25,27 +21,9 @@ import Svg.Attributes
 {-| -}
 layer : Layer msg
 layer =
-    Layer.custom render Layer.overlay
-
-
-render : Layer.RenderParameters msg -> Svg msg
-render { transform, mapConfig } =
-    let
-        size =
-            Map.size mapConfig
-
-        project ( lon, lat, _ ) =
-            Transform.locationToScreenPoint transform (Location lon lat)
-    in
-    Svg.svg
-        [ -- Important for touch pinching
-          Svg.Attributes.pointerEvents "none"
-        , Svg.Attributes.width (toString size.x)
-        , Svg.Attributes.height (toString size.y)
-        , Svg.Attributes.style "position: absolute;"
-        ]
-        [ Render.renderGeoJson (renderConfig project) graticule
-        ]
+    GeoJsonLayer.layer
+        (GeoJsonLayer.styleConfig style)
+        graticule
 
 
 style : GeoJson.FeatureObject -> List (Svg.Attribute msg)
@@ -58,17 +36,6 @@ style { properties } =
     -- , Svg.Attributes.shapeRendering "crispEdges"
     , Svg.Attributes.fill "none"
     ]
-
-
-renderConfig : (GeoJson.Position -> Point) -> Render.Config msg
-renderConfig project =
-    Render.Config
-        { project = project
-        , style = style
-        , renderPoint =
-            \attrs ->
-                Svg.circle (attrs ++ [ Svg.Attributes.r "8" ]) []
-        }
 
 
 {-| -}

@@ -3,11 +3,12 @@ module SlippyMap.Layer.GeoJson
         ( Config
         , defaultConfig
         , layer
+        , styleConfig
         )
 
 {-| A layer to render GeoJson.
 
-@docs Config, defaultConfig, layer
+@docs Config, defaultConfig, styleConfig, layer
 
 -}
 
@@ -47,6 +48,13 @@ defaultConfig events =
                 ]
                     ++ events featureObject
         }
+
+
+{-| -}
+styleConfig : (GeoJson.FeatureObject -> List (Svg.Attribute msg)) -> Config msg
+styleConfig style =
+    Config
+        { style = style }
 
 
 
