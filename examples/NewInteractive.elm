@@ -1,12 +1,13 @@
 module NewInteractive exposing (..)
 
+-- import Layer.Debug
+
 import Data.World
 import GeoJson exposing (GeoJson)
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
 import Json.Decode
-import Layer.Debug
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
 import SlippyMap.Layer as Layer
@@ -82,8 +83,10 @@ mapConfig size =
 view : Model -> Html Msg
 view model =
     Html.div []
-        [ Map.view (mapConfig model.size)
+        [ Map.view MapMsg
+            (mapConfig model.size)
             model.mapState
+            []
             [ {- StaticImage.layer
                      (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
                          |> StaticImage.withAttribution "© OpenStreetMap contributors"
@@ -112,15 +115,15 @@ view model =
             --         )
             --     )
             --     (Maybe.withDefault myGeoJson Data.World.geoJson)
-            -- , Layer.group
-            --     [ Circle.layer (Circle.config 500)
-            --         (Location 0 60)
-            --     , Circle.layer (Circle.config 500)
-            --         (Location 0 30)
-            --     , Circle.layer (Circle.config 500)
-            --         (Location 0 0)
-            --     ]
-            , CircleMarker.layer [ Location 0 0 ]
+            , Layer.group
+                [ Circle.layer (Circle.config 500)
+                    (Location 0 60)
+                , Circle.layer (Circle.config 500)
+                    (Location 0 30)
+                , Circle.layer (Circle.config 500)
+                    (Location 0 0)
+                ]
+            , CircleMarker.marker [ Location 0 0 ]
 
             -- , PinMarker.layer [ Location -10 0 ]
             -- , Popup.layer Popup.config
