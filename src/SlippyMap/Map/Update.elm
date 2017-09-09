@@ -167,7 +167,8 @@ updateDrag config dragMsg state =
                                         }
 
                             Pinching { last } ->
-                                identity
+                                -- identity
+                                State.snapZoom config
                 in
                 state
                     |> State.setInteraction NoInteraction
@@ -180,25 +181,27 @@ updatePinch config pinchMsg state =
         interaction =
             State.interaction state
     in
-    State.withInteraction config <|
-        case pinchMsg of
-            PinchStart touches ->
-                State.setInteraction (Pinching (Pinch touches touches)) state
+    case pinchMsg of
+        PinchStart touches ->
+            State.setInteraction (Pinching (Pinch touches touches)) state
 
-            PinchAt touches ->
-                let
-                    newInteraction =
-                        case interaction of
-                            NoInteraction ->
-                                Pinching (Pinch touches touches)
+        PinchAt touches ->
+            let
+                newInteraction =
+                    case interaction of
+                        NoInteraction ->
+                            Pinching (Pinch touches touches)
 
-                            Dragging { current } ->
-                                Pinching (Pinch ( current, current ) touches)
+                        Dragging { current } ->
+                            Pinching (Pinch ( current, current ) touches)
 
-                            Pinching { current } ->
-                                Pinching (Pinch current touches)
-                in
-                State.setInteraction newInteraction state
+                        Pinching { current } ->
+                            Pinching (Pinch current touches)
+            in
+            State.setInteraction newInteraction state
+                |> State.withInteraction config
 
-            PinchEnd _ ->
-                State.setInteraction NoInteraction state
+        PinchEnd _ ->
+            State.setInteraction NoInteraction state
+                -- state
+                |> State.snapZoom config

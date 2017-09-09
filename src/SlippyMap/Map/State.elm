@@ -17,6 +17,7 @@ module SlippyMap.Map.State
         , setScene
         , setTransition
         , setZoom
+        , snapZoom
         , tickTransition
         , transition
         , withInteraction
@@ -28,7 +29,7 @@ module SlippyMap.Map.State
 
 {-| TODO: Should the functions expect a Transform directly combined with the Config?
 
-@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setTransition, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, moveByAnimated, getScene, interaction, focus, transition
+@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setTransition, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, moveByAnimated, getScene, interaction, focus, transition, snapZoom
 
 -}
 
@@ -302,6 +303,26 @@ setZoom config newZoom ((State { scene }) as state) =
                 }
             )
             state
+
+
+{-| -}
+snapZoom : Config msg -> State -> State
+snapZoom config ((State { scene }) as state) =
+    let
+        ( zoomSnap, minZoom, maxZoom ) =
+            ( Config.zoomSnap config
+            , Config.minZoom config
+            , Config.maxZoom config
+            )
+
+        zoomSnapped =
+            clamp minZoom maxZoom <|
+                if zoomSnap == 0 then
+                    scene.zoom
+                else
+                    toFloat (floor (scene.zoom / zoomSnap)) * zoomSnap
+    in
+    setZoom config zoomSnapped state
 
 
 {-| -}
