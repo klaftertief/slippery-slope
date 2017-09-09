@@ -16,6 +16,7 @@ import Regex
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Config as Map
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -50,27 +51,32 @@ layer config =
 
 
 render : Config data msg -> Layer.RenderParameters msg -> Svg msg
-render (Config { toData, renderData }) { transform } =
+render (Config { toData, renderData }) ({ mapConfig, transform } as renderParameters) =
     let
         tiles =
             Transform.tileCover transform
 
         tilesRendered =
             List.map
-                (tile (toData >> renderData transform) transform)
+                (tile
+                    (toData >> renderData transform)
+                    renderParameters
+                )
                 tiles
     in
     Svg.Keyed.node "svg"
         [ -- Important for touch pinching
           Svg.Attributes.pointerEvents "none"
-        , Svg.Attributes.width (toString transform.size.x)
-        , Svg.Attributes.height (toString transform.size.y)
+        , Svg.Attributes.width
+            (toString <| .x (Map.size mapConfig))
+        , Svg.Attributes.height
+            (toString <| .y (Map.size mapConfig))
         ]
         tilesRendered
 
 
-tile : (Tile -> Svg msg) -> Transform -> Tile -> ( String, Svg msg )
-tile render transform ({ z, x, y } as tile) =
+tile : (Tile -> Svg msg) -> Layer.RenderParameters msg -> Tile -> ( String, Svg msg )
+tile render { transform } ({ z, x, y } as tile) =
     let
         key =
             toString z
@@ -80,8 +86,7 @@ tile render transform ({ z, x, y } as tile) =
                 ++ toString (y % (2 ^ z))
 
         scale =
-            transform.crs.scale
-                (transform.zoom - toFloat z)
+            Transform.scaleT transform (toFloat z)
 
         origin =
             Transform.origin transform

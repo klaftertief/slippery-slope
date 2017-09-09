@@ -52,7 +52,7 @@ tile : Config -> Transform -> Tile -> Svg msg
 tile (Config config) transform ({ z, x, y } as tile) =
     let
         scale =
-            transform.crs.scale transform.zoom / transform.crs.scale (toFloat z)
+            Transform.scaleZ transform (toFloat z)
     in
     Svg.image
         [ Svg.Attributes.width

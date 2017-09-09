@@ -74,9 +74,9 @@ layer ((Config configInternal) as config) =
 tile : Config -> Transform -> WebData Tile -> Svg msg
 tile (Config configInternal) transform tileResponse =
     let
+        -- TODO: unify scale usage, do not calculate by rounding
         scale =
-            transform.crs.scale
-                (transform.zoom - toFloat (round transform.zoom))
+            Transform.scaleZ transform (toFloat (round <| Transform.zoom transform))
     in
     case tileResponse of
         RemoteData.NotAsked ->

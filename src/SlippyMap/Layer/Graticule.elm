@@ -16,6 +16,7 @@ import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.GeoJson.Svg as Render
 import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Config as Map
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -28,16 +29,19 @@ layer =
 
 
 render : Layer.RenderParameters msg -> Svg msg
-render { transform } =
+render { transform, mapConfig } =
     let
+        size =
+            Map.size mapConfig
+
         project ( lon, lat, _ ) =
             Transform.locationToScreenPoint transform (Location lon lat)
     in
     Svg.svg
         [ -- Important for touch pinching
           Svg.Attributes.pointerEvents "none"
-        , Svg.Attributes.width (toString transform.size.x)
-        , Svg.Attributes.height (toString transform.size.y)
+        , Svg.Attributes.width (toString size.x)
+        , Svg.Attributes.height (toString size.y)
         , Svg.Attributes.style "position: absolute;"
         ]
         [ Render.renderGeoJson (renderConfig project) graticule
