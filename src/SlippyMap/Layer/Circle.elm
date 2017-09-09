@@ -7,6 +7,8 @@ module SlippyMap.Layer.Circle
 
 {-| A layer to render a Circle at a given location.
 
+TODO: move radius out of the config and support multiple circles in one layer.
+
 @docs Config, config, layer
 
 -}
@@ -39,7 +41,7 @@ config radius =
         , style =
             [ Svg.Attributes.stroke "#8833ff"
             , Svg.Attributes.strokeWidth "3"
-            , Svg.Attributes.fill "#ff33ff"
+            , Svg.Attributes.fill "#8833ff"
             , Svg.Attributes.fillOpacity "0.2"
             , Svg.Attributes.strokeLinecap "round"
             , Svg.Attributes.strokeLinejoin "round"
@@ -69,7 +71,7 @@ circle radius { lon, lat } =
             radius / 110.574
 
         steps =
-            90
+            128
 
         points =
             List.range 0 steps
