@@ -10,7 +10,7 @@ import Keyboard exposing (KeyCode)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
-import SlippyMap.Map.State as State exposing (State(..))
+import SlippyMap.Map.State as State exposing (State)
 import SlippyMap.Map.Types as Types exposing (Drag, Focus, Interaction(..), Pinch, Transition(..))
 
 
