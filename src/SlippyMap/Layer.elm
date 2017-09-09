@@ -40,7 +40,7 @@ type Config msg
 {-| -}
 type Renderer msg
     = NoRenderer
-    | CustomRenderer (RenderParameters msg -> Html msg)
+    | Renderer (RenderParameters msg -> Html msg)
 
 
 {-| -}
@@ -168,7 +168,7 @@ custom render (Config config) =
     Layer Nothing <|
         Config
             { config
-                | renderer = CustomRenderer render
+                | renderer = Renderer render
             }
 
 
@@ -237,7 +237,7 @@ render renderParams layer =
                 NoRenderer ->
                     Html.text ""
 
-                CustomRenderer render ->
+                Renderer render ->
                     render renderParams
 
         LayerGroup _ _ ->
