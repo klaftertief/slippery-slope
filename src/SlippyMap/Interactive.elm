@@ -126,13 +126,13 @@ update config msg (State state) =
             State { state | popup = Just popup }
 
         ClosePopup ->
-            closePopup state
+            closePopup (State state)
 
 
 {-| -}
 closePopup : State -> State
 closePopup (State state) =
-    State { state | popup = Just popup }
+    State { state | popup = Nothing }
 
 
 
