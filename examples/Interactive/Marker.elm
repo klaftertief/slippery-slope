@@ -146,6 +146,7 @@ viewMap model =
     Map.view MapMsg
         config
         model.map
+        []
         [ Map.tileLayer
 
         -- , Marker.marker (List.map .location model.pois)
