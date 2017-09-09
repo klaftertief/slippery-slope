@@ -62,6 +62,13 @@ defaultState =
         }
 
 
+defaultScene : Scene
+defaultScene =
+    { center = Location 0 0
+    , zoom = 0
+    }
+
+
 
 -- CONSTRUCTORS
 
@@ -104,13 +111,6 @@ setFocus : Focus -> State -> State
 setFocus newFocus (State state) =
     State
         { state | focus = newFocus }
-
-
-defaultScene : Scene
-defaultScene =
-    { center = Location 0 0
-    , zoom = 0
-    }
 
 
 {-| -}
@@ -197,7 +197,9 @@ moveTo : Config msg -> Point -> State -> State
 moveTo config newCenterPoint ((State { scene }) as state) =
     let
         ( crs, size ) =
-            ( Config.crs config, Config.size config )
+            ( Config.crs config
+            , Config.size config
+            )
 
         transform =
             Transform.transform crs size scene
