@@ -6,6 +6,7 @@ module SlippyMap.Interactive
         , State
         , around
         , at
+        , closePopup
         , config
         , getScene
         , markerLayer
@@ -18,7 +19,7 @@ module SlippyMap.Interactive
 
 {-| A convenience module wrapping or re-exposing various specialised functions and types to quickly create a basic interactive map with a default configuration.
 
-@docs Config, config, State, at, around, Msg, update, view, subscriptions, Layer, tileLayer, markerLayer, setMapState, getScene
+@docs Config, config, State, at, around, Msg, update, view, subscriptions, Layer, tileLayer, markerLayer, setMapState, getScene, closePopup
 
 -}
 
@@ -125,7 +126,13 @@ update config msg (State state) =
             State { state | popup = Just popup }
 
         ClosePopup ->
-            State { state | popup = Nothing }
+            closePopup state
+
+
+{-| -}
+closePopup : State -> State
+closePopup (State state) =
+    State { state | popup = Just popup }
 
 
 
