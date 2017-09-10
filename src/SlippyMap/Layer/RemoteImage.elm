@@ -18,7 +18,6 @@ import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
 import SlippyMap.Map.Map as Map exposing (Map)
-import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
 

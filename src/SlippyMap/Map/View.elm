@@ -20,7 +20,6 @@ import SlippyMap.Map.Events as Events exposing (Event)
 import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (State(..))
-import SlippyMap.Map.Transform as Transform exposing (Transform)
 import SlippyMap.Map.Types as Types exposing (Focus(..))
 
 

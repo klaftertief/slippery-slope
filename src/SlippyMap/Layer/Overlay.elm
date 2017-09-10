@@ -19,7 +19,6 @@ import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Map as Map exposing (Map)
-import SlippyMap.Map.Transform as Transform exposing (Transform)
 
 
 -- CONFIG

@@ -18,7 +18,6 @@ import Html.Events
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Map as Map exposing (Map)
-import SlippyMap.Map.Transform as Transform exposing (Transform)
 
 
 -- CONFIG
