@@ -17,6 +17,7 @@ import RemoteData exposing (WebData)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
+import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -71,12 +72,12 @@ layer ((Config configInternal) as config) =
         |> TileLayer.layer
 
 
-tile : Config -> Transform -> WebData Tile -> Svg msg
-tile (Config configInternal) transform tileResponse =
+tile : Config -> Map msg -> WebData Tile -> Svg msg
+tile (Config configInternal) map tileResponse =
     let
         -- TODO: unify scale usage, do not calculate by rounding
         scale =
-            Transform.scaleZ transform (toFloat (round <| Transform.zoom transform))
+            Map.scaleZ map (toFloat (round <| Map.zoom map))
     in
     case tileResponse of
         RemoteData.NotAsked ->

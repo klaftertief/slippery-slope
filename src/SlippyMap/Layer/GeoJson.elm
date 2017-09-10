@@ -16,7 +16,7 @@ import GeoJson exposing (GeoJson)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.GeoJson.Svg as Render
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Config as Map
+import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -67,14 +67,14 @@ layer config geoJson =
     Layer.custom (render config geoJson) Layer.overlay
 
 
-render : Config msg -> GeoJson -> Layer.RenderParameters msg -> Svg msg
-render (Config internalConfig) geoJson { transform, mapConfig } =
+render : Config msg -> GeoJson -> Map msg -> Svg msg
+render (Config internalConfig) geoJson map =
     let
         size =
-            Map.size mapConfig
+            Map.size map
 
         project ( lon, lat, _ ) =
-            Transform.locationToScreenPoint transform (Location lon lat)
+            Map.locationToScreenPoint map (Location lon lat)
 
         renderConfig =
             Render.Config

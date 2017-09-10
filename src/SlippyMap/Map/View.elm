@@ -17,6 +17,7 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config exposing (Config(..))
 import SlippyMap.Map.Events as Events exposing (Event)
+import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (State(..))
 import SlippyMap.Map.Transform as Transform exposing (Transform)
@@ -33,22 +34,16 @@ view config state nestedLayers =
 viewWithEvents : Config msg -> State -> List (Event msg) -> List (Layer msg) -> Html msg
 viewWithEvents config state events nestedLayers =
     let
-        ( crs, size ) =
-            ( Config.crs config, Config.size config )
-
         ( scene, interaction ) =
             ( State.getScene state
             , State.interaction state
             )
 
-        transform =
-            Transform.transform crs size scene
+        map =
+            Map.make config state
 
-        layerParameters =
-            { mapConfig = config
-            , mapState = state
-            , transform = transform
-            }
+        size =
+            Config.size config
 
         attributions =
             List.concatMap Layer.attributions nestedLayers
@@ -94,7 +89,7 @@ viewWithEvents config state events nestedLayers =
                         (clientPosition
                             |> Decode.map
                                 (\point ->
-                                    ( point, Transform.screenPointToLocation transform point )
+                                    ( point, Map.screenPointToLocation map point )
                                 )
                             |> Decode.andThen toDecoder
                         )
@@ -156,7 +151,7 @@ viewWithEvents config state events nestedLayers =
                             , ( "pointer-events", "none" )
                             ]
                         ]
-                        [ Layer.render layerParameters layer ]
+                        [ Layer.render map layer ]
                 )
                 layers
             )

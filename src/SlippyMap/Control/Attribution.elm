@@ -7,6 +7,7 @@ import Html exposing (Html)
 import Html.Attributes
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config
+import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 
 
@@ -16,11 +17,11 @@ control attributions =
     Layer.custom (render attributions) Layer.control
 
 
-render : List String -> Layer.RenderParameters msg -> Html msg
-render attributions { mapConfig } =
+render : List String -> Map msg -> Html msg
+render attributions map =
     let
         prefixText =
-            Config.attributionPrefix mapConfig
+            Config.attributionPrefix (Map.config map)
                 |> Maybe.map (\p -> p ++ " | ")
                 |> Maybe.withDefault ""
     in

@@ -14,6 +14,7 @@ module SlippyMap.Layer.StaticImage
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
+import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -48,11 +49,11 @@ layer config =
         |> TileLayer.layer
 
 
-tile : Config -> Transform -> Tile -> Svg msg
-tile (Config config) transform ({ z, x, y } as tile) =
+tile : Config -> Map msg -> Tile -> Svg msg
+tile (Config config) map ({ z, x, y } as tile) =
     let
         scale =
-            Transform.scaleZ transform (toFloat z)
+            Map.scaleZ map (toFloat z)
     in
     Svg.image
         [ Svg.Attributes.width

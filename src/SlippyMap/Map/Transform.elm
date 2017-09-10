@@ -1,6 +1,7 @@
 module SlippyMap.Map.Transform
     exposing
         ( Transform
+        , Transformer
         , locationToPoint
         , locationToScreenPoint
         , origin
@@ -10,12 +11,13 @@ module SlippyMap.Map.Transform
         , screenPointToLocation
         , tileCover
         , transform
+        , transformer
         , zoom
         )
 
-{-| TODO: Maybe rename module to `ViewState`?
+{-|
 
-@docs Transform, locationToPoint, locationToScreenPoint, pointToLocation, transform, screenPointToLocation, origin, tileCover, scaleT, scaleZ, zoom
+@docs Transform, Transformer, locationToPoint, locationToScreenPoint, pointToLocation, transform, transformer, screenPointToLocation, origin, tileCover, scaleT, scaleZ, zoom
 
 -}
 
@@ -45,6 +47,41 @@ transform crs size { center, zoom } =
         , center = center
         , zoom = zoom
         }
+
+
+{-| -}
+type alias Transformer =
+    { origin : Point
+    , bounds : ( Point, Point )
+    , scaleT : Float -> Float
+    , scaleZ : Float -> Float
+    , locationToPoint : Location -> Point
+    , locationToPointRelativeTo : Point -> Location -> Point
+    , locationToScreenPoint : Location -> Point
+    , pointToLocation : Point -> Location
+    , screenPointToLocation : Point -> Location
+    , tileCover : List Tile
+    }
+
+
+{-| -}
+transformer : CRS -> Point -> Scene -> Transformer
+transformer crs size scene =
+    let
+        t =
+            transform crs size scene
+    in
+    { origin = origin t
+    , bounds = bounds t
+    , scaleT = scaleT t
+    , scaleZ = scaleZ t
+    , locationToPoint = locationToPoint t
+    , locationToPointRelativeTo = locationToPointRelativeTo t
+    , locationToScreenPoint = locationToScreenPoint t
+    , pointToLocation = pointToLocation t
+    , screenPointToLocation = screenPointToLocation t
+    , tileCover = tileCover t
+    }
 
 
 size : Transform -> Point

@@ -7,6 +7,7 @@ import Html exposing (Html)
 import Html.Attributes
 import Html.Events
 import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Msg as Msg exposing (Msg(ZoomIn, ZoomOut))
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
@@ -34,8 +35,8 @@ control config =
 
 {-| TODO: This also needs the general map config, or at least its min- and maxZoom
 -}
-render : Config msg -> Layer.RenderParameters msg -> Html msg
-render (Config { toMsg }) { transform } =
+render : Config msg -> Map msg -> Html msg
+render (Config { toMsg }) map =
     Html.map toMsg <|
         Html.div
             [ Html.Attributes.style

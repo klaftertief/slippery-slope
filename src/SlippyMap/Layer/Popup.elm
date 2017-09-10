@@ -17,6 +17,7 @@ import Html.Attributes
 import Html.Events
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 
 
@@ -97,17 +98,17 @@ layer config locatedPopups =
     Layer.custom (render config locatedPopups) Layer.popup
 
 
-render : Config popup msg -> List ( Location, popup ) -> Layer.RenderParameters msg -> Html msg
-render config locatedPopups { transform } =
+render : Config popup msg -> List ( Location, popup ) -> Map msg -> Html msg
+render config locatedPopups map =
     Html.div [ Html.Attributes.class "layer--popup" ]
-        (List.map (renderPopup config transform) locatedPopups)
+        (List.map (renderPopup config map) locatedPopups)
 
 
-renderPopup : Config popup msg -> Transform -> ( Location, popup ) -> Html msg
-renderPopup (Config config) transform ( location, popup ) =
+renderPopup : Config popup msg -> Map msg -> ( Location, popup ) -> Html msg
+renderPopup (Config config) map ( location, popup ) =
     let
         popupPoint =
-            Transform.locationToScreenPoint transform location
+            Map.locationToScreenPoint map location
 
         closeAttributes =
             config.closeMsg

@@ -18,6 +18,7 @@ import Html.Attributes
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 
 
@@ -115,24 +116,24 @@ layer config boundedOverlays =
     Layer.custom (render config boundedOverlays) Layer.overlay
 
 
-render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Layer.RenderParameters msg -> Html msg
-render config boundedOverlays { transform } =
+render : Config overlay msg -> List ( Location.Bounds, overlay ) -> Map msg -> Html msg
+render config boundedOverlays map =
     Html.div []
-        (List.map (renderOverlay config transform) boundedOverlays)
+        (List.map (renderOverlay config map) boundedOverlays)
 
 
-renderOverlay : Config overlay msg -> Transform -> ( Location.Bounds, overlay ) -> Html msg
-renderOverlay (Config config) transform ( bounds, overlay ) =
+renderOverlay : Config overlay msg -> Map msg -> ( Location.Bounds, overlay ) -> Html msg
+renderOverlay (Config config) map ( bounds, overlay ) =
     let
         origin =
-            Transform.origin transform
+            Map.origin map
 
         southWestPoint =
-            Transform.locationToPoint transform
+            Map.locationToPoint map
                 bounds.southWest
 
         northEastPoint =
-            Transform.locationToPoint transform
+            Map.locationToPoint map
                 bounds.northEast
 
         overlaySize =

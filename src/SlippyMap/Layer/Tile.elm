@@ -16,7 +16,7 @@ import Regex
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Config as Map
+import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Transform as Transform exposing (Transform)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -31,12 +31,12 @@ TODO: add tileSize
 type Config data msg
     = Config
         { toData : Tile -> data
-        , renderData : Transform -> data -> Svg msg
+        , renderData : Map msg -> data -> Svg msg
         }
 
 
 {-| -}
-config : (Tile -> data) -> (Transform -> data -> Svg msg) -> Config data msg
+config : (Tile -> data) -> (Map msg -> data -> Svg msg) -> Config data msg
 config toData renderData =
     Config
         { toData = toData
@@ -50,17 +50,20 @@ layer config =
     Layer.custom (render config) Layer.base
 
 
-render : Config data msg -> Layer.RenderParameters msg -> Svg msg
-render (Config { toData, renderData }) ({ mapConfig, transform } as renderParameters) =
+render : Config data msg -> Map msg -> Svg msg
+render (Config { toData, renderData }) map =
     let
         tiles =
-            Transform.tileCover transform
+            Map.tileCover map
+
+        size =
+            Map.size map
 
         tilesRendered =
             List.map
                 (tile
-                    (toData >> renderData transform)
-                    renderParameters
+                    (toData >> renderData map)
+                    map
                 )
                 tiles
     in
@@ -68,15 +71,15 @@ render (Config { toData, renderData }) ({ mapConfig, transform } as renderParame
         [ -- Important for touch pinching
           Svg.Attributes.pointerEvents "none"
         , Svg.Attributes.width
-            (toString <| .x (Map.size mapConfig))
+            (toString size.x)
         , Svg.Attributes.height
-            (toString <| .y (Map.size mapConfig))
+            (toString size.y)
         ]
         tilesRendered
 
 
-tile : (Tile -> Svg msg) -> Layer.RenderParameters msg -> Tile -> ( String, Svg msg )
-tile render { transform } ({ z, x, y } as tile) =
+tile : (Tile -> Svg msg) -> Map msg -> Tile -> ( String, Svg msg )
+tile render map ({ z, x, y } as tile) =
     let
         key =
             toString z
@@ -86,10 +89,10 @@ tile render { transform } ({ z, x, y } as tile) =
                 ++ toString (y % (2 ^ z))
 
         scale =
-            Transform.scaleT transform (toFloat z)
+            Map.scaleT map (toFloat z)
 
         origin =
-            Transform.origin transform
+            Map.origin map
 
         point =
             { x = toFloat x

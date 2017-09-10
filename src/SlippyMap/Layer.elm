@@ -2,7 +2,6 @@ module SlippyMap.Layer
     exposing
         ( Config
         , Layer
-        , RenderParameters
         , attributions
         , base
         , control
@@ -18,14 +17,12 @@ module SlippyMap.Layer
 
 {-| A `Layer` usually renders geolocated contents on top of a map.
 
-@docs Config, marker, popup, overlay, base, control, Layer, RenderParameters, custom, group, withAttribution, attributions, flatten, render
+@docs Config, marker, popup, overlay, base, control, Layer, custom, group, withAttribution, attributions, flatten, render
 
 -}
 
 import Html exposing (Html)
-import SlippyMap.Map.Config as Map
-import SlippyMap.Map.State as Map
-import SlippyMap.Map.Transform as Transform exposing (Transform)
+import SlippyMap.Map.Map as Map exposing (Map)
 
 
 {-| Configuration for a layer.
@@ -40,15 +37,7 @@ type Config msg
 {-| -}
 type Renderer msg
     = NoRenderer
-    | Renderer (RenderParameters msg -> Html msg)
-
-
-{-| -}
-type alias RenderParameters msg =
-    { mapConfig : Map.Config msg
-    , mapState : Map.State
-    , transform : Transform
-    }
+    | Renderer (Map msg -> Html msg)
 
 
 {-| Each `Layer` is placed on a `Pane` that defines the order of layers on top of the map.
@@ -163,7 +152,7 @@ type Layer msg
 
 
 {-| -}
-custom : (RenderParameters msg -> Html msg) -> Config msg -> Layer msg
+custom : (Map msg -> Html msg) -> Config msg -> Layer msg
 custom render (Config config) =
     Layer Nothing <|
         Config
@@ -229,8 +218,8 @@ level layer =
 
 {-| TODO: Layers should have general attributes like class name. Add here.
 -}
-render : RenderParameters msg -> Layer msg -> Html msg
-render renderParams layer =
+render : Map msg -> Layer msg -> Html msg
+render map layer =
     case layer of
         Layer _ (Config { renderer }) ->
             case renderer of
@@ -238,7 +227,7 @@ render renderParams layer =
                     Html.text ""
 
                 Renderer render ->
-                    render renderParams
+                    render map
 
         LayerGroup _ _ ->
             Html.text ""
