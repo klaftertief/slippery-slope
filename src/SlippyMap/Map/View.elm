@@ -71,12 +71,15 @@ viewWithEvents config state events nestedLayers =
         layers =
             Layer.flatten layersWithControls
 
+        pointerPositionDecoder =
+            Config.pointerPositionDecoder config
+
         interactionAttributesInternal =
             case tagger of
                 Just toMsg ->
                     List.map
                         (Html.Attributes.map toMsg)
-                        (eventAttributes <| Config.interactions config)
+                        (eventAttributes pointerPositionDecoder <| Config.interactions config)
 
                 Nothing ->
                     []
@@ -85,7 +88,7 @@ viewWithEvents config state events nestedLayers =
             List.map
                 (\{ name, toDecoder } ->
                     Html.Events.on name
-                        (clientPosition
+                        (pointerPositionDecoder
                             |> Decode.map
                                 (\point ->
                                     ( point, Map.screenPointToLocation map point )
@@ -157,8 +160,8 @@ viewWithEvents config state events nestedLayers =
         ]
 
 
-eventAttributes : Config.Interactions -> List (Html.Attribute Msg)
-eventAttributes interactions =
+eventAttributes : Decoder Point -> Config.Interactions -> List (Html.Attribute Msg)
+eventAttributes pointerPositionDecoder interactions =
     let
         scrollWheelZoom =
             if interactions.scrollWheelZoom then
@@ -170,7 +173,7 @@ eventAttributes interactions =
                         (Decode.field "deltaY" Decode.float
                             |> Decode.map (\y -> -y / 100)
                         )
-                        clientPosition
+                        pointerPositionDecoder
                     )
                 ]
             else
@@ -179,7 +182,7 @@ eventAttributes interactions =
         doubleClickZoom =
             if interactions.doubleClickZoom then
                 [ Html.Events.on "dblclick"
-                    (Decode.map ZoomInAround clientPosition)
+                    (Decode.map ZoomInAround pointerPositionDecoder)
                 ]
             else
                 []
@@ -212,13 +215,6 @@ eventAttributes interactions =
                 (Decode.map touchesEndMsg (Decode.succeed (Tap (Position 0 0))))
           ]
         ]
-
-
-clientPosition : Decoder Point
-clientPosition =
-    Decode.map2 Point
-        (Decode.field "offsetX" Decode.float)
-        (Decode.field "offsetY" Decode.float)
 
 
 type Touches

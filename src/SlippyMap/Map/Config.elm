@@ -8,6 +8,7 @@ module SlippyMap.Map.Config
         , interactive
         , maxZoom
         , minZoom
+        , pointerPositionDecoder
         , size
         , static
         , tagger
@@ -22,12 +23,13 @@ module SlippyMap.Map.Config
 
 {-|
 
-@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, withMaxZoom, withMinZoom, Interactions, crs, minZoom, maxZoom, zoomDelta, zoomSnap, tagger, interactions, attributionPrefix
+@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, withMaxZoom, withMinZoom, Interactions, crs, minZoom, maxZoom, zoomDelta, zoomSnap, tagger, interactions, attributionPrefix, pointerPositionDecoder
 
 TODO: Add field for client position decoder
 
 -}
 
+import Json.Decode as Decode exposing (Decoder)
 import SlippyMap.Geo.CRS as CRS exposing (CRS)
 import SlippyMap.Geo.CRS.EPSG3857 as EPSG3857
 import SlippyMap.Geo.Point as Point exposing (Point)
@@ -50,6 +52,7 @@ type alias ConfigInternal msg =
     , toMsg : Maybe (Msg -> msg)
     , crs : CRS
     , interactions : Interactions
+    , pointerPositionDecoder : Decoder Point
     }
 
 
@@ -64,7 +67,15 @@ defaultConfigInternal =
     , toMsg = Nothing
     , crs = EPSG3857.crs
     , interactions = interactiveInteractions
+    , pointerPositionDecoder = defaultPointerPositionDecoder
     }
+
+
+defaultPointerPositionDecoder : Decoder Point
+defaultPointerPositionDecoder =
+    Decode.map2 Point
+        (Decode.field "offsetX" Decode.float)
+        (Decode.field "offsetY" Decode.float)
 
 
 {-| TODO: make opaque
@@ -199,3 +210,9 @@ interactions (Config { interactions }) =
 attributionPrefix : Config msg -> Maybe String
 attributionPrefix (Config { attributionPrefix }) =
     attributionPrefix
+
+
+{-| -}
+pointerPositionDecoder : Config msg -> Decoder Point
+pointerPositionDecoder (Config { pointerPositionDecoder }) =
+    pointerPositionDecoder
