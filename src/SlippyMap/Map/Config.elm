@@ -29,6 +29,7 @@ TODO: Add field for client position decoder
 
 -}
 
+import DOM
 import Json.Decode as Decode exposing (Decoder)
 import SlippyMap.Geo.CRS as CRS exposing (CRS)
 import SlippyMap.Geo.CRS.EPSG3857 as EPSG3857
@@ -67,7 +68,7 @@ defaultConfigInternal =
     , toMsg = Nothing
     , crs = EPSG3857.crs
     , interactions = interactiveInteractions
-    , pointerPositionDecoder = defaultPointerPositionDecoder
+    , pointerPositionDecoder = domPointerPositionDecoder
     }
 
 
@@ -76,6 +77,34 @@ defaultPointerPositionDecoder =
     Decode.map2 Point
         (Decode.field "offsetX" Decode.float)
         (Decode.field "offsetY" Decode.float)
+
+
+domPointerPositionDecoder : Decoder Point
+domPointerPositionDecoder =
+    Decode.map5
+        (\x y r l t ->
+            { x = x - r.left - l
+            , y = y - r.top - t
+            }
+        )
+        (Decode.field "clientX" Decode.float)
+        (Decode.field "clientY" Decode.float)
+        -- (DOM.target mapPosition)
+        (Decode.field "currentTarget" mapPosition)
+        (Decode.field "currentTarget" <|
+            Decode.field "clientLeft" Decode.float
+        )
+        (Decode.field "currentTarget" <|
+            Decode.field "clientTop" Decode.float
+        )
+
+
+mapPosition : Decoder DOM.Rectangle
+mapPosition =
+    Decode.oneOf
+        [ DOM.boundingClientRect
+        , Decode.lazy (\_ -> DOM.parentElement mapPosition)
+        ]
 
 
 {-| TODO: make opaque
