@@ -9,14 +9,15 @@ module SlippyMap.Layer.Control
         )
 
 {-| A layer tor create custom controls.
+
+@docs Config, bottomLeft, bottomRight, control, topLeft, topRight
+
 -}
 
 import Html exposing (Html)
 import Html.Attributes
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Config as Map
-import SlippyMap.Map.State as Map
-import SlippyMap.Map.Transform as Transform exposing (Transform)
+import SlippyMap.Map.Map as Map exposing (Map)
 
 
 -- CONFIG
@@ -27,7 +28,7 @@ import SlippyMap.Map.Transform as Transform exposing (Transform)
 type Config msg
     = Config
         { position : Position
-        , render : Transform -> Html msg
+        , render : Map msg -> Html msg
         }
 
 
@@ -46,7 +47,7 @@ config position =
         }
 
 
-withRenderer : (Transform -> Html msg) -> Config msg -> Config msg
+withRenderer : (Map msg -> Html msg) -> Config msg -> Config msg
 withRenderer renderer (Config config) =
     Config
         { config | render = renderer }
@@ -77,7 +78,7 @@ bottomRight =
 
 
 {-| -}
-control : Config msg -> (Transform -> Html msg) -> Layer msg
+control : Config msg -> (Map msg -> Html msg) -> Layer msg
 control config renderer =
     Layer.custom
         (render (withRenderer renderer config))
@@ -85,7 +86,39 @@ control config renderer =
 
 
 {-| -}
-render : Config msg -> Transform -> Html msg
-render (Config { position }) transform =
-    Html.div []
-        []
+render : Config msg -> Map msg -> Html msg
+render (Config { position, render }) map =
+    Html.div [ positionStyle position ]
+        [ render map ]
+
+
+positionStyle : Position -> Html.Attribute msg
+positionStyle position =
+    let
+        baseProperties =
+            [ ( "position", "absolute" ) ]
+
+        positionProperties =
+            case position of
+                TopLeft ->
+                    [ ( "top", "0" )
+                    , ( "left", "0" )
+                    ]
+
+                TopRight ->
+                    [ ( "top", "0" )
+                    , ( "right", "0" )
+                    ]
+
+                BottomRight ->
+                    [ ( "bottom", "0" )
+                    , ( "left", "0" )
+                    ]
+
+                BottomLeft ->
+                    [ ( "bottom", "0" )
+                    , ( "right", "0" )
+                    ]
+    in
+    Html.Attributes.style
+        (baseProperties ++ positionProperties)
