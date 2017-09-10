@@ -112,12 +112,12 @@ positionStyle position =
 
                 BottomRight ->
                     [ ( "bottom", "0" )
-                    , ( "left", "0" )
+                    , ( "right", "0" )
                     ]
 
                 BottomLeft ->
                     [ ( "bottom", "0" )
-                    , ( "right", "0" )
+                    , ( "left", "0" )
                     ]
     in
     Html.Attributes.style

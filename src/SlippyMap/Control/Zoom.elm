@@ -1,14 +1,20 @@
 module SlippyMap.Control.Zoom exposing (Config, config, control)
 
 {-| Zoom control for a map.
+
+@docs Config, config, control
+
 -}
 
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
 import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Layer.Control as Control
+import SlippyMap.Map.Config as Map
 import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Msg as Msg exposing (Msg(ZoomIn, ZoomOut))
+import SlippyMap.Map.State as Map
 import Svg exposing (Svg)
 import Svg.Attributes
 
@@ -29,21 +35,22 @@ config toMsg =
 {-| -}
 control : Config msg -> Layer msg
 control config =
-    Layer.custom (render config) Layer.control
+    Control.control Control.topLeft (render config)
 
 
 {-| TODO: This also needs the general map config, or at least its min- and maxZoom
 -}
 render : Config msg -> Map msg -> Html msg
 render (Config { toMsg }) map =
+    let
+        ( currentZoom, minZoom, maxZoom ) =
+            ( Map.state map |> Map.getScene |> .zoom
+            , Map.config map |> Map.minZoom
+            , Map.config map |> Map.maxZoom
+            )
+    in
     Html.map toMsg <|
-        Html.div
-            [ Html.Attributes.style
-                [ ( "position", "absolute" )
-                , ( "top", "0" )
-                , ( "left", "0" )
-                ]
-            ]
+        Html.div []
             [ Html.button
                 [ Html.Attributes.style
                     (buttonStyleProperties
@@ -51,6 +58,7 @@ render (Config { toMsg }) map =
                            , ( "border-radius", "2px 2px 0 0" )
                            ]
                     )
+                , Html.Attributes.disabled (currentZoom >= maxZoom)
                 , Html.Events.onClick ZoomIn
                 ]
                 [ Svg.svg
@@ -72,6 +80,7 @@ render (Config { toMsg }) map =
                            , ( "border-radius", "0 0 2px 2px" )
                            ]
                     )
+                , Html.Attributes.disabled (currentZoom <= minZoom)
                 , Html.Events.onClick ZoomOut
                 ]
                 [ Svg.svg
@@ -101,4 +110,5 @@ buttonStyleProperties =
     , ( "border", "1px solid #aaa" )
     , ( "position", "absolute" )
     , ( "left", "12px" )
+    , ( "pointer-events", "all" )
     ]

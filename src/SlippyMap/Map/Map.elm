@@ -15,13 +15,14 @@ module SlippyMap.Map.Map
         , scaleZ
         , screenPointToLocation
         , size
+        , state
         , tileCover
         , zoom
         )
 
 {-|
 
-@docs Map, make, bounds, center, crs, locationToPoint, locationToPointRelativeTo, locationToScreenPoint, origin, pointToLocation, scaleT, scaleZ, screenPointToLocation, size, tileCover, zoom, config
+@docs Map, make, bounds, center, crs, locationToPoint, locationToPointRelativeTo, locationToScreenPoint, origin, pointToLocation, scaleT, scaleZ, screenPointToLocation, size, tileCover, zoom, config, state
 
 -}
 
@@ -82,15 +83,21 @@ config (Map { config }) =
 
 
 {-| -}
+state : Map msg -> State
+state (Map { state }) =
+    state
+
+
+{-| -}
 center : Map msg -> Location
-center (Map { state }) =
-    State.getScene state |> .center
+center =
+    state >> State.getScene >> .center
 
 
 {-| -}
 zoom : Map msg -> Float
-zoom (Map { state }) =
-    State.getScene state |> .zoom
+zoom =
+    state >> State.getScene >> .zoom
 
 
 {-| -}
