@@ -42,7 +42,7 @@ viewWithEvents config state events nestedLayers =
             Map.make config state
 
         size =
-            Config.size config
+            Map.size map
 
         attributions =
             List.concatMap Layer.attributions nestedLayers
