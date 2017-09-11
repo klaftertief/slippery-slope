@@ -76,13 +76,7 @@ render (Config internalConfig) geoJson map =
             Map.locationToScreenPoint map (Location lon lat)
 
         renderConfig =
-            Render.Config
-                { project = project
-                , style = internalConfig.style
-                , renderPoint =
-                    \attrs ->
-                        Svg.circle (attrs ++ [ Svg.Attributes.r "8" ]) []
-                }
+            Render.config project
     in
     Svg.svg
         [ -- Important for touch pinching

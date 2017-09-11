@@ -1,16 +1,19 @@
 module SlippyMap.GeoJson.Svg
     exposing
-        ( Config(Config)
+        ( Config
+        , config
         , renderGeoJson
         , renderGeoJsonGeometry
         , renderGeoJsonLineString
         , renderGeoJsonPoint
         , renderGeoJsonPolygon
+        , withAttributes
+        , withPointRenderer
         )
 
 {-| GeoJson SVG renderer.
 
-@docs Config, renderGeoJson, renderGeoJsonPoint, renderGeoJsonLineString, renderGeoJsonPolygon, renderGeoJsonGeometry
+@docs Config, config, withAttributes, withPointRenderer, renderGeoJson, renderGeoJsonPoint, renderGeoJsonLineString, renderGeoJsonPolygon, renderGeoJsonGeometry
 
 -}
 
@@ -26,9 +29,49 @@ import Svg.Attributes
 type Config msg
     = Config
         { project : GeoJson.Position -> Point
-        , style : GeoJson.FeatureObject -> List (Svg.Attribute msg)
+        , attributes : GeoJson.FeatureObject -> List (Svg.Attribute msg)
         , renderPoint : List (Svg.Attribute msg) -> Svg msg
         }
+
+
+{-| -}
+config : (GeoJson.Position -> Point) -> Config msg
+config project =
+    Config
+        { project = project
+        , attributes = defaultAttributes
+        , renderPoint = circle
+        }
+
+
+{-| -}
+withAttributes : (GeoJson.FeatureObject -> List (Svg.Attribute msg)) -> Config msg -> Config msg
+withAttributes attributes (Config config) =
+    Config { config | attributes = attributes }
+
+
+{-| -}
+withPointRenderer : (List (Svg.Attribute msg) -> Svg msg) -> Config msg -> Config msg
+withPointRenderer render (Config config) =
+    Config { config | renderPoint = render }
+
+
+defaultAttributes : GeoJson.FeatureObject -> List (Svg.Attribute msg)
+defaultAttributes featureObject =
+    [ Svg.Attributes.stroke "#3388ff"
+    , Svg.Attributes.strokeWidth "2"
+    , Svg.Attributes.fill "#3388ff"
+    , Svg.Attributes.fillOpacity "0.2"
+    , Svg.Attributes.strokeLinecap "round"
+    , Svg.Attributes.strokeLinejoin "round"
+    ]
+
+
+circle : List (Svg.Attribute msg) -> Svg msg
+circle attributes =
+    Svg.circle
+        (Svg.Attributes.r "8" :: attributes)
+        []
 
 
 {-| -}
@@ -59,8 +102,8 @@ renderGeoJsonObject config geoJsonObject =
 
 {-| -}
 renderGeoJsonFeatureObject : Config msg -> GeoJson.FeatureObject -> List (Svg msg)
-renderGeoJsonFeatureObject ((Config { style }) as config) featureObject =
-    Maybe.map (renderGeoJsonGeometry config (style featureObject ++ propertiesStyle featureObject))
+renderGeoJsonFeatureObject ((Config { attributes }) as config) featureObject =
+    Maybe.map (renderGeoJsonGeometry config (attributes featureObject ++ propertiesStyle featureObject))
         featureObject.geometry
         |> Maybe.withDefault []
 
@@ -116,7 +159,8 @@ renderGeoJsonLineString : Config msg -> List (Svg.Attribute msg) -> List GeoJson
 renderGeoJsonLineString config attributes positionList =
     [ Svg.path
         (attributes
-            ++ [ pathPoints config positionList
+            ++ [ Svg.Attributes.fill "none"
+               , pathPoints config positionList
                     |> Svg.Attributes.d
                ]
         )
@@ -129,7 +173,8 @@ renderGeoJsonMultiLineString : Config msg -> List (Svg.Attribute msg) -> List (L
 renderGeoJsonMultiLineString config attributes positionListList =
     [ Svg.path
         (attributes
-            ++ [ positionListList
+            ++ [ Svg.Attributes.fill "none"
+               , positionListList
                     |> List.map (\positionList -> pathPoints config positionList)
                     |> String.join ""
                     |> Svg.Attributes.d
