@@ -1,5 +1,6 @@
 module Interactive.Simple exposing (..)
 
+import Data.Simplestyle
 import GeoJson exposing (GeoJson)
 import Html exposing (Html)
 import Html.Attributes
@@ -65,7 +66,7 @@ view model =
             []
             [ Map.tileLayer
             , GeoJsonLayer.layer (GeoJsonLayer.defaultConfig (always []))
-                myGeoJson
+                (Maybe.withDefault myGeoJson Data.Simplestyle.geoJson)
             ]
         ]
 
