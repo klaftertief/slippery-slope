@@ -13,6 +13,8 @@ module SlippyMap.GeoJson.Svg
 
 {-| GeoJson SVG renderer.
 
+TODO: Pull out simplestyle spec decoder
+
 @docs Config, config, withAttributes, withPointRenderer, renderGeoJson, renderGeoJsonPoint, renderGeoJsonLineString, renderGeoJsonPolygon, renderGeoJsonGeometry
 
 -}
