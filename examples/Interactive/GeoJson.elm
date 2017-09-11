@@ -62,6 +62,7 @@ view model =
         , Map.view MapMsg
             config
             model.map
+            []
             [ Map.tileLayer
             , GeoJsonLayer.layer (GeoJsonLayer.defaultConfig (always []))
                 myGeoJson
