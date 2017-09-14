@@ -1,6 +1,7 @@
 module SlippyMap.Map.State
     exposing
         ( State
+        , animate
         , around
         , at
         , defaultState
@@ -29,7 +30,7 @@ module SlippyMap.Map.State
 
 {-| TODO: Should the functions expect a Transform directly combined with the Config?
 
-@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setTransition, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, moveByAnimated, getScene, interaction, focus, transition, snapZoom
+@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setTransition, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, moveByAnimated, getScene, interaction, focus, transition, snapZoom, animate
 
 -}
 
@@ -85,6 +86,10 @@ around config initialBounds =
     fitBounds config initialBounds defaultState
 
 
+
+-- BASE SETTERS
+
+
 {-| -}
 setScene : Scene -> State -> State
 setScene newScene (State state) =
@@ -113,7 +118,12 @@ setFocus newFocus (State state) =
         { state | focus = newFocus }
 
 
-{-| -}
+
+-- INTERACTIONS
+
+
+{-| TODO: rename to applyInteraction or similar
+-}
 withInteraction : Config msg -> State -> State
 withInteraction config ((State { interaction }) as state) =
     case interaction of
@@ -192,6 +202,10 @@ withPinch config { last, current } ((State { scene }) as state) =
         |> setZoom config (scene.zoom + zoomDelta)
 
 
+
+-- UPDATES
+
+
 {-| -}
 moveTo : Config msg -> Point -> State -> State
 moveTo config newCenterPoint ((State { scene }) as state) =
@@ -228,35 +242,8 @@ moveBy config offset state =
 
 {-| -}
 moveByAnimated : Config msg -> Point -> State -> State
-moveByAnimated config offset ((State { scene }) as state) =
-    let
-        ( crs, size ) =
-            ( Config.crs config
-            , Config.size config
-            )
-
-        newCenterPoint =
-            size
-                |> Point.divideBy 2
-                |> Point.add offset
-
-        transform =
-            Transform.transform crs size scene
-
-        newCenter =
-            Transform.screenPointToLocation transform
-                newCenterPoint
-    in
-    setTransition
-        (MoveTo
-            { fromScene = scene
-            , toScene =
-                { scene | center = newCenter }
-            , duration = 400
-            , elapsed = 0
-            }
-        )
-        state
+moveByAnimated config offset state =
+    animate 400 (moveBy config offset) state
 
 
 {-| -}
@@ -402,7 +389,7 @@ zoomByAround config delta around ((State { scene }) as state) =
 
 {-| -}
 fitBounds : Config msg -> Location.Bounds -> State -> State
-fitBounds config { southWest, northEast } (State { scene }) =
+fitBounds config { southWest, northEast } ((State { scene }) as state) =
     let
         ( crs, size, zoomSnap, minZoom, maxZoom ) =
             ( Config.crs config
@@ -452,11 +439,27 @@ fitBounds config { southWest, northEast } (State { scene }) =
                 northEastPoint
                 |> Transform.pointToLocation transform
     in
+    -- setTransition
+    --     (FlyTo
+    --         { fromScene = scene
+    --         , toScene =
+    --             { center = center
+    --             , zoom = zoomSnapped
+    --             }
+    --         , duration = 800
+    --         , elapsed = 0
+    --         }
+    --     )
+    --     state
     setScene
         { center = center
         , zoom = zoomSnapped
         }
-        defaultState
+        state
+
+
+
+-- BASE GETTER
 
 
 {-| -}
@@ -481,6 +484,25 @@ focus (State { focus }) =
 transition : State -> Transition
 transition (State { transition }) =
     transition
+
+
+
+-- TRANSITION
+
+
+{-| -}
+animate : Time -> (State -> State) -> State -> State
+animate duration update state =
+    let
+        transition =
+            MoveTo
+                { fromScene = getScene state
+                , toScene = getScene (update state)
+                , duration = duration
+                , elapsed = 0
+                }
+    in
+    setTransition transition state
 
 
 {-| -}
@@ -527,6 +549,55 @@ tickTransition diff ((State { transition, scene }) as state) =
                         NoTransition
                     else
                         MoveTo
+                            { target
+                                | elapsed = newElapsed
+                            }
+            in
+            state
+                |> setScene newScene
+                |> setTransition newTransition
+
+        FlyTo target ->
+            let
+                fromScene =
+                    target.fromScene
+
+                toScene =
+                    target.toScene
+
+                newElapsed =
+                    target.elapsed + diff
+
+                progress =
+                    clamp 0 1 (newElapsed / target.duration)
+                        |> (\time ->
+                                1 - (1 - time) ^ 4
+                           )
+
+                newScene =
+                    { scene
+                        | zoom =
+                            fromScene.zoom
+                                + (toScene.zoom - fromScene.zoom)
+                                * progress
+                        , center =
+                            -- Location.betweenAt fromScene.center toScene.center progress
+                            { lon =
+                                fromScene.center.lon
+                                    + (toScene.center.lon - fromScene.center.lon)
+                                    * progress
+                            , lat =
+                                fromScene.center.lat
+                                    + (toScene.center.lat - fromScene.center.lat)
+                                    * progress
+                            }
+                    }
+
+                newTransition =
+                    if progress >= 1 then
+                        NoTransition
+                    else
+                        FlyTo
                             { target
                                 | elapsed = newElapsed
                             }
