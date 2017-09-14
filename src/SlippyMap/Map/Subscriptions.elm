@@ -55,6 +55,9 @@ subscriptions config state =
 
                         MoveTo _ ->
                             [ AnimationFrame.diffs Tick ]
+
+                        FlyTo _ ->
+                            [ AnimationFrame.diffs Tick ]
             in
             (dragSubscriptions
                 ++ keyboardNavigationSubscriptions
