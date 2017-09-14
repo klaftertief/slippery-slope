@@ -44,6 +44,12 @@ type Transition
         , duration : Time
         , elapsed : Time
         }
+    | FlyTo
+        { fromScene : Scene
+        , toScene : Scene
+        , duration : Time
+        , elapsed : Time
+        }
 
 
 {-| Supported interactions
