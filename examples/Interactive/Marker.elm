@@ -6,8 +6,6 @@ import Html.Events
 import Set exposing (Set)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
-import SlippyMap.Layer.Marker.Circle as Marker
-import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Map.State as MapState
 
 
@@ -107,8 +105,10 @@ updateSelection updater index model =
 
         newMap =
             Map.setMapState config
-                (flip MapState.fitBounds
-                    (selectionBounds newSelection model.pois)
+                (\config ->
+                    MapState.fitBounds config
+                        (selectionBounds newSelection model.pois)
+                        |> MapState.animate 800
                 )
                 model.map
     in

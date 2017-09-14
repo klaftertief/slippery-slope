@@ -59,6 +59,7 @@ view model =
         , Map.view MapMsg
             config
             model.map
+            []
             [ Map.tileLayer ]
         ]
 
