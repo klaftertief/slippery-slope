@@ -10,7 +10,6 @@ module SlippyMap.Map.State
         , getScene
         , interaction
         , moveBy
-        , moveByAnimated
         , moveTo
         , setCenter
         , setFocus
@@ -30,7 +29,7 @@ module SlippyMap.Map.State
 
 {-| TODO: Should the functions expect a Transform directly combined with the Config?
 
-@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setTransition, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, moveByAnimated, getScene, interaction, focus, transition, snapZoom, animate
+@docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setTransition, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, getScene, interaction, focus, transition, snapZoom, animate
 
 -}
 
@@ -241,24 +240,8 @@ moveBy config offset state =
 
 
 {-| -}
-moveByAnimated : Config msg -> Point -> State -> State
-moveByAnimated config offset state =
-    animate 400 (moveBy config offset) state
-
-
-{-| -}
 setCenter : Config msg -> Location -> State -> State
 setCenter config newCenter ((State { scene }) as state) =
-    -- setTransition
-    --     (MoveTo
-    --         { fromScene = scene
-    --         , toScene =
-    --             { scene | center = newCenter }
-    --         , duration = 200
-    --         , elapsed = 0
-    --         }
-    --     )
-    --     state
     setScene
         { scene | center = newCenter }
         state
@@ -276,21 +259,8 @@ setZoom config newZoom ((State { scene }) as state) =
                 , Config.maxZoom config
                 )
         in
-        -- setScene
-        --     { scene | zoom = clamp minZoom maxZoom newZoom }
-        --     state
-        setTransition
-            (MoveTo
-                { fromScene = scene
-                , toScene =
-                    { scene
-                        | zoom =
-                            clamp minZoom maxZoom newZoom
-                    }
-                , duration = 200
-                , elapsed = 0
-                }
-            )
+        setScene
+            { scene | zoom = clamp minZoom maxZoom newZoom }
             state
 
 
@@ -439,18 +409,6 @@ fitBounds config { southWest, northEast } ((State { scene }) as state) =
                 northEastPoint
                 |> Transform.pointToLocation transform
     in
-    -- setTransition
-    --     (FlyTo
-    --         { fromScene = scene
-    --         , toScene =
-    --             { center = center
-    --             , zoom = zoomSnapped
-    --             }
-    --         , duration = 800
-    --         , elapsed = 0
-    --         }
-    --     )
-    --     state
     setScene
         { center = center
         , zoom = zoomSnapped

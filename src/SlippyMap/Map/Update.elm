@@ -19,10 +19,14 @@ update : Config msg -> Msg -> State -> State
 update config msg state =
     case msg of
         ZoomIn ->
-            State.zoomIn config state
+            State.animate 400
+                (State.zoomIn config)
+                state
 
         ZoomOut ->
-            State.zoomOut config state
+            State.animate 400
+                (State.zoomOut config)
+                state
 
         ZoomInAround point ->
             State.zoomInAround config point state
@@ -40,18 +44,11 @@ update config msg state =
             State.setFocus focus state
 
         KeyboardNavigation keyCode ->
-            case keyboardNavigation keyCode of
-                KeyboardMoveBy offset ->
-                    State.moveByAnimated config offset state
-
-                KeyboardZoomIn ->
-                    State.zoomIn config state
-
-                KeyboardZoomOut ->
-                    State.zoomOut config state
-
-                NoKeyboardNavigation ->
-                    state
+            State.animate 400
+                (updateKeyboardNavigation config
+                    (keyboardNavigation keyCode)
+                )
+                state
 
         Tick diff ->
             State.tickTransition diff state
@@ -115,6 +112,22 @@ keyboardNavigation keyCode =
             NoKeyboardNavigation
 
 
+updateKeyboardNavigation : Config msg -> KeyboardNavigation -> State -> State
+updateKeyboardNavigation config keyboard state =
+    case keyboard of
+        KeyboardMoveBy offset ->
+            State.moveBy config offset state
+
+        KeyboardZoomIn ->
+            State.zoomIn config state
+
+        KeyboardZoomOut ->
+            State.zoomOut config state
+
+        NoKeyboardNavigation ->
+            state
+
+
 updateDrag : Config msg -> DragMsg -> State -> State
 updateDrag config dragMsg state =
     let
@@ -161,10 +174,11 @@ updateDrag config dragMsg state =
                                         speed =
                                             5
                                     in
-                                    State.moveByAnimated config
+                                    State.moveBy config
                                         { x = (last.x - current.x) * speed |> toFloat
                                         , y = (last.y - current.y) * speed |> toFloat
                                         }
+                                        |> State.animate 400
 
                             Pinching { last } ->
                                 -- identity

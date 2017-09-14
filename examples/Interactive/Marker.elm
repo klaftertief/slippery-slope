@@ -108,7 +108,7 @@ updateSelection updater index model =
                 (\config ->
                     MapState.fitBounds config
                         (selectionBounds newSelection model.pois)
-                        |> MapState.animate 800
+                        |> MapState.animate 1800
                 )
                 model.map
     in
