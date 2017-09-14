@@ -1,8 +1,19 @@
-module SlippyMap.Geo.Location exposing (Bounds, Location, bounds, boundsAreOverlapping, center, isInsideBounds, maybeBounds, wrap)
+module SlippyMap.Geo.Location
+    exposing
+        ( Bounds
+        , Location
+        , betweenAt
+        , bounds
+        , boundsAreOverlapping
+        , center
+        , isInsideBounds
+        , maybeBounds
+        , wrap
+        )
 
 {-| Geographical coordinates
 
-@docs Location, Bounds, center, wrap, bounds, maybeBounds, isInsideBounds, boundsAreOverlapping
+@docs Location, Bounds, center, wrap, bounds, maybeBounds, isInsideBounds, boundsAreOverlapping, betweenAt
 
 -}
 
@@ -103,3 +114,97 @@ boundsAreOverlapping b1 b2 =
             (northEast2.lat > southWest1.lat) && (southWest2.lat < northEast1.lat)
     in
     latOverlaps && lonOverlaps
+
+
+{-| -}
+betweenAt : Location -> Location -> Float -> Location
+betweenAt from to fraction =
+    let
+        delta =
+            distance from to
+
+        a =
+            sin ((1 - fraction) * delta) / sin delta
+
+        b =
+            sin (fraction * delta) / sin delta
+
+        phi1 =
+            degreesToRadians from.lat
+
+        phi2 =
+            degreesToRadians to.lat
+
+        lambda1 =
+            degreesToRadians from.lon
+
+        lamda2 =
+            degreesToRadians to.lon
+
+        x =
+            a * cos phi1 * cos lambda1 + b * cos phi2 * cos lamda2
+
+        y =
+            a * cos phi1 * sin lambda1 + b * cos phi2 * sin lamda2
+
+        z =
+            a * sin phi1 + b * sin phi2
+
+        lati =
+            atan2 z (sqrt (x ^ 2 + y ^ 2))
+
+        loni =
+            atan2 y x
+    in
+    { lon =
+        -- floatMod (radiansToDegrees lamda3 + 540) 360 - 180
+        radiansToDegrees loni
+    , lat = radiansToDegrees lati
+    }
+
+
+distance : Location -> Location -> Float
+distance from to =
+    let
+        phi1 =
+            degreesToRadians from.lat
+
+        phi2 =
+            degreesToRadians to.lat
+
+        lambda1 =
+            degreesToRadians from.lon
+
+        lamda2 =
+            degreesToRadians to.lon
+
+        deltaLat =
+            phi2 - phi1
+
+        deltaLon =
+            lamda2 - lambda1
+
+        a =
+            sin (deltaLat / 2)
+                * sin (deltaLat / 2)
+                + cos phi1
+                * cos phi2
+                * sin (deltaLon / 2)
+                * sin (deltaLon / 2)
+    in
+    2 * atan2 (sqrt a) (sqrt (1 - a))
+
+
+degreesToRadians : Float -> Float
+degreesToRadians deg =
+    deg * pi / 180
+
+
+radiansToDegrees : Float -> Float
+radiansToDegrees rad =
+    rad * 180 / pi
+
+
+floatMod : Float -> Float -> Float
+floatMod a b =
+    a - (b * (toFloat << floor) (a / b))
