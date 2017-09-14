@@ -581,16 +581,7 @@ tickTransition diff ((State { transition, scene }) as state) =
                                 + (toScene.zoom - fromScene.zoom)
                                 * progress
                         , center =
-                            -- Location.betweenAt fromScene.center toScene.center progress
-                            { lon =
-                                fromScene.center.lon
-                                    + (toScene.center.lon - fromScene.center.lon)
-                                    * progress
-                            , lat =
-                                fromScene.center.lat
-                                    + (toScene.center.lat - fromScene.center.lat)
-                                    * progress
-                            }
+                            Location.betweenAt fromScene.center toScene.center progress
                     }
 
                 newTransition =
