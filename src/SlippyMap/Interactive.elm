@@ -187,7 +187,8 @@ tileLayer =
         |> Layer.withAttribution "© OpenStreetMap contributors"
 
 
-{-| -}
+{-| TODO: Do not depend on `toMsg`, this should go into a wrapped Config.
+-}
 markerLayer : (Msg -> msg) -> List ( Location, String ) -> Layer msg
 markerLayer toMsg locations =
     Marker.individualMarker Tuple.first
