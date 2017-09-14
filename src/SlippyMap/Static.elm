@@ -2,19 +2,21 @@ module SlippyMap.Static
     exposing
         ( around
         , at
+        , markerLayer
         , tileLayer
         )
 
 {-| Just a static map.
 
-@docs at, around, tileLayer
+@docs at, around, tileLayer, markerLayer
 
 -}
 
 import Html exposing (Html)
-import SlippyMap.Geo.Location as Location
+import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point
 import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Layer.Marker.Circle as Marker
 import SlippyMap.Layer.StaticImage as StaticImageLayer
 import SlippyMap.Map.Config as Config
 import SlippyMap.Map.State as State
@@ -59,3 +61,9 @@ tileLayer =
     StaticImageLayer.layer
         (StaticImageLayer.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
         |> Layer.withAttribution "© OpenStreetMap contributors"
+
+
+{-| -}
+markerLayer : List Location -> Layer msg
+markerLayer locations =
+    Marker.marker locations
