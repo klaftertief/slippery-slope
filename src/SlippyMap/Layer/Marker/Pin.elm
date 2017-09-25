@@ -92,7 +92,7 @@ renderIcon (Config config) =
 
 markerConfig : (marker -> Location) -> (marker -> Config msg) -> Marker.Config marker msg
 markerConfig toLocation toConfig =
-    Marker.config toLocation (toConfig >> renderIcon)
+    Marker.config toLocation (toConfig >> renderIcon) []
 
 
 {-| Renders a list of locations with default circle markers.
