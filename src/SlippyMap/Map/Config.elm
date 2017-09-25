@@ -12,18 +12,22 @@ module SlippyMap.Map.Config
         , size
         , static
         , tagger
+        , withAttributionPrefix
         , withCRS
         , withMaxZoom
         , withMinZoom
         , withZoomDelta
         , withZoomSnap
+        , withoutAttributionControl
+        , withoutZoomControl
+        , zoomControl
         , zoomDelta
         , zoomSnap
         )
 
 {-|
 
-@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, withMaxZoom, withMinZoom, Interactions, crs, minZoom, maxZoom, zoomDelta, zoomSnap, tagger, interactions, attributionPrefix, pointerPositionDecoder
+@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, withMaxZoom, withMinZoom, withoutZoomControl, zoomControl, Interactions, crs, minZoom, maxZoom, zoomDelta, zoomSnap, tagger, interactions, attributionPrefix, withoutAttributionControl, withAttributionPrefix, pointerPositionDecoder
 
 TODO: Add field for client position decoder
 
@@ -52,6 +56,8 @@ type alias ConfigInternal msg =
     , zoomDelta : Float
     , toMsg : Maybe (Msg -> msg)
     , crs : CRS
+    , zoomControl : Bool
+    , attributionControl : Bool
     , interactions : Interactions
     , pointerPositionDecoder : Decoder Point
     }
@@ -59,7 +65,7 @@ type alias ConfigInternal msg =
 
 defaultConfigInternal : ConfigInternal msg
 defaultConfigInternal =
-    { attributionPrefix = Just "Elm"
+    { attributionPrefix = Nothing
     , size = { x = 600, y = 400 }
     , minZoom = 0
     , maxZoom = 19
@@ -67,6 +73,8 @@ defaultConfigInternal =
     , zoomDelta = 1
     , toMsg = Nothing
     , crs = EPSG3857.crs
+    , zoomControl = False
+    , attributionControl = True
     , interactions = interactiveInteractions
     , pointerPositionDecoder = domPointerPositionDecoder
     }
@@ -149,6 +157,7 @@ interactive size toMsg =
         { defaultConfigInternal
             | size = size
             , toMsg = Just toMsg
+            , zoomControl = True
         }
 
 
@@ -157,6 +166,27 @@ withCRS : CRS -> Config msg -> Config msg
 withCRS crs (Config configInternal) =
     Config
         { configInternal | crs = crs }
+
+
+{-| -}
+withoutZoomControl : Config msg -> Config msg
+withoutZoomControl (Config configInternal) =
+    Config
+        { configInternal | zoomControl = False }
+
+
+{-| -}
+withAttributionPrefix : String -> Config msg -> Config msg
+withAttributionPrefix prefix (Config configInternal) =
+    Config
+        { configInternal | attributionPrefix = Just prefix }
+
+
+{-| -}
+withoutAttributionControl : Config msg -> Config msg
+withoutAttributionControl (Config configInternal) =
+    Config
+        { configInternal | attributionControl = False }
 
 
 {-| -}
@@ -221,6 +251,12 @@ zoomDelta (Config { zoomDelta }) =
 zoomSnap : Config msg -> Float
 zoomSnap (Config { zoomSnap }) =
     zoomSnap
+
+
+{-| -}
+zoomControl : Config msg -> Bool
+zoomControl (Config { zoomControl }) =
+    zoomControl
 
 
 {-| -}
