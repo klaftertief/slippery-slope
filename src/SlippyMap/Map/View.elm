@@ -13,6 +13,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Mouse exposing (Position)
 import SlippyMap.Control.Attribution as Attribution
 import SlippyMap.Control.Zoom as Zoom
+import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config exposing (Config(..))
@@ -30,7 +31,7 @@ view config state nestedLayers =
 
 
 {-| -}
-viewWithEvents : Config msg -> State -> List (Event msg) -> List (Layer msg) -> Html msg
+viewWithEvents : Config msg -> State -> List (Event ( Point, Location ) msg) -> List (Layer msg) -> Html msg
 viewWithEvents config state events nestedLayers =
     let
         ( scene, interaction ) =
@@ -56,7 +57,10 @@ viewWithEvents config state events nestedLayers =
         zoomControl =
             case tagger of
                 Just toMsg ->
-                    [ Zoom.control (Zoom.config toMsg) ]
+                    if Config.zoomControl config then
+                        [ Zoom.control (Zoom.config toMsg) ]
+                    else
+                        []
 
                 Nothing ->
                     []
