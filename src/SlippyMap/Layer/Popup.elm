@@ -117,7 +117,7 @@ renderPopup (Config config) map ( location, popup ) =
     Html.div
         ([ Html.Attributes.class "popup__positioner"
          , Html.Attributes.style
-            [ ( "position", "relative" )
+            [ ( "position", "absolute" )
             , ( "pointer-events", "auto" )
             , ( "transform"
               , "translate("
