@@ -5,6 +5,12 @@ module SlippyMap.Map.Msg
         , PinchMsg(..)
         )
 
+{-| Messages for map state updates.
+
+@docs Msg, DragMsg, PinchMsg
+
+-}
+
 import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
 import SlippyMap.Geo.Point as Point exposing (Point)
