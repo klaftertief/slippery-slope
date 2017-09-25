@@ -1,12 +1,14 @@
 module SlippyMap.Map.Events
     exposing
         ( Event
+        , MapEvent
         , on
+        , onn
         )
 
 {-|
 
-@docs Event, on
+@docs Event, MapEvent, on, onn
 
 -}
 
@@ -15,14 +17,26 @@ import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 
 
-{-| -}
-type alias Event msg =
+{-| TODO: make opaque
+-}
+type alias Event data msg =
     { name : String
-    , toDecoder : ( Point, Location ) -> Decoder msg
+    , toDecoder : data -> Decoder msg
     }
 
 
 {-| -}
-on : String -> (( Point, Location ) -> Decoder msg) -> Event msg
+type alias MapEvent msg =
+    Event ( Point, Location ) msg
+
+
+{-| -}
+on : String -> (( Point, Location ) -> Decoder msg) -> Event ( Point, Location ) msg
 on name toDecoder =
+    Event name toDecoder
+
+
+{-| -}
+onn : String -> (data -> Decoder msg) -> Event data msg
+onn name toDecoder =
     Event name toDecoder
