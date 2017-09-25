@@ -1,15 +1,14 @@
 module SlippyMap.Layer.Overlay
     exposing
         ( Config
-        , customConfig
+        , config
         , defaultConfig
-        , iframeConfig
         , layer
         )
 
 {-| A layer to show something at specific bounds.
 
-@docs Config, defaultConfig, iframeConfig, customConfig, layer
+@docs Config, config, defaultConfig, layer
 
 -}
 
@@ -34,26 +33,17 @@ type Config overlay msg
 
 
 {-| -}
+config : (( Float, Float ) -> overlay -> Html msg) -> Config overlay msg
+config render =
+    Config
+        { renderOverlay = render }
+
+
+{-| -}
 defaultConfig : Config String msg
 defaultConfig =
     Config
         { renderOverlay = imageOverlay
-        }
-
-
-{-| -}
-iframeConfig : Config String msg
-iframeConfig =
-    Config
-        { renderOverlay = iframeOverlay
-        }
-
-
-{-| -}
-customConfig : Config (Html msg) msg
-customConfig =
-    Config
-        { renderOverlay = customOverlay
         }
 
 
@@ -63,46 +53,8 @@ imageOverlay ( width, height ) url =
         [ Html.Attributes.width (round width)
         , Html.Attributes.height (round height)
         , Html.Attributes.src url
-
-        -- , Html.Attributes.style [ ( "pointer-events", "none" ) ]
         ]
         []
-
-
-iframeOverlay : ( Float, Float ) -> String -> Html msg
-iframeOverlay ( width, height ) url =
-    let
-        scale =
-            width / 1024
-    in
-    Html.iframe
-        [ Html.Attributes.src url
-        , Html.Attributes.attribute "frameBorder" "0"
-        , Html.Attributes.width 1024
-        , Html.Attributes.height 576
-        , Html.Attributes.style
-            [ ( "transform", "scale(" ++ toString scale ++ ")" )
-            , ( "transform-origin", "0 0" )
-            ]
-        ]
-        []
-
-
-customOverlay : ( Float, Float ) -> Html msg -> Html msg
-customOverlay ( width, height ) content =
-    let
-        scale =
-            width / 1024
-    in
-    Html.div
-        [ Html.Attributes.style
-            [ ( "width", "1024px" )
-            , ( "height", "576px" )
-            , ( "transform", "scale(" ++ toString scale ++ ")" )
-            , ( "transform-origin", "0 0" )
-            ]
-        ]
-        [ content ]
 
 
 
