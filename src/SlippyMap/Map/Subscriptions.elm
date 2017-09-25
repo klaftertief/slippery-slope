@@ -48,7 +48,7 @@ subscriptions config state =
                         HasNoFocus ->
                             []
 
-                stepSubscriptions =
+                transitionSubscriptions =
                     case transition of
                         NoTransition ->
                             []
@@ -61,7 +61,7 @@ subscriptions config state =
             in
             (dragSubscriptions
                 ++ keyboardNavigationSubscriptions
-                ++ stepSubscriptions
+                ++ transitionSubscriptions
             )
                 |> List.map (Sub.map toMsg)
                 |> Sub.batch
