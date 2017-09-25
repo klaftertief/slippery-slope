@@ -151,7 +151,8 @@ type Layer msg
     | LayerGroup Attribution (List (Layer msg))
 
 
-{-| -}
+{-| TODO: rename
+-}
 custom : (Map msg -> Html msg) -> Config msg -> Layer msg
 custom render (Config config) =
     Layer Nothing <|
