@@ -2,21 +2,29 @@ module SlippyMap.Static
     exposing
         ( around
         , at
+        , geoJsonLayer
         , markerLayer
+        , popupLayer
         , tileLayer
+        , withAttribution
         )
 
 {-| Just a static map.
 
-@docs at, around, tileLayer, markerLayer
+@docs at, around
+
+@docs tileLayer, markerLayer, geoJsonLayer, popupLayer, withAttribution
 
 -}
 
+import GeoJson exposing (GeoJson)
 import Html exposing (Html)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point
 import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Marker.Circle as Marker
+import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImageLayer
 import SlippyMap.Map.Config as Config
 import SlippyMap.Map.State as State
@@ -56,14 +64,31 @@ around size bounds =
 
 
 {-| -}
-tileLayer : Layer msg
-tileLayer =
+tileLayer : String -> Layer msg
+tileLayer urlTemplate =
     StaticImageLayer.layer
-        (StaticImageLayer.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
-        |> Layer.withAttribution "© OpenStreetMap contributors"
+        (StaticImageLayer.config urlTemplate [])
 
 
 {-| -}
 markerLayer : List Location -> Layer msg
 markerLayer locations =
     Marker.marker locations
+
+
+{-| -}
+geoJsonLayer : GeoJson -> Layer msg
+geoJsonLayer =
+    GeoJson.layer (GeoJson.defaultConfig (always []))
+
+
+{-| -}
+popupLayer : List ( Location, String ) -> Layer msg
+popupLayer =
+    Popup.layer Popup.config
+
+
+{-| -}
+withAttribution : String -> Layer msg -> Layer msg
+withAttribution =
+    Layer.withAttribution

@@ -8,30 +8,39 @@ module SlippyMap.Interactive
         , at
         , closePopup
         , config
+        , geoJsonLayer
         , getScene
         , markerLayer
+        , on
+        , popupLayer
         , setMapState
         , subscriptions
         , tileLayer
         , update
         , view
+        , viewWithEvents
+        , withAttribution
         )
 
 {-| A convenience module wrapping or re-exposing various specialised functions and types to quickly create a basic interactive map with a default configuration.
 
-@docs Config, config, State, at, around, Msg, update, view, subscriptions, Layer, tileLayer, markerLayer, setMapState, getScene, closePopup
+@docs Config, config, State, at, around, Msg, update, view, viewWithEvents, subscriptions, Layer, tileLayer, markerLayer, setMapState, getScene, closePopup, geoJsonLayer, popupLayer, withAttribution, on
 
 -}
 
+import GeoJson exposing (GeoJson)
 import Html exposing (Html)
+import Json.Decode exposing (Decoder)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer
-import SlippyMap.Layer.Marker.Pin as Marker
+import SlippyMap.Layer.GeoJson as GeoJson
+import SlippyMap.Layer.Marker.Circle as Marker
+import SlippyMap.Layer.Marker.Pin as PinMarker
 import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImageLayer
 import SlippyMap.Map.Config as Config
-import SlippyMap.Map.Events as Events exposing (Event)
+import SlippyMap.Map.Events as Events exposing (Event, MapEvent)
 import SlippyMap.Map.Msg as MapMsg
 import SlippyMap.Map.State as MapState
 import SlippyMap.Map.Subscriptions as Subscriptions
@@ -149,10 +158,28 @@ subscriptions config (State { mapState }) =
 -- VIEW
 
 
+{-| -}
+view : Config msg -> State -> List (Layer msg) -> Html msg
+view config (State { mapState }) layers =
+    View.view config mapState layers
+
+
+{-| -}
+viewWithEvents : Config msg -> State -> List (MapEvent msg) -> List (Layer msg) -> Html msg
+viewWithEvents config (State { mapState }) events layers =
+    View.viewWithEvents config mapState events layers
+
+
+{-| -}
+on : String -> (( Point, Location ) -> Decoder msg) -> Event ( Point, Location ) msg
+on =
+    Events.on
+
+
 {-| TODO: Do not depend on `toMsg`, this should go into a wrapped Config.
 -}
-view : (Msg -> msg) -> Config msg -> State -> List (Event msg) -> List (Layer msg) -> Html msg
-view toMsg config (State { mapState, popup }) events layers =
+viewWithMsg : (Msg -> msg) -> Config msg -> State -> List (Event ( Point, Location ) msg) -> List (Layer msg) -> Html msg
+viewWithMsg toMsg config (State { mapState, popup }) events layers =
     let
         popupLayers =
             popup
@@ -180,21 +207,44 @@ type alias Layer msg =
 
 
 {-| -}
-tileLayer : Layer msg
-tileLayer =
+tileLayer : String -> Layer msg
+tileLayer urlTemplate =
     StaticImageLayer.layer
-        (StaticImageLayer.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
-        |> Layer.withAttribution "© OpenStreetMap contributors"
+        (StaticImageLayer.config urlTemplate [])
+
+
+{-| -}
+markerLayer : List Location -> Layer msg
+markerLayer locations =
+    Marker.marker locations
+
+
+{-| -}
+geoJsonLayer : GeoJson -> Layer msg
+geoJsonLayer =
+    GeoJson.layer (GeoJson.defaultConfig (always []))
+
+
+{-| -}
+popupLayer : List ( Location, String ) -> Layer msg
+popupLayer =
+    Popup.layer Popup.config
 
 
 {-| TODO: Do not depend on `toMsg`, this should go into a wrapped Config.
 -}
-markerLayer : (Msg -> msg) -> List ( Location, String ) -> Layer msg
-markerLayer toMsg locations =
-    Marker.individualMarker Tuple.first
+markerPopupLayer : (Msg -> msg) -> List ( Location, String ) -> Layer msg
+markerPopupLayer toMsg locations =
+    PinMarker.individualMarker Tuple.first
         (\( location, title ) ->
-            Marker.icon
-                |> Marker.onClick
+            PinMarker.icon
+                |> PinMarker.onClick
                     (toMsg <| OpenPopup ( location, title ))
         )
         locations
+
+
+{-| -}
+withAttribution : String -> Layer msg -> Layer msg
+withAttribution =
+    Layer.withAttribution
