@@ -65,7 +65,7 @@ update msg model =
 
 config : Map.Config Msg
 config =
-    Map.config { width = 600, height = 400 } MapMsg
+    Map.config { width = 840, height = 560 } MapMsg
 
 
 subscriptions : Model -> Sub Msg
@@ -81,7 +81,15 @@ view model =
         ]
         [ Html.h1 []
             [ Html.text "Interactive map with marker playground" ]
-        , Map.view MapMsg
+        , Html.div
+            [ Html.Attributes.style
+                [ ( "height", "60vh" )
+                , ( "width", "20%" )
+                , ( "background", "#123432" )
+                ]
+            ]
+            []
+        , Map.viewWithEvents
             config
             model.map
             [ Events.on "click"
@@ -91,8 +99,9 @@ view model =
                         |> Json.Decode.succeed
                 )
             ]
-            [ Map.tileLayer
+            [ Map.tileLayer "http://localhost:9000/styles/positron/{z}/{x}/{y}.png"
             , Marker.marker (List.map .location model.pois)
+            , Map.popupLayer (List.map (\p -> ( p.location, p.name )) model.pois)
             ]
         ]
 

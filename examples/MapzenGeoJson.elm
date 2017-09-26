@@ -16,6 +16,7 @@ import SlippyMap.Interactive as Map
 import SlippyMap.Layer as Layer
 import SlippyMap.Layer.RemoteTile as RemoteTile
 import SlippyMap.Map.Config as MapConfig
+import SlippyMap.Map.Map as Map exposing (Map)
 import SlippyMap.Map.Transform as Transform
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -169,7 +170,7 @@ getTile config ({ z, x, y } as tile) =
 
 mapConfig : Map.Config Msg
 mapConfig =
-    Map.config { width = 600, height = 400 } MapMsg
+    MapConfig.interactive { width = 600, height = 400 } MapMsg
 
 
 
@@ -182,14 +183,16 @@ initialLayerConfig =
         "https://tile.mapzen.com/mapzen/vector/v1/all/{z}/{x}/{y}.json?api_key=mapzen-A4166oq"
         []
         |> RemoteTile.withRender
-            (\( { z, x, y } as tile, features ) transform ->
+            (\( { z, x, y } as tile, features ) map ->
                 let
+                    zoom =
+                        Map.zoom map
+
                     scale =
-                        transform.crs.scale
-                            (transform.zoom - toFloat z)
+                        Map.scaleT map (toFloat z)
 
                     origin =
-                        Transform.origin transform
+                        Map.origin map
 
                     point =
                         { x = toFloat x
@@ -209,12 +212,12 @@ initialLayerConfig =
 
                                     Just props ->
                                         not props.labelPlacement
-                                            && (props.minZoom < transform.zoom)
+                                            && (props.minZoom < zoom)
                             )
                         |> List.concatMap
                             (renderFeature
                                 (\( lon, lat, _ ) ->
-                                    Transform.locationToPoint transform { lon = lon, lat = lat }
+                                    Map.locationToPoint map { lon = lon, lat = lat }
                                         |> Point.subtract point
                                 )
                             )
@@ -237,9 +240,9 @@ view : Model -> Html Msg
 view model =
     Html.div [ Html.Attributes.style [ ( "padding", "10px" ) ] ]
         [ Html.node "style" [] [ Html.text layerStyles ]
-        , Map.view MapMsg
-            mapConfig
+        , Map.viewWithEvents mapConfig
             model.mapState
+            []
             [ RemoteTile.layer (layerConfig model.tiles)
                 |> Layer.withAttribution "Mapzen"
             ]
@@ -281,13 +284,7 @@ renderFeature project { properties, geometry } =
                 |> Maybe.withDefault []
 
         geoJsonConfig =
-            RenderGeoJson.Config
-                { project = project
-                , style = always []
-                , renderPoint =
-                    \attrs ->
-                        Svg.circle (attrs ++ [ Svg.Attributes.r "8" ]) []
-                }
+            RenderGeoJson.config project
 
         children =
             case geometry of

@@ -56,11 +56,11 @@ view model =
         ]
         [ Html.h1 []
             [ Html.text "Simple interactive map" ]
-        , Map.view MapMsg
-            config
+        , Map.view config
             model.map
-            []
-            [ Map.tileLayer ]
+            [ Map.tileLayer "http://localhost:9000/styles/positron/{z}/{x}/{y}.png"
+                |> Map.withAttribution "© OpenMapTiles © OpenStreetMap contributors"
+            ]
         ]
 
 

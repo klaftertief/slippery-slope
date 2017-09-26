@@ -3,45 +3,48 @@ module Interactive.Marker exposing (..)
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
+import Json.Decode
 import Set exposing (Set)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Interactive as Map
+import SlippyMap.Layer.Marker.Circle as Marker
+import SlippyMap.Map.Config as MapConfig
 import SlippyMap.Map.State as MapState
 
 
 type alias Model =
     { map : Map.State
     , pois : List Poi
-    , poiSelection : Set Int
     }
 
 
 type alias Poi =
     { name : String
     , location : Location
+    , selected : Bool
     }
 
 
 type Msg
     = MapMsg Map.Msg
-    | Select Int
-    | Deselect Int
+    | ToggleSelected String
 
 
 init : ( Model, Cmd Msg )
 init =
     { map = Map.around config (bounds initialPois)
     , pois = initialPois
-    , poiSelection = Set.empty
     }
         ! []
 
 
+{-| TODO: make Dict String Location
+-}
 initialPois : List Poi
 initialPois =
-    [ Poi "London" (Location 0.1275 51.507222)
-    , Poi "Madrid" (Location -3.716667 40.383333)
-    , Poi "Berlin" (Location 13.383333 52.516667)
+    [ Poi "London" (Location 0.1275 51.507222) False
+    , Poi "Madrid" (Location -3.716667 40.383333) False
+    , Poi "Berlin" (Location 13.383333 52.516667) False
     ]
 
 
@@ -57,70 +60,58 @@ bounds pois =
             }
 
 
-selectionBounds : Set Int -> List Poi -> Location.Bounds
-selectionBounds selection pois =
-    let
-        selectionList =
-            Set.toList selection
-
-        selectedPois =
-            pois
-                |> List.indexedMap
-                    (\index poi ->
-                        if List.member index selectionList then
-                            Just poi
-                        else
-                            Nothing
-                    )
-                |> List.filterMap identity
-    in
-    bounds selectedPois
+selectionBounds : List Poi -> Location.Bounds
+selectionBounds pois =
+    bounds (List.filter .selected pois)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         MapMsg mapMsg ->
-            { model
+            ( { model
                 | map =
                     Map.update config
                         mapMsg
                         model.map
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
-        Select index ->
-            updateSelection Set.insert index model ! []
+        ToggleSelected name ->
+            let
+                newPois =
+                    List.map (toggle name) model.pois
 
-        Deselect index ->
-            updateSelection Set.remove index model
-                ! []
+                newMap =
+                    Map.setMapState config
+                        (\config ->
+                            MapState.fitBounds config
+                                (selectionBounds newPois)
+                                |> MapState.animate 1800
+                        )
+                        model.map
+            in
+            ( { model
+                | pois = newPois
+                , map = newMap
+              }
+            , Cmd.none
+            )
 
 
-updateSelection : (Int -> Set Int -> Set Int) -> Int -> Model -> Model
-updateSelection updater index model =
-    let
-        newSelection =
-            updater index model.poiSelection
-
-        newMap =
-            Map.setMapState config
-                (\config ->
-                    MapState.fitBounds config
-                        (selectionBounds newSelection model.pois)
-                        |> MapState.animate 1800
-                )
-                model.map
-    in
-    { model
-        | poiSelection = newSelection
-        , map = newMap
-    }
+toggle : String -> Poi -> Poi
+toggle name poi =
+    if poi.name == name then
+        { poi | selected = not poi.selected }
+    else
+        poi
 
 
 config : Map.Config Msg
 config =
     Map.config { width = 600, height = 400 } MapMsg
+        |> MapConfig.withMaxZoom 9
 
 
 subscriptions : Model -> Sub Msg
@@ -143,42 +134,35 @@ view model =
 
 viewMap : Model -> Html Msg
 viewMap model =
-    Map.view MapMsg
+    Map.view
         config
         model.map
-        []
-        [ Map.tileLayer
-
-        -- , Marker.marker (List.map .location model.pois)
-        -- , Popup.layer Popup.config [ ( Location -3.716667 40.383333, "I popped up, merry poppin!" ) ]
-        , Map.markerLayer MapMsg
-            (List.map
-                (\p -> ( p.location, p.name ))
-                model.pois
-            )
+        [ Map.tileLayer "http://localhost:9000/styles/positron/{z}/{x}/{y}.png"
+            |> Map.withAttribution "© OpenMapTiles © OpenStreetMap contributors"
+        , Marker.individualMarker .location
+            (always Marker.icon)
+            [ Marker.onClick (.name >> ToggleSelected) ]
+            model.pois
         ]
 
 
 viewPois : Model -> Html Msg
 viewPois model =
     Html.div []
-        (List.indexedMap (viewPoi model.poiSelection) model.pois)
+        (List.map viewPoi model.pois)
 
 
-viewPoi : Set Int -> Int -> Poi -> Html Msg
-viewPoi selection index poi =
+viewPoi : Poi -> Html Msg
+viewPoi poi =
     let
-        isSelected =
-            Set.member index selection
-
-        ( background, toggle ) =
-            if isSelected then
-                ( "#ccc", Deselect )
+        background =
+            if poi.selected then
+                "#ccc"
             else
-                ( "transparent", Select )
+                "transparent"
     in
     Html.div
-        [ Html.Events.onClick (toggle index)
+        [ Html.Events.onClick (ToggleSelected poi.name)
         , Html.Attributes.style
             [ ( "background", background ) ]
         ]
