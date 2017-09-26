@@ -79,9 +79,6 @@ render ((Config { location }) as config) markers map =
     Svg.svg
         [ -- Important for touch pinching
           Svg.Attributes.pointerEvents "none"
-
-        -- , Svg.Attributes.width (toString transform.size.x)
-        -- , Svg.Attributes.height (toString transform.size.y)
         , Svg.Attributes.width "100%"
         , Svg.Attributes.height "100%"
         , Svg.Attributes.style "position: absolute;"
