@@ -1,6 +1,9 @@
 module SlippyMap.Geo.Projection.PlateCarree exposing (project, projection, unproject)
 
 {-| Equirectangular, or Plate Carree projection — the most simple projection, mostly used by GIS enthusiasts. Directly maps `x` as longitude, and `y` as latitude. Also suitable for flat worlds, e.g. game maps. Used by the `EPSG:4326` and `Simple` CRS.
+
+@docs project, projection, unproject
+
 -}
 
 import SlippyMap.Geo.Location as Location exposing (Location)

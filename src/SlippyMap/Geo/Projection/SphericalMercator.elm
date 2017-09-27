@@ -1,6 +1,9 @@
 module SlippyMap.Geo.Projection.SphericalMercator exposing (project, projection, radius, unproject)
 
 {-| Spherical Mercator projection — the most common projection for online maps, used by almost all free and commercial tile providers. Assumes that Earth is a sphere. Used by the `EPSG:3857` CRS.
+
+@docs project, projection, radius, unproject
+
 -}
 
 import SlippyMap.Geo.Location as Location exposing (Location)
@@ -54,6 +57,7 @@ unproject { x, y } =
     }
 
 
+{-| -}
 radius : Float
 radius =
     6378137

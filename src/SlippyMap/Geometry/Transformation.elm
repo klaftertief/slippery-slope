@@ -1,8 +1,15 @@
 module SlippyMap.Geometry.Transformation exposing (Transformation, transform, untransform)
 
+{-| Affine transformations.
+
+@docs Transformation, transform, untransform
+
+-}
+
 import SlippyMap.Geo.Point as Point exposing (Point)
 
 
+{-| -}
 type alias Transformation =
     { a : Float
     , b : Float
@@ -11,6 +18,7 @@ type alias Transformation =
     }
 
 
+{-| -}
 transform : Transformation -> Point -> Point
 transform { a, b, c, d } { x, y } =
     { x = a * x + b
@@ -18,6 +26,7 @@ transform { a, b, c, d } { x, y } =
     }
 
 
+{-| -}
 untransform : Transformation -> Point -> Point
 untransform { a, b, c, d } { x, y } =
     { x = (x - b) / a

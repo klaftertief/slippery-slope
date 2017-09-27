@@ -1,6 +1,9 @@
 module SlippyMap.Geo.Projection.Stereographic exposing (project, projection, radius, unproject)
 
 {-| Stereographic
+
+@docs project, projection, radius, unproject
+
 -}
 
 import SlippyMap.Geo.Location as Location exposing (Location)
@@ -70,6 +73,7 @@ unproject { x, y } =
     }
 
 
+{-| -}
 radius : Float
 radius =
     6378137
