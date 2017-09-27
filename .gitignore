@@ -1,2 +1,4 @@
 elm-stuff/
 tests/Doc/
+documentation/
+.doit.db
