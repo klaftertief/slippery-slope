@@ -6,14 +6,11 @@ module SlippyMap.Interactive
         , State
         , around
         , at
-        , closePopup
         , config
         , geoJsonLayer
-        , getScene
         , markerLayer
         , on
         , popupLayer
-        , setMapState
         , subscriptions
         , tileLayer
         , update
@@ -24,7 +21,7 @@ module SlippyMap.Interactive
 
 {-| A convenience module wrapping or re-exposing various specialised functions and types to quickly create a basic interactive map with a default configuration.
 
-@docs Config, config, State, at, around, Msg, update, view, viewWithEvents, subscriptions, Layer, tileLayer, markerLayer, setMapState, getScene, closePopup, geoJsonLayer, popupLayer, withAttribution, on
+@docs Config, config, State, at, around, Msg, update, view, viewWithEvents, subscriptions, Layer, tileLayer, markerLayer, geoJsonLayer, popupLayer, withAttribution, on
 
 -}
 
@@ -59,9 +56,8 @@ type alias Config msg =
 
 {-| -}
 config : Size -> (Msg -> msg) -> Config msg
-config size msg =
+config size =
     Config.interactive (Point.fromSize size)
-        (MapMsg >> msg)
 
 
 
@@ -69,42 +65,20 @@ config size msg =
 
 
 {-| -}
-type State
-    = State
-        { mapState : MapState.State
-        , popup : Maybe ( Location, String )
-        }
+type alias State =
+    MapState.State
 
 
 {-| -}
 at : Config msg -> Scene -> State
-at config scene =
-    State
-        { mapState = MapState.at config scene
-        , popup = Nothing
-        }
+at =
+    MapState.at
 
 
 {-| -}
 around : Config msg -> Location.Bounds -> State
-around config bounds =
-    State
-        { mapState = MapState.around config bounds
-        , popup = Nothing
-        }
-
-
-{-| -}
-getScene : State -> Scene
-getScene (State { mapState }) =
-    MapState.getScene mapState
-
-
-{-| -}
-setMapState : Config msg -> (Config msg -> MapState.State -> MapState.State) -> State -> State
-setMapState config f (State state) =
-    State
-        { state | mapState = f config state.mapState }
+around =
+    MapState.around
 
 
 
@@ -112,36 +86,14 @@ setMapState config f (State state) =
 
 
 {-| -}
-type Msg
-    = MapMsg MapMsg.Msg
-    | OpenPopup ( Location, String )
-    | ClosePopup
+type alias Msg =
+    MapMsg.Msg
 
 
 {-| -}
 update : Config msg -> Msg -> State -> State
-update config msg (State state) =
-    case msg of
-        MapMsg mapMsg ->
-            State
-                { state
-                    | mapState =
-                        Update.update config
-                            mapMsg
-                            state.mapState
-                }
-
-        OpenPopup popup ->
-            State { state | popup = Just popup }
-
-        ClosePopup ->
-            closePopup (State state)
-
-
-{-| -}
-closePopup : State -> State
-closePopup (State state) =
-    State { state | popup = Nothing }
+update =
+    Update.update
 
 
 
@@ -150,8 +102,8 @@ closePopup (State state) =
 
 {-| -}
 subscriptions : Config msg -> State -> Sub msg
-subscriptions config (State { mapState }) =
-    Subscriptions.subscriptions config mapState
+subscriptions =
+    Subscriptions.subscriptions
 
 
 
@@ -160,41 +112,20 @@ subscriptions config (State { mapState }) =
 
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
-view config (State { mapState }) layers =
-    View.view config mapState layers
+view =
+    View.view
 
 
 {-| -}
 viewWithEvents : Config msg -> State -> List (MapEvent msg) -> List (Layer msg) -> Html msg
-viewWithEvents config (State { mapState }) events layers =
-    View.viewWithEvents config mapState events layers
+viewWithEvents =
+    View.viewWithEvents
 
 
 {-| -}
 on : String -> (( Point, Location ) -> Decoder msg) -> Event ( Point, Location ) msg
 on =
     Events.on
-
-
-{-| TODO: Do not depend on `toMsg`, this should go into a wrapped Config.
--}
-viewWithMsg : (Msg -> msg) -> Config msg -> State -> List (Event ( Point, Location ) msg) -> List (Layer msg) -> Html msg
-viewWithMsg toMsg config (State { mapState, popup }) events layers =
-    let
-        popupLayers =
-            popup
-                |> Maybe.map
-                    (\p ->
-                        [ Popup.layer
-                            (Popup.withCloseMsg (toMsg ClosePopup)
-                                Popup.config
-                            )
-                            [ p ]
-                        ]
-                    )
-                |> Maybe.withDefault []
-    in
-    View.viewWithEvents config mapState events (layers ++ popupLayers)
 
 
 
@@ -231,17 +162,18 @@ popupLayer =
     Popup.layer Popup.config
 
 
-{-| TODO: Do not depend on `toMsg`, this should go into a wrapped Config.
--}
-markerPopupLayer : (Msg -> msg) -> List ( Location, String ) -> Layer msg
-markerPopupLayer toMsg locations =
-    PinMarker.individualMarker Tuple.first
-        (\( location, title ) ->
-            PinMarker.icon
-                |> PinMarker.onClick
-                    (toMsg <| OpenPopup ( location, title ))
-        )
-        locations
+
+-- {-| TODO: Do not depend on `toMsg`, this should go into a wrapped Config.
+-- -}
+-- markerPopupLayer : (Msg -> msg) -> List ( Location, String ) -> Layer msg
+-- markerPopupLayer toMsg locations =
+--     PinMarker.individualMarker Tuple.first
+--         (\( location, title ) ->
+--             PinMarker.icon
+--                 |> PinMarker.onClick
+--                     (toMsg <| OpenPopup ( location, title ))
+--         )
+--         locations
 
 
 {-| -}
