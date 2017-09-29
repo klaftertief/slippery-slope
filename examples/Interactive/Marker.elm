@@ -38,8 +38,6 @@ init =
         ! []
 
 
-{-| TODO: make Dict String Location
--}
 initialPois : List Poi
 initialPois =
     [ Poi "London" (Location 0.1275 51.507222) False
