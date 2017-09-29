@@ -93,7 +93,10 @@ around config initialBounds =
 setScene : Scene -> State -> State
 setScene newScene (State state) =
     State
-        { state | scene = newScene }
+        { state
+            | scene = newScene
+            , transition = NoTransition
+        }
 
 
 {-| -}
