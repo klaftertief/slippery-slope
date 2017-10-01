@@ -82,11 +82,9 @@ update msg model =
                     List.map (toggle name) model.pois
 
                 newMap =
-                    Map.setMapState config
-                        (\config ->
-                            MapState.fitBounds config
-                                (selectionBounds newPois)
-                                |> MapState.animate 1800
+                    MapState.animate 1800
+                        (MapState.fitBounds config
+                            (selectionBounds newPois)
                         )
                         model.map
             in

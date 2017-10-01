@@ -35,9 +35,7 @@ update msg model =
         MapMsg mapMsg ->
             { model
                 | map =
-                    Map.update config
-                        mapMsg
-                        model.map
+                    Map.update config mapMsg model.map
             }
                 ! []
 
@@ -60,11 +58,9 @@ view model =
         ]
         [ Html.h1 []
             [ Html.text "Map with GeoJson" ]
-        , Map.view MapMsg
-            config
+        , Map.view config
             model.map
-            []
-            [ Map.tileLayer
+            [ Map.tileLayer ""
             , GeoJsonLayer.layer (GeoJsonLayer.defaultConfig (always []))
                 (Maybe.withDefault myGeoJson Data.Simplestyle.geoJson)
             ]

@@ -53,14 +53,10 @@ update msg model =
         LocationChange location ->
             let
                 newMap =
-                    Map.setMapState config
-                        (\_ state ->
-                            MapState.setScene
-                                { center = toLocation location
-                                , zoom = 15
-                                }
-                                state
-                        )
+                    MapState.setScene
+                        { center = toLocation location
+                        , zoom = 15
+                        }
                         model.map
             in
             { model
@@ -77,14 +73,10 @@ update msg model =
                 Ok location ->
                     let
                         newMap =
-                            Map.setMapState config
-                                (\_ state ->
-                                    MapState.setScene
-                                        { center = toLocation location
-                                        , zoom = 15
-                                        }
-                                        state
-                                )
+                            MapState.setScene
+                                { center = toLocation location
+                                , zoom = 15
+                                }
                                 model.map
                     in
                     { model
@@ -138,11 +130,9 @@ viewMap model =
             Maybe.map toUserLayer model.userLocation
                 |> Maybe.withDefault []
     in
-    Map.view MapMsg
-        config
+    Map.view config
         model.map
-        []
-        (Map.tileLayer :: userLayer)
+        (Map.tileLayer "" :: userLayer)
 
 
 toUserLayer : Geolocation.Location -> List (Layer msg)
