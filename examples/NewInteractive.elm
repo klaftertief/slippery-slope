@@ -83,10 +83,8 @@ mapConfig size =
 view : Model -> Html Msg
 view model =
     Html.div []
-        [ Map.view MapMsg
-            (mapConfig model.size)
+        [ Map.view (mapConfig model.size)
             model.mapState
-            []
             [ {- StaticImage.layer
                      (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
                          |> StaticImage.withAttribution "© OpenStreetMap contributors"

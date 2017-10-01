@@ -124,12 +124,9 @@ update msg model =
 newTilesToLoad : Model -> List Tile
 newTilesToLoad model =
     let
-        transform =
-            Transform.transform mapConfig
-                (Map.getScene model.mapState)
-
         tiles =
-            Transform.tileCover transform
+            Map.tileCover
+                (Map.make mapConfig model.mapState)
 
         newTileSet =
             tiles
@@ -170,7 +167,7 @@ getTile config ({ z, x, y } as tile) =
 
 mapConfig : Map.Config Msg
 mapConfig =
-    MapConfig.interactive { width = 600, height = 400 } MapMsg
+    MapConfig.interactive { x = 600, y = 400 } MapMsg
 
 
 
@@ -246,8 +243,6 @@ view model =
             [ RemoteTile.layer (layerConfig model.tiles)
                 |> Layer.withAttribution "Mapzen"
             ]
-        , Html.div []
-            [ Html.text (toString model.mapState) ]
         ]
 
 
