@@ -168,7 +168,8 @@ group layers =
     LayerGroup Nothing layers
 
 
-{-| -}
+{-| TODO: should this expect a `List Layer`?
+-}
 attributions : Layer msg -> List String
 attributions layer =
     case layer of
