@@ -1,4 +1,4 @@
-NODE_MODULES_BIN = ./node_modules/.bin
+NODE_MODULES_BIN = $(realpath ./node_modules/.bin)
 ELM_FILES = $(shell find src -name '*.elm' -type f)
 
 help: ## Prints a help guide
@@ -14,14 +14,22 @@ install: ## Install build dependencies
 	@npm install
 
 
-test: prepare-elm-verify-examples ## Run tests with human readable output
+elm-stuff:
+	@$(NODE_MODULES_BIN)/elm-package install --yes
+
+
+test: tests/Doc tests/elm-stuff ## Run tests with human readable output
 	@echo "> Running tests..."
 	@$(NODE_MODULES_BIN)/elm-test --compiler $(NODE_MODULES_BIN)/elm-make
 
 
-prepare-elm-verify-examples:
+tests/Doc: $(ELM_FILES)
 	@echo "> Preparing example tests..."
 	@$(NODE_MODULES_BIN)/elm-verify-examples
+
+
+tests/elm-stuff: tests/elm-package.json
+	@cd tests && $(NODE_MODULES_BIN)/elm-package install --yes
 
 
 analyse: ## Analyse source files
@@ -38,8 +46,7 @@ format: ## Format source files
 
 clean: ## Clean build artefacts and caches
 	@echo "> Cleaning build artefacts and caches..."
-	@rm -rf elm-stuff/
-	@rm -rf tests/Doc/
+	@rm -rf elm-stuff/ tests/elm-stuff/ tests/Doc/
 
 
 clean-deps: ## Clean dependencies
