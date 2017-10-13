@@ -14,10 +14,10 @@ TODO: move radius out of the config and support multiple circles in one layer.
 -}
 
 import GeoJson exposing (GeoJson)
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Geo.Location exposing (Location)
+import SlippyMap.Layer exposing (Layer)
 import SlippyMap.Layer.GeoJson as GeoJsonLayer
-import Svg exposing (Svg)
+import Svg
 import Svg.Attributes
 
 

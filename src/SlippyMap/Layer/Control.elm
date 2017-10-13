@@ -17,7 +17,7 @@ module SlippyMap.Layer.Control
 import Html exposing (Html)
 import Html.Attributes
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Map as Map exposing (Map)
+import SlippyMap.Map.Map exposing (Map)
 
 
 -- CONFIG

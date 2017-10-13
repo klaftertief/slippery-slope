@@ -6,9 +6,9 @@ module SlippyMap.Geo.Projection.Stereographic exposing (project, projection, rad
 
 -}
 
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.Geo.Projection as Projection exposing (Projection)
+import SlippyMap.Geo.Location exposing (Location)
+import SlippyMap.Geo.Point exposing (Point)
+import SlippyMap.Geo.Projection exposing (Projection)
 
 
 {-| -}

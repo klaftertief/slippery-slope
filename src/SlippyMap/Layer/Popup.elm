@@ -15,7 +15,7 @@ module SlippyMap.Layer.Popup
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
-import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Map as Map exposing (Map)
 

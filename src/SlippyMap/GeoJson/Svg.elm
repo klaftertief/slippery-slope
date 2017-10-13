@@ -22,7 +22,7 @@ TODO: Pull out simplestyle spec decoder
 import GeoJson exposing (GeoJson)
 import Json.Decode
 import Json.Encode as Json
-import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Point exposing (Point)
 import Svg exposing (Svg)
 import Svg.Attributes
 

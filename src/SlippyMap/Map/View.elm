@@ -13,13 +13,13 @@ import Json.Decode as Decode exposing (Decoder)
 import Mouse exposing (Position)
 import SlippyMap.Control.Attribution as Attribution
 import SlippyMap.Control.Zoom as Zoom
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Location exposing (Location)
+import SlippyMap.Geo.Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Config as Config exposing (Config(..))
-import SlippyMap.Map.Events as Events exposing (Event)
-import SlippyMap.Map.Map as Map exposing (Map)
-import SlippyMap.Map.Msg as Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
+import SlippyMap.Map.Events exposing (Event)
+import SlippyMap.Map.Map as Map
+import SlippyMap.Map.Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.Map.State as State exposing (State(..))
 import SlippyMap.Map.Types as Types exposing (Focus(..))
 
@@ -34,7 +34,7 @@ view config state nestedLayers =
 viewWithEvents : Config msg -> State -> List (Event ( Point, Location ) msg) -> List (Layer msg) -> Html msg
 viewWithEvents config state events nestedLayers =
     let
-        ( scene, interaction ) =
+        ( _, interaction ) =
             ( State.getScene state
             , State.interaction state
             )

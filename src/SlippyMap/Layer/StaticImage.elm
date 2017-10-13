@@ -11,8 +11,8 @@ module SlippyMap.Layer.StaticImage
 
 -}
 
-import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Geo.Tile exposing (Tile)
+import SlippyMap.Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
 import SlippyMap.Map.Map as Map exposing (Map)
 import Svg exposing (Svg)

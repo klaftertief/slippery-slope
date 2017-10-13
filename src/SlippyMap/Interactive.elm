@@ -33,7 +33,7 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer
 import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Marker.Circle as Marker
-import SlippyMap.Layer.Marker.Pin as PinMarker
+import SlippyMap.Layer.Marker.Pin
 import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImageLayer
 import SlippyMap.Map.Config as Config
@@ -41,7 +41,7 @@ import SlippyMap.Map.Events as Events exposing (Event, MapEvent)
 import SlippyMap.Map.Msg as MapMsg
 import SlippyMap.Map.State as MapState
 import SlippyMap.Map.Subscriptions as Subscriptions
-import SlippyMap.Map.Types as Types exposing (Scene, Size)
+import SlippyMap.Map.Types exposing (Scene, Size)
 import SlippyMap.Map.Update as Update
 import SlippyMap.Map.View as View
 

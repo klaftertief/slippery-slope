@@ -6,8 +6,8 @@ module SlippyMap.Geo.CRS exposing (CRS)
 
 -}
 
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Location exposing (Location)
+import SlippyMap.Geo.Point exposing (Point)
 
 
 {-| -}

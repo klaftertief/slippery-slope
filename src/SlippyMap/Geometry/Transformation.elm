@@ -6,7 +6,7 @@ module SlippyMap.Geometry.Transformation exposing (Transformation, transform, un
 
 -}
 
-import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Point exposing (Point)
 
 
 {-| -}

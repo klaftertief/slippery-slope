@@ -14,7 +14,7 @@ module SlippyMap.Geo.Coordinate
 
 -}
 
-import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Point exposing (Point)
 
 
 {-| -}
@@ -77,7 +77,7 @@ fromPoint tileSize atZoom { x, y } =
 toPoint : Int -> Float -> Coordinate -> Point
 toPoint tileSize atZoom coordinate =
     let
-        { column, row, zoom } =
+        { column, row } =
             zoomTo atZoom coordinate
 
         scale =

@@ -36,8 +36,8 @@ module SlippyMap.Map.State
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Map.Config as Config exposing (Config)
-import SlippyMap.Map.Transform as Transform exposing (Transform)
-import SlippyMap.Map.Types as Types exposing (..)
+import SlippyMap.Map.Transform as Transform
+import SlippyMap.Map.Types exposing (..)
 import Time exposing (Time)
 
 

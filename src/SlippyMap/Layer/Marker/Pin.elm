@@ -14,8 +14,8 @@ module SlippyMap.Layer.Marker.Pin
 
 -}
 
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Geo.Location exposing (Location)
+import SlippyMap.Layer exposing (Layer)
 import SlippyMap.Layer.Marker as Marker exposing (Config)
 import Svg exposing (Svg)
 import Svg.Attributes

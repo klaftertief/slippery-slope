@@ -28,7 +28,7 @@ module SlippyMap.Layer.Marker.Circle
 
 import Json.Decode exposing (Decoder)
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Layer exposing (Layer)
 import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Map.Events as Events exposing (Event)
 import Svg exposing (Svg)

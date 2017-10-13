@@ -7,7 +7,7 @@ module SlippyMap.Geo.CRS.EPSG3857 exposing (crs)
 -}
 
 import SlippyMap.Geo.CRS exposing (CRS)
-import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Projection.SphericalMercator as Projection
 import SlippyMap.Geometry.Transformation as Transformation exposing (Transformation)

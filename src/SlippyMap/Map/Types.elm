@@ -16,7 +16,7 @@ module SlippyMap.Map.Types
 -}
 
 import Mouse exposing (Position)
-import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Location exposing (Location)
 import Time exposing (Time)
 
 

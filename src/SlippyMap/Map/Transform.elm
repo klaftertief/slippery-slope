@@ -21,11 +21,11 @@ module SlippyMap.Map.Transform
 
 -}
 
-import SlippyMap.Geo.CRS as CRS exposing (CRS)
+import SlippyMap.Geo.CRS exposing (CRS)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile as Tile exposing (Tile)
-import SlippyMap.Map.Types as Types exposing (Scene)
+import SlippyMap.Map.Types exposing (Scene)
 
 
 {-| -}

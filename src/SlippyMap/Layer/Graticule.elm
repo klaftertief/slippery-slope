@@ -12,9 +12,9 @@ module SlippyMap.Layer.Graticule
 
 import GeoJson exposing (GeoJson)
 import Json.Encode as Json
-import SlippyMap.Layer as Layer exposing (Layer)
+import SlippyMap.Layer exposing (Layer)
 import SlippyMap.Layer.GeoJson as GeoJsonLayer
-import Svg exposing (Svg)
+import Svg
 import Svg.Attributes
 
 

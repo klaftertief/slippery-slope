@@ -205,6 +205,7 @@ radiansToDegrees rad =
     rad * 180 / pi
 
 
-floatMod : Float -> Float -> Float
-floatMod a b =
-    a - (b * (toFloat << floor) (a / b))
+
+-- floatMod : Float -> Float -> Float
+-- floatMod a b =
+--     a - (b * (toFloat << floor) (a / b))

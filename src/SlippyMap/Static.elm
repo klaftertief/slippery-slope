@@ -28,7 +28,7 @@ import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImageLayer
 import SlippyMap.Map.Config as Config
 import SlippyMap.Map.State as State
-import SlippyMap.Map.Types as Types exposing (Scene, Size)
+import SlippyMap.Map.Types exposing (Scene, Size)
 import SlippyMap.Map.View as View
 
 

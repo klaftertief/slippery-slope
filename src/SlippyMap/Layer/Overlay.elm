@@ -14,8 +14,8 @@ module SlippyMap.Layer.Overlay
 
 import Html exposing (Html)
 import Html.Attributes
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Location as Location
+import SlippyMap.Geo.Point as Point
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Map as Map exposing (Map)
 

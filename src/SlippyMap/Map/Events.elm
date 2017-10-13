@@ -13,8 +13,8 @@ module SlippyMap.Map.Events
 -}
 
 import Json.Decode exposing (Decoder)
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
+import SlippyMap.Geo.Location exposing (Location)
+import SlippyMap.Geo.Point exposing (Point)
 
 
 {-| TODO: make opaque

@@ -13,8 +13,8 @@ module SlippyMap.Layer.Tile
 -}
 
 import Regex
-import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.Geo.Tile as Tile exposing (Tile)
+import SlippyMap.Geo.Point as Point
+import SlippyMap.Geo.Tile exposing (Tile)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Map as Map exposing (Map)
 import Svg exposing (Svg)

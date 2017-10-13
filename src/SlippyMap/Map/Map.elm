@@ -26,10 +26,10 @@ module SlippyMap.Map.Map
 
 -}
 
-import SlippyMap.Geo.CRS as CRS exposing (CRS)
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.Geo.Tile as Tile exposing (Tile)
+import SlippyMap.Geo.CRS exposing (CRS)
+import SlippyMap.Geo.Location exposing (Location)
+import SlippyMap.Geo.Point exposing (Point)
+import SlippyMap.Geo.Tile exposing (Tile)
 import SlippyMap.Map.Config as Config exposing (Config)
 import SlippyMap.Map.State as State exposing (State)
 import SlippyMap.Map.Transform as Transform exposing (Transformer)

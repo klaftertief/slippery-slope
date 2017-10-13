@@ -22,7 +22,7 @@ module SlippyMap.Layer
 -}
 
 import Html exposing (Html)
-import SlippyMap.Map.Map as Map exposing (Map)
+import SlippyMap.Map.Map exposing (Map)
 
 
 {-| Configuration for a layer.

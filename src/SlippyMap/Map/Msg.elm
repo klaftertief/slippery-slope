@@ -13,8 +13,8 @@ module SlippyMap.Map.Msg
 
 import Keyboard exposing (KeyCode)
 import Mouse exposing (Position)
-import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.Map.Types as Types exposing (Focus)
+import SlippyMap.Geo.Point exposing (Point)
+import SlippyMap.Map.Types exposing (Focus)
 import Time exposing (Time)
 
 

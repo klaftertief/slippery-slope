@@ -11,10 +11,10 @@ module SlippyMap.Layer.Marker
 
 -}
 
-import Json.Decode exposing (Decoder)
-import SlippyMap.Geo.Location as Location exposing (Location)
+import Json.Decode
+import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Events as Events exposing (Event)
+import SlippyMap.Map.Events exposing (Event)
 import SlippyMap.Map.Map as Map exposing (Map)
 import Svg exposing (Svg)
 import Svg.Attributes
