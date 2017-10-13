@@ -1,0 +1,19 @@
+{
+  "name": "slippery-slope",
+  "version": "1.0.0",
+  "description": "Slippery Slope - A slippy map written in pure Elm",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "elm": "^0.18.0",
+    "elm-analyse": "^0.11.0",
+    "elm-format": "^0.7.0-exp",
+    "elm-test": "^0.18.9",
+    "elm-verify-examples": "^1.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jonas Coch",
+  "license": "BSD3"
+}

@@ -1,0 +1,10 @@
+{
+    "checks": {
+        "LineLengthExceeded" : false,
+        "SingleFieldRecord" : false
+    },
+    "excludedPaths": [
+        "vendor",
+        "submodules/api/build/elm"
+    ]
+}

@@ -3,3 +3,4 @@ tests/Doc/
 documentation/
 .doit.db
 documentation.json
+node_modules/
