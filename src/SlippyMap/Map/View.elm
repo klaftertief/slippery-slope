@@ -113,11 +113,9 @@ viewWithEvents config state events nestedLayers =
             [ ( "with-interaction", interaction /= Types.NoInteraction ) ]
          ]
             ++ interactionAttributesInternal
-            -- TODO: Mover user events into separate DOM element so that those won't override internal ones
             ++ userEventAttributes
         )
-        [ -- TODO: Reactivate when working on event cleanup
-          {- Html.div
+        [ {- Html.div
                  [ -- This is needed at the moment as a touch event target for panning. The touchmove gets lost when it originates in a tile that gets removed during panning.
                    Html.Attributes.style
                      [ ( "position"
@@ -279,5 +277,9 @@ pinchDecoder =
 tapDecoderAt : Int -> Decoder Position
 tapDecoderAt index =
     Decode.map2 Position
-        (Decode.at [ "targetTouches", toString index, "clientX" ] Decode.int)
-        (Decode.at [ "targetTouches", toString index, "clientY" ] Decode.int)
+        (Decode.at [ "touches", toString index, "clientX" ] Decode.float
+            |> Decode.andThen (round >> Decode.succeed)
+        )
+        (Decode.at [ "touches", toString index, "clientY" ] Decode.float
+            |> Decode.andThen (round >> Decode.succeed)
+        )
