@@ -26,9 +26,6 @@ import Svg.Attributes
 
 
 {-| Configuration for the layer.
-
-TODO: add type alias for internal config
-
 -}
 type Config
     = Config
@@ -74,7 +71,6 @@ layer ((Config configInternal) as config) =
 tile : Config -> Map msg -> WebData Tile -> Svg msg
 tile (Config configInternal) map tileResponse =
     let
-        -- TODO: unify scale usage, do not calculate by rounding
         scale =
             Map.scaleZ map (toFloat (round <| Map.zoom map))
     in
@@ -88,7 +84,7 @@ tile (Config configInternal) map tileResponse =
         RemoteData.Failure e ->
             Svg.text_ [] [ Svg.text ("Error: " ++ toString e) ]
 
-        RemoteData.Success tile ->
+        RemoteData.Success t ->
             Svg.image
                 [ Svg.Attributes.width
                     -- (toString renderState.transform.tileSize)
@@ -96,7 +92,7 @@ tile (Config configInternal) map tileResponse =
                 , Svg.Attributes.height
                     -- (toString renderState.transform.tileSize)
                     "256"
-                , Svg.Attributes.xlinkHref (configInternal.toUrl tile)
+                , Svg.Attributes.xlinkHref (configInternal.toUrl t)
                 , Svg.Attributes.transform
                     ("scale("
                         ++ toString scale

@@ -218,9 +218,8 @@ isVisible transform tile =
             .scale (crs transform)
                 (zoom transform - toFloat tile.z)
 
-        originPoint =
-            origin transform
-
+        -- originPoint =
+        --     origin transform
         locationBounds =
             bounds transform
                 |> (\( topLeft, bottomRight ) ->

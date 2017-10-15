@@ -180,7 +180,7 @@ updateDrag config dragMsg state =
                                         }
                                         |> State.animate 400
 
-                            Pinching { last } ->
+                            Pinching _ ->
                                 -- identity
                                 State.snapZoom config
                 in

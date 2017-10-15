@@ -27,7 +27,7 @@ module SlippyMap.Layer.Marker.Circle
 -}
 
 import Json.Decode exposing (Decoder)
-import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Layer exposing (Layer)
 import SlippyMap.Layer.Marker as Marker
 import SlippyMap.Map.Events as Events exposing (Event)
@@ -118,7 +118,7 @@ on name toDecoder =
 
 {-| -}
 onClick : (marker -> msg) -> marker -> Event marker msg
-onClick toMessage marker =
+onClick toMessage _ =
     on "click" (\marker -> Json.Decode.map toMessage (Json.Decode.succeed marker))
 
 

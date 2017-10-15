@@ -23,9 +23,6 @@ import Svg.Keyed
 
 
 {-| Configuration for the layer.
-
-TODO: add tileSize
-
 -}
 type Config data msg
     = Config

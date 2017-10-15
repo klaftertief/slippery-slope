@@ -29,8 +29,6 @@ module SlippyMap.Map.Config
 
 @docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, withMaxZoom, withMinZoom, withoutZoomControl, zoomControl, Interactions, crs, minZoom, maxZoom, zoomDelta, zoomSnap, tagger, interactions, attributionPrefix, withoutAttributionControl, withAttributionPrefix, pointerPositionDecoder
 
-TODO: Add field for client position decoder
-
 -}
 
 import DOM
@@ -80,15 +78,8 @@ defaultConfigInternal =
     }
 
 
-defaultPointerPositionDecoder : Decoder Point
-defaultPointerPositionDecoder =
-    Decode.map2 Point
-        (Decode.field "offsetX" Decode.float)
-        (Decode.field "offsetY" Decode.float)
-
-
-domPointerPositionDecoder : Decoder Point
-domPointerPositionDecoder =
+pointerPositionDecoder : Decoder Point
+pointerPositionDecoder =
     Decode.map5
         (\x y r l t ->
             { x = x - r.left - l
@@ -115,8 +106,7 @@ mapPosition =
         ]
 
 
-{-| TODO: make opaque
--}
+{-| -}
 type alias Interactions =
     { scrollWheelZoom : Bool
     , doubleClickZoom : Bool
@@ -131,15 +121,6 @@ interactiveInteractions =
     , doubleClickZoom = True
     , touchZoom = True
     , keyboardControl = True
-    }
-
-
-staticInteractions : Interactions
-staticInteractions =
-    { scrollWheelZoom = False
-    , doubleClickZoom = False
-    , touchZoom = True
-    , keyboardControl = False
     }
 
 

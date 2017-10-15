@@ -33,7 +33,6 @@ import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer
 import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Marker.Circle as Marker
-import SlippyMap.Layer.Marker.Pin
 import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImageLayer
 import SlippyMap.Map.Config as Config
@@ -160,20 +159,6 @@ geoJsonLayer =
 popupLayer : List ( Location, String ) -> Layer msg
 popupLayer =
     Popup.layer Popup.config
-
-
-
--- {-| TODO: Do not depend on `toMsg`, this should go into a wrapped Config.
--- -}
--- markerPopupLayer : (Msg -> msg) -> List ( Location, String ) -> Layer msg
--- markerPopupLayer toMsg locations =
---     PinMarker.individualMarker Tuple.first
---         (\( location, title ) ->
---             PinMarker.icon
---                 |> PinMarker.onClick
---                     (toMsg <| OpenPopup ( location, title ))
---         )
---         locations
 
 
 {-| -}

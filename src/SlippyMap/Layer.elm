@@ -138,8 +138,7 @@ withAttribution attribution layer =
             LayerGroup (Just attribution) layers
 
 
-{-| TODO: should the attribution be a proper type?
--}
+{-| -}
 type alias Attribution =
     Maybe String
 
@@ -218,8 +217,7 @@ level layer =
             0
 
 
-{-| TODO: Layers should have general attributes like class name. Add here.
--}
+{-| -}
 render : Map msg -> Layer msg -> Html msg
 render map layer =
     case layer of
@@ -228,8 +226,8 @@ render map layer =
                 NoRenderer ->
                     Html.text ""
 
-                Renderer render ->
-                    render map
+                Renderer renderLayer ->
+                    renderLayer map
 
         LayerGroup _ _ ->
             Html.text ""

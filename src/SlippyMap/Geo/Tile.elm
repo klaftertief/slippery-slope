@@ -1,8 +1,8 @@
-module SlippyMap.Geo.Tile exposing (Comparable, Tile, children, cover, fromComparable, toComparable)
+module SlippyMap.Geo.Tile exposing (Comparable, Tile, children, cover, fromComparable, normalize, toComparable)
 
 {-|
 
-@docs Tile, Comparable, toComparable, fromComparable, cover, children
+@docs Tile, Comparable, toComparable, fromComparable, cover, children, normalize
 
 -}
 
@@ -43,6 +43,7 @@ coordinateToTile { column, row, zoom } =
     }
 
 
+{-| -}
 normalize : Tile -> Tile
 normalize { z, x, y } =
     { z = z

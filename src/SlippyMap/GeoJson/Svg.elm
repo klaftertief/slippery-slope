@@ -13,8 +13,6 @@ module SlippyMap.GeoJson.Svg
 
 {-| GeoJson SVG renderer.
 
-TODO: Pull out simplestyle spec decoder
-
 @docs Config, config, withAttributes, withPointRenderer, renderGeoJson, renderGeoJsonPoint, renderGeoJsonLineString, renderGeoJsonPolygon, renderGeoJsonGeometry
 
 -}
@@ -59,7 +57,7 @@ withPointRenderer render (Config config) =
 
 
 defaultAttributes : GeoJson.FeatureObject -> List (Svg.Attribute msg)
-defaultAttributes featureObject =
+defaultAttributes _ =
     [ Svg.Attributes.stroke "#3388ff"
     , Svg.Attributes.strokeWidth "2"
     , Svg.Attributes.fill "#3388ff"
@@ -216,19 +214,6 @@ pathPoints (Config internalConfig) positionList =
             )
         |> String.join "L"
         |> (\ll -> "M" ++ ll)
-
-
-{-| -}
-points : Config msg -> List GeoJson.Position -> String
-points (Config internalConfig) positionList =
-    List.foldl
-        (\position accum ->
-            internalConfig.project position
-                |> (\{ x, y } -> toString x ++ "," ++ toString y)
-                |> (\xy -> accum ++ " " ++ xy)
-        )
-        ""
-        positionList
 
 
 propertiesStyle : GeoJson.FeatureObject -> List (Svg.Attribute msg)

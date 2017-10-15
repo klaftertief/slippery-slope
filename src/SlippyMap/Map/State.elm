@@ -27,7 +27,7 @@ module SlippyMap.Map.State
         , zoomOut
         )
 
-{-| TODO: Should the functions expect a Transform directly combined with the Config?
+{-|
 
 @docs State, at, around, defaultState, fitBounds, moveBy, moveTo, setCenter, setFocus, setInteraction, setTransition, setScene, setZoom, tickTransition, withInteraction, zoomByAround, zoomIn, zoomInAround, zoomOut, getScene, interaction, focus, transition, snapZoom, animate
 
@@ -75,7 +75,7 @@ defaultScene =
 
 {-| -}
 at : Config msg -> Scene -> State
-at config initialScene =
+at _ initialScene =
     setScene initialScene defaultState
 
 
@@ -124,8 +124,7 @@ setFocus newFocus (State state) =
 -- INTERACTIONS
 
 
-{-| TODO: rename to applyInteraction or similar
--}
+{-| -}
 withInteraction : Config msg -> State -> State
 withInteraction config ((State { interaction }) as state) =
     case interaction of
@@ -244,7 +243,7 @@ moveBy config offset state =
 
 {-| -}
 setCenter : Config msg -> Location -> State -> State
-setCenter config newCenter ((State { scene }) as state) =
+setCenter _ newCenter ((State { scene }) as state) =
     setScene
         { scene | center = newCenter }
         state
@@ -362,7 +361,7 @@ zoomByAround config delta around ((State { scene }) as state) =
 
 {-| -}
 fitBounds : Config msg -> Location.Bounds -> State -> State
-fitBounds config { southWest, northEast } ((State { scene }) as state) =
+fitBounds config { southWest, northEast } state =
     let
         ( crs, size, zoomSnap, minZoom, maxZoom ) =
             ( Config.crs config

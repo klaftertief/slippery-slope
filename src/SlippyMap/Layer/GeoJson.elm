@@ -67,7 +67,7 @@ layer config geoJson =
 
 
 render : Config msg -> GeoJson -> Map msg -> Svg msg
-render (Config internalConfig) geoJson map =
+render _ geoJson map =
     let
         size =
             Map.size map

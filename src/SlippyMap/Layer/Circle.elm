@@ -7,8 +7,6 @@ module SlippyMap.Layer.Circle
 
 {-| A layer to render a Circle at a given location.
 
-TODO: move radius out of the config and support multiple circles in one layer.
-
 @docs Config, config, layer
 
 -}

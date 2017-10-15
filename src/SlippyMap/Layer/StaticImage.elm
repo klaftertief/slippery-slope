@@ -49,7 +49,7 @@ layer config =
 
 
 tile : Config -> Map msg -> Tile -> Svg msg
-tile (Config config) map ({ z, x, y } as tile) =
+tile (Config config) map ({ z } as tile) =
     let
         scale =
             Map.scaleZ map (toFloat z)

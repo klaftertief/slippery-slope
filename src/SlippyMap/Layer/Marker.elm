@@ -11,14 +11,12 @@ module SlippyMap.Layer.Marker
 
 -}
 
-import Json.Decode
 import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map.Events exposing (Event)
 import SlippyMap.Map.Map as Map exposing (Map)
 import Svg exposing (Svg)
 import Svg.Attributes
-import Svg.Events
 import VirtualDom
 
 
@@ -43,18 +41,6 @@ config toLocation toIcon toEvents =
         , icon = toIcon
         , toEvents = toEvents
         }
-
-
-
--- {-| TODO: Is this needed?
--- -}
--- on : String -> (marker -> Decoder msg) -> Config marker msg -> Config marker msg
--- on name toDecoder (Config ({ events } as config)) =
---     Config
---         { config
---             | events =
---                 Events.onn name toDecoder :: events
---         }
 
 
 {-| -}

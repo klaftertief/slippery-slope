@@ -53,8 +53,6 @@ type Transition
 
 
 {-| Supported interactions
-TODO: add Zooming
-TODO: keep track of time to allow speed/acceleration calculation
 -}
 type Interaction
     = NoInteraction
