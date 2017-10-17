@@ -38,25 +38,29 @@ import SlippyMap.View as View
 {-| Render a map at a given center and zoom.
 -}
 at : Size -> Scene -> List (Layer msg) -> Html msg
-at size scene =
+at size scene layers =
     let
         config =
             Config.static (Point.fromSize size)
     in
     View.view config
         (State.at config scene)
+        layers
+        |> Tuple.first
 
 
 {-| Render a map around given bounds.
 -}
 around : Size -> Location.Bounds -> List (Layer msg) -> Html msg
-around size bounds =
+around size bounds layers =
     let
         config =
             Config.static (Point.fromSize size)
     in
     View.view config
         (State.around config bounds)
+        layers
+        |> Tuple.first
 
 
 

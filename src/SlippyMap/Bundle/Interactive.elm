@@ -111,14 +111,16 @@ subscriptions =
 
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> Html msg
-view =
-    View.view
+view config state layers =
+    View.view config state layers
+        |> Tuple.first
 
 
 {-| -}
 viewWithEvents : Config msg -> State -> List (MapEvent msg) -> List (Layer msg) -> Html msg
-viewWithEvents =
-    View.viewWithEvents
+viewWithEvents config state events layers =
+    View.viewWithEvents config state events layers
+        |> Tuple.first
 
 
 {-| -}
