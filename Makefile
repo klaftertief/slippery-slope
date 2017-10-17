@@ -32,7 +32,8 @@ tests/elm-stuff: tests/elm-package.json
 	@cd tests && $(NODE_MODULES_BIN)/elm-package install --yes
 
 
-documentation.json: elm-stuff $(ELM_FILES)
+documentation.json: elm-stuff $(ELM_FILES) ## Generate Elm documentation file
+	@echo "> Generating Elm documentation file..."
 	$(NODE_MODULES_BIN)/elm-make --yes --warn --docs=$@
 
 
