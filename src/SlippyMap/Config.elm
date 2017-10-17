@@ -1,4 +1,4 @@
-module SlippyMap.Map.Config
+module SlippyMap.Config
     exposing
         ( Config
         , Interactions
@@ -36,7 +36,7 @@ import Json.Decode as Decode exposing (Decoder)
 import SlippyMap.Geo.CRS exposing (CRS)
 import SlippyMap.Geo.CRS.EPSG3857 as EPSG3857
 import SlippyMap.Geo.Point exposing (Point)
-import SlippyMap.Map.Msg exposing (Msg)
+import SlippyMap.Msg exposing (Msg)
 
 
 {-| Configuration for the map.

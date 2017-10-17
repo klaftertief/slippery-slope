@@ -1,4 +1,4 @@
-module SlippyMap.Map.Types
+module SlippyMap.Types
     exposing
         ( Drag
         , Focus(..)

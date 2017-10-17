@@ -18,7 +18,7 @@ import RemoteData exposing (WebData)
 import SlippyMap.Geo.Tile exposing (Tile)
 import SlippyMap.Layer exposing (Layer)
 import SlippyMap.Layer.Tile as TileLayer
-import SlippyMap.Map.Map exposing (Map)
+import SlippyMap.Map exposing (Map)
 import Svg exposing (Svg)
 
 

@@ -1,4 +1,4 @@
-module SlippyMap.Static
+module SlippyMap.Map.Static
     exposing
         ( around
         , at
@@ -19,6 +19,7 @@ module SlippyMap.Static
 
 import GeoJson exposing (GeoJson)
 import Html exposing (Html)
+import SlippyMap.Config as Config
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point
 import SlippyMap.Layer as Layer exposing (Layer)
@@ -26,10 +27,9 @@ import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Marker.Circle as Marker
 import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImageLayer
-import SlippyMap.Map.Config as Config
-import SlippyMap.Map.State as State
-import SlippyMap.Map.Types exposing (Scene, Size)
-import SlippyMap.Map.View as View
+import SlippyMap.State as State
+import SlippyMap.Types exposing (Scene, Size)
+import SlippyMap.View as View
 
 
 -- VIEW

@@ -1,4 +1,4 @@
-module SlippyMap.Map.View exposing (view, viewWithEvents)
+module SlippyMap.View exposing (view, viewWithEvents)
 
 {-|
 
@@ -11,17 +11,17 @@ import Html.Attributes
 import Html.Events
 import Json.Decode as Decode exposing (Decoder)
 import Mouse exposing (Position)
+import SlippyMap.Config as Config exposing (Config(..))
 import SlippyMap.Control.Attribution as Attribution
 import SlippyMap.Control.Zoom as Zoom
+import SlippyMap.Events exposing (Event)
 import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Geo.Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Config as Config exposing (Config(..))
-import SlippyMap.Map.Events exposing (Event)
-import SlippyMap.Map.Map as Map
-import SlippyMap.Map.Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
-import SlippyMap.Map.State as State exposing (State(..))
-import SlippyMap.Map.Types as Types exposing (Focus(..))
+import SlippyMap.Map as Map
+import SlippyMap.Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
+import SlippyMap.State as State exposing (State(..))
+import SlippyMap.Types as Types exposing (Focus(..))
 
 
 {-| -}

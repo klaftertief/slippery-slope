@@ -1,4 +1,4 @@
-module SlippyMap.Map.Subscriptions exposing (subscriptions)
+module SlippyMap.Subscriptions exposing (subscriptions)
 
 {-|
 
@@ -9,10 +9,10 @@ module SlippyMap.Map.Subscriptions exposing (subscriptions)
 import AnimationFrame
 import Keyboard
 import Mouse
-import SlippyMap.Map.Config as Config exposing (Config(..))
-import SlippyMap.Map.Msg exposing (DragMsg(..), Msg(..))
-import SlippyMap.Map.State as State exposing (State(..))
-import SlippyMap.Map.Types exposing (Focus(..), Interaction(..), Transition(..))
+import SlippyMap.Config as Config exposing (Config(..))
+import SlippyMap.Msg exposing (DragMsg(..), Msg(..))
+import SlippyMap.State as State exposing (State(..))
+import SlippyMap.Types exposing (Focus(..), Interaction(..), Transition(..))
 
 
 {-| -}

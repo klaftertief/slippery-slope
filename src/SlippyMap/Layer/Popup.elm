@@ -17,7 +17,7 @@ import Html.Attributes
 import Html.Events
 import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Map as Map exposing (Map)
+import SlippyMap.Map as Map exposing (Map)
 
 
 -- CONFIG

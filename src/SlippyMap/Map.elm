@@ -1,4 +1,4 @@
-module SlippyMap.Map.Map
+module SlippyMap.Map
     exposing
         ( Map
         , bounds
@@ -26,13 +26,13 @@ module SlippyMap.Map.Map
 
 -}
 
+import SlippyMap.Config as Config exposing (Config)
 import SlippyMap.Geo.CRS exposing (CRS)
 import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Geo.Point exposing (Point)
 import SlippyMap.Geo.Tile exposing (Tile)
-import SlippyMap.Map.Config as Config exposing (Config)
-import SlippyMap.Map.State as State exposing (State)
-import SlippyMap.Map.Transform as Transform exposing (Transformer)
+import SlippyMap.State as State exposing (State)
+import SlippyMap.Transform as Transform exposing (Transformer)
 
 
 {-| -}

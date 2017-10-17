@@ -1,4 +1,4 @@
-module SlippyMap.Map.State
+module SlippyMap.State
     exposing
         ( State
         , animate
@@ -33,11 +33,11 @@ module SlippyMap.Map.State
 
 -}
 
+import SlippyMap.Config as Config exposing (Config)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
-import SlippyMap.Map.Config as Config exposing (Config)
-import SlippyMap.Map.Transform as Transform
-import SlippyMap.Map.Types exposing (..)
+import SlippyMap.Transform as Transform
+import SlippyMap.Types exposing (..)
 import Time exposing (Time)
 
 

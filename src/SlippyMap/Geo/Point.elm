@@ -17,7 +17,7 @@ module SlippyMap.Geo.Point
 
 -}
 
-import SlippyMap.Map.Types exposing (Size)
+import SlippyMap.Types exposing (Size)
 
 
 {-| A point

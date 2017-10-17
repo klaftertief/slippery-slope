@@ -1,4 +1,4 @@
-module SlippyMap.Map.Update exposing (update)
+module SlippyMap.Update exposing (update)
 
 {-|
 
@@ -7,11 +7,11 @@ module SlippyMap.Map.Update exposing (update)
 -}
 
 import Keyboard exposing (KeyCode)
+import SlippyMap.Config exposing (Config(..))
 import SlippyMap.Geo.Point exposing (Point)
-import SlippyMap.Map.Config exposing (Config(..))
-import SlippyMap.Map.Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
-import SlippyMap.Map.State as State exposing (State)
-import SlippyMap.Map.Types exposing (Drag, Interaction(..), Pinch, Transition(..))
+import SlippyMap.Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
+import SlippyMap.State as State exposing (State)
+import SlippyMap.Types exposing (Drag, Interaction(..), Pinch, Transition(..))
 
 
 {-| -}

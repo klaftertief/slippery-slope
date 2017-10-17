@@ -10,12 +10,12 @@ import Html exposing (Html)
 import Html.Attributes
 import Html.Events
 import Json.Decode
+import SlippyMap.Config as Map
 import SlippyMap.Layer exposing (Layer)
 import SlippyMap.Layer.Control as Control
-import SlippyMap.Map.Config as Map
-import SlippyMap.Map.Map as Map exposing (Map)
-import SlippyMap.Map.Msg exposing (Msg(ZoomIn, ZoomOut))
-import SlippyMap.Map.State as Map
+import SlippyMap.Map as Map exposing (Map)
+import SlippyMap.Msg exposing (Msg(ZoomIn, ZoomOut))
+import SlippyMap.State as Map
 import Svg
 import Svg.Attributes
 

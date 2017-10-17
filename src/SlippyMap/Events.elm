@@ -1,4 +1,4 @@
-module SlippyMap.Map.Events
+module SlippyMap.Events
     exposing
         ( Event
         , MapEvent

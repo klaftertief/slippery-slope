@@ -16,7 +16,7 @@ import Regex
 import SlippyMap.Geo.Point as Point
 import SlippyMap.Geo.Tile exposing (Tile)
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Map as Map exposing (Map)
+import SlippyMap.Map as Map exposing (Map)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Svg.Keyed

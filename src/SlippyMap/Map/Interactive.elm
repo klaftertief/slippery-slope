@@ -1,4 +1,4 @@
-module SlippyMap.Interactive
+module SlippyMap.Map.Interactive
     exposing
         ( Config
         , Layer
@@ -28,6 +28,8 @@ module SlippyMap.Interactive
 import GeoJson exposing (GeoJson)
 import Html exposing (Html)
 import Json.Decode exposing (Decoder)
+import SlippyMap.Config as Config
+import SlippyMap.Events as Events exposing (Event, MapEvent)
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Layer as Layer
@@ -35,14 +37,12 @@ import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Marker.Circle as Marker
 import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImageLayer
-import SlippyMap.Map.Config as Config
-import SlippyMap.Map.Events as Events exposing (Event, MapEvent)
-import SlippyMap.Map.Msg as MapMsg
-import SlippyMap.Map.State as MapState
-import SlippyMap.Map.Subscriptions as Subscriptions
-import SlippyMap.Map.Types exposing (Scene, Size)
-import SlippyMap.Map.Update as Update
-import SlippyMap.Map.View as View
+import SlippyMap.Msg as MapMsg
+import SlippyMap.State as MapState
+import SlippyMap.Subscriptions as Subscriptions
+import SlippyMap.Types exposing (Scene, Size)
+import SlippyMap.Update as Update
+import SlippyMap.View as View
 
 
 -- CONFIG

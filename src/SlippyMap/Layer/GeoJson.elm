@@ -16,7 +16,7 @@ import GeoJson exposing (GeoJson)
 import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.GeoJson.Svg as Render
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map.Map as Map exposing (Map)
+import SlippyMap.Map as Map exposing (Map)
 import Svg exposing (Svg)
 import Svg.Attributes
 
