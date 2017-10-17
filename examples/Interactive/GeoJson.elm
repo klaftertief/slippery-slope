@@ -1,4 +1,4 @@
-module Interactive.Simple exposing (..)
+module Interactive.GeoJson exposing (..)
 
 import Data.Simplestyle
 import GeoJson exposing (GeoJson)
