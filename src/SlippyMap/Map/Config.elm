@@ -78,8 +78,8 @@ defaultConfigInternal =
     }
 
 
-pointerPositionDecoder : Decoder Point
-pointerPositionDecoder =
+domPointerPositionDecoder : Decoder Point
+domPointerPositionDecoder =
     Decode.map5
         (\x y r l t ->
             { x = x - r.left - l
