@@ -1,10 +1,9 @@
 {
     "checks": {
         "LineLengthExceeded" : false,
-        "SingleFieldRecord" : false
-    },
-    "excludedPaths": [
-        "vendor",
-        "submodules/api/build/elm"
-    ]
+        "SingleFieldRecord" : false,
+        "ExposeAll": false,
+        "ImportAll": false,
+        "NonStaticRegex": false
+    }
 }
