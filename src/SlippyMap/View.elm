@@ -18,20 +18,25 @@ import SlippyMap.Events exposing (Event)
 import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Geo.Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
-import SlippyMap.Map as Map
+import SlippyMap.Map as Map exposing (Map)
 import SlippyMap.Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.State as State exposing (State(..))
 import SlippyMap.Types as Types exposing (Focus(..))
 
 
 {-| -}
-view : Config msg -> State -> List (Layer msg) -> Html msg
+view : Config msg -> State -> List (Layer msg) -> ( Html msg, Map msg )
 view config state nestedLayers =
     viewWithEvents config state [] nestedLayers
 
 
 {-| -}
-viewWithEvents : Config msg -> State -> List (Event ( Point, Location ) msg) -> List (Layer msg) -> Html msg
+viewWithEvents :
+    Config msg
+    -> State
+    -> List (Event ( Point, Location ) msg)
+    -> List (Layer msg)
+    -> ( Html msg, Map msg )
 viewWithEvents config state events nestedLayers =
     let
         ( _, interaction ) =
@@ -102,7 +107,7 @@ viewWithEvents config state events nestedLayers =
                 )
                 events
     in
-    Html.div
+    ( Html.div
         ([ Html.Attributes.style
             [ ( "position", "relative" )
             , ( "width", toString size.x ++ "px" )
@@ -160,6 +165,8 @@ viewWithEvents config state events nestedLayers =
                 layers
             )
         ]
+    , map
+    )
 
 
 eventAttributes : Decoder Point -> Config.Interactions -> List (Html.Attribute Msg)
