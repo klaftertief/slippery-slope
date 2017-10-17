@@ -9,6 +9,7 @@ module SlippyMap.Control.Zoom exposing (Config, config, control)
 import Html exposing (Html)
 import Html.Attributes
 import Html.Events
+import Json.Decode
 import SlippyMap.Layer exposing (Layer)
 import SlippyMap.Layer.Control as Control
 import SlippyMap.Map.Config as Map
@@ -59,7 +60,16 @@ render (Config { toMsg }) map =
                            ]
                     )
                 , Html.Attributes.disabled (currentZoom >= maxZoom)
-                , Html.Events.onClick ZoomIn
+                , Html.Events.onWithOptions "touchend"
+                    { preventDefault = True
+                    , stopPropagation = True
+                    }
+                    (Json.Decode.succeed ZoomIn)
+                , Html.Events.onWithOptions "click"
+                    { preventDefault = True
+                    , stopPropagation = True
+                    }
+                    (Json.Decode.succeed ZoomIn)
                 ]
                 [ Svg.svg
                     [ Svg.Attributes.width "24"
@@ -81,7 +91,16 @@ render (Config { toMsg }) map =
                            ]
                     )
                 , Html.Attributes.disabled (currentZoom <= minZoom)
-                , Html.Events.onClick ZoomOut
+                , Html.Events.onWithOptions "touchend"
+                    { preventDefault = True
+                    , stopPropagation = True
+                    }
+                    (Json.Decode.succeed ZoomOut)
+                , Html.Events.onWithOptions "click"
+                    { preventDefault = True
+                    , stopPropagation = True
+                    }
+                    (Json.Decode.succeed ZoomOut)
                 ]
                 [ Svg.svg
                     [ Svg.Attributes.width "24"
