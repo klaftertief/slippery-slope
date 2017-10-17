@@ -6,7 +6,7 @@ help: ## Prints a help guide
 	@grep -E '^[\%a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 
-all: test analyse ## Test and build everything
+all: documentation.json test analyse ## Test and build everything
 
 
 install: ## Install build dependencies
@@ -30,6 +30,10 @@ tests/Doc: $(ELM_FILES)
 
 tests/elm-stuff: tests/elm-package.json
 	@cd tests && $(NODE_MODULES_BIN)/elm-package install --yes
+
+
+documentation.json: elm-stuff $(ELM_FILES)
+	$(NODE_MODULES_BIN)/elm-make --yes --warn --docs=$@
 
 
 analyse: ## Analyse source files
