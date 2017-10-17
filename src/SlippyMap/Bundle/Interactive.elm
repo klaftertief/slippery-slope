@@ -1,4 +1,4 @@
-module SlippyMap.Map.Interactive
+module SlippyMap.Bundle.Interactive
     exposing
         ( Config
         , Layer

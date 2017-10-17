@@ -7,10 +7,10 @@
         "src"
     ],
     "exposed-modules": [
+        "SlippyMap.Bundle.Static",
+        "SlippyMap.Bundle.Interactive",
         "SlippyMap.Control.Attribution",
         "SlippyMap.Control.Zoom",
-        "SlippyMap.Map.Static",
-        "SlippyMap.Map.Interactive",
         "SlippyMap.Geo.Coordinate",
         "SlippyMap.Geo.CRS",
         "SlippyMap.Geo.CRS.EPSG3857",

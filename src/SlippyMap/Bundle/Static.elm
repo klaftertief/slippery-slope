@@ -1,4 +1,4 @@
-module SlippyMap.Map.Static
+module SlippyMap.Bundle.Static
     exposing
         ( around
         , at
