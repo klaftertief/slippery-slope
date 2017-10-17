@@ -5,6 +5,7 @@ module SlippyMap.Map
         , center
         , config
         , crs
+        , locationBounds
         , locationToPoint
         , locationToPointRelativeTo
         , locationToScreenPoint
@@ -22,14 +23,14 @@ module SlippyMap.Map
 
 {-|
 
-@docs Map, make, bounds, center, crs, locationToPoint, locationToPointRelativeTo, locationToScreenPoint, origin, pointToLocation, scaleT, scaleZ, screenPointToLocation, size, tileCover, zoom, config, state
+@docs Map, make, bounds, locationBounds, center, crs, locationToPoint, locationToPointRelativeTo, locationToScreenPoint, origin, pointToLocation, scaleT, scaleZ, screenPointToLocation, size, tileCover, zoom, config, state
 
 -}
 
 import SlippyMap.Config as Config exposing (Config)
 import SlippyMap.Geo.CRS exposing (CRS)
-import SlippyMap.Geo.Location exposing (Location)
-import SlippyMap.Geo.Point exposing (Point)
+import SlippyMap.Geo.Location as Location exposing (Location)
+import SlippyMap.Geo.Point as Point exposing (Point)
 import SlippyMap.Geo.Tile exposing (Tile)
 import SlippyMap.State as State exposing (State)
 import SlippyMap.Transform as Transform exposing (Transformer)
@@ -107,9 +108,15 @@ origin (Map { transformer }) =
 
 
 {-| -}
-bounds : Map msg -> ( Point, Point )
+bounds : Map msg -> Point.Bounds
 bounds (Map { transformer }) =
     transformer.bounds
+
+
+{-| -}
+locationBounds : Map msg -> Location.Bounds
+locationBounds (Map { transformer }) =
+    transformer.locationBounds
 
 
 {-| -}

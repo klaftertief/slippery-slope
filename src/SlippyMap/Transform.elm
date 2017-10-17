@@ -52,7 +52,8 @@ transform crs size { center, zoom } =
 {-| -}
 type alias Transformer =
     { origin : Point
-    , bounds : ( Point, Point )
+    , bounds : Point.Bounds
+    , locationBounds : Location.Bounds
     , scaleT : Float -> Float
     , scaleZ : Float -> Float
     , locationToPoint : Location -> Point
@@ -73,6 +74,7 @@ transformer crs size scene =
     in
     { origin = origin t
     , bounds = bounds t
+    , locationBounds = locationBounds t
     , scaleT = scaleT t
     , scaleZ = scaleZ t
     , locationToPoint = locationToPoint t
@@ -114,13 +116,34 @@ origin transform =
 
 
 {-| -}
-bounds : Transform -> ( Point, Point )
+bounds : Transform -> Point.Bounds
 bounds transform =
     let
         topLeft =
             origin transform
     in
-    ( topLeft, Point.add (size transform) topLeft )
+    { topLeft = topLeft
+    , bottomRight = Point.add (size transform) topLeft
+    }
+
+
+{-| -}
+locationBounds : Transform -> Location.Bounds
+locationBounds transform =
+    bounds transform
+        |> (\{ topLeft, bottomRight } ->
+                { southWest =
+                    screenPointToLocation transform
+                        { x = topLeft.x
+                        , y = bottomRight.y
+                        }
+                , northEast =
+                    screenPointToLocation transform
+                        { x = bottomRight.x
+                        , y = topLeft.y
+                        }
+                }
+           )
 
 
 {-| -}
@@ -218,24 +241,6 @@ isVisible transform tile =
             .scale (crs transform)
                 (zoom transform - toFloat tile.z)
 
-        -- originPoint =
-        --     origin transform
-        locationBounds =
-            bounds transform
-                |> (\( topLeft, bottomRight ) ->
-                        { southWest =
-                            screenPointToLocation transform
-                                { x = topLeft.x
-                                , y = bottomRight.y
-                                }
-                        , northEast =
-                            screenPointToLocation transform
-                                { x = bottomRight.x
-                                , y = topLeft.y
-                                }
-                        }
-                   )
-
         toLocation ( x, y ) =
             { x = toFloat x
             , y = toFloat y
@@ -251,5 +256,6 @@ isVisible transform tile =
                 toLocation ( tile.x + 1, tile.y )
             }
     in
-    Location.boundsAreOverlapping locationBounds
+    Location.boundsAreOverlapping
+        (locationBounds transform)
         tileLocationBounds
