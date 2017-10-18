@@ -9,6 +9,7 @@ module SlippyMap.Update exposing (Msg, update)
 import Keyboard exposing (KeyCode)
 import SlippyMap.Config exposing (Config(..))
 import SlippyMap.Geo.Point exposing (Point)
+import SlippyMap.Map as Map exposing (Map)
 import SlippyMap.Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.State as State exposing (State)
 import SlippyMap.Types exposing (Drag, Interaction(..), Pinch, Transition(..))
@@ -20,43 +21,47 @@ type alias Msg =
 
 
 {-| -}
-update : Config msg -> Msg -> State -> State
+update : Config msg -> Msg -> State -> ( State, Map msg )
 update config msg state =
-    case msg of
-        ZoomIn ->
-            State.animate 400
-                (State.zoomIn config)
-                state
+    let
+        newState =
+            case msg of
+                ZoomIn ->
+                    State.animate 400
+                        (State.zoomIn config)
+                        state
 
-        ZoomOut ->
-            State.animate 400
-                (State.zoomOut config)
-                state
+                ZoomOut ->
+                    State.animate 400
+                        (State.zoomOut config)
+                        state
 
-        ZoomInAround point ->
-            State.zoomInAround config point state
+                ZoomInAround point ->
+                    State.zoomInAround config point state
 
-        ZoomByAround delta point ->
-            State.zoomByAround config delta point state
+                ZoomByAround delta point ->
+                    State.zoomByAround config delta point state
 
-        DragMsg dragMsg ->
-            updateDrag config dragMsg state
+                DragMsg dragMsg ->
+                    updateDrag config dragMsg state
 
-        PinchMsg pinchMsg ->
-            updatePinch config pinchMsg state
+                PinchMsg pinchMsg ->
+                    updatePinch config pinchMsg state
 
-        SetFocus focus ->
-            State.setFocus focus state
+                SetFocus focus ->
+                    State.setFocus focus state
 
-        KeyboardNavigation keyCode ->
-            State.animate 400
-                (updateKeyboardNavigation config
-                    (keyboardNavigation keyCode)
-                )
-                state
+                KeyboardNavigation keyCode ->
+                    State.animate 400
+                        (updateKeyboardNavigation config
+                            (keyboardNavigation keyCode)
+                        )
+                        state
 
-        Tick diff ->
-            State.tickTransition diff state
+                Tick diff ->
+                    State.tickTransition diff state
+    in
+    ( newState, Map.make config newState )
 
 
 type KeyboardNavigation

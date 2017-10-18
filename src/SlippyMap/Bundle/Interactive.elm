@@ -91,8 +91,9 @@ type alias Msg =
 
 {-| -}
 update : Config msg -> Msg -> State -> State
-update =
-    Update.update
+update config msg state =
+    Update.update config msg state
+        |> Tuple.first
 
 
 
