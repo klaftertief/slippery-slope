@@ -34,7 +34,7 @@ tests/elm-stuff: tests/elm-package.json
 
 documentation.json: elm-stuff $(ELM_FILES) ## Generate Elm documentation file
 	@echo "> Generating Elm documentation file..."
-	$(NODE_MODULES_BIN)/elm-make --yes --warn --docs=$@
+	@$(NODE_MODULES_BIN)/elm-make --yes --warn --docs=$@
 
 
 analyse: ## Analyse source files
