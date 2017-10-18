@@ -1,8 +1,8 @@
-module SlippyMap.Update exposing (update)
+module SlippyMap.Update exposing (Msg, update)
 
 {-|
 
-@docs update
+@docs update, Msg
 
 -}
 
@@ -12,6 +12,11 @@ import SlippyMap.Geo.Point exposing (Point)
 import SlippyMap.Msg exposing (DragMsg(..), Msg(..), PinchMsg(..))
 import SlippyMap.State as State exposing (State)
 import SlippyMap.Types exposing (Drag, Interaction(..), Pinch, Transition(..))
+
+
+{-| -}
+type alias Msg =
+    SlippyMap.Msg.Msg
 
 
 {-| -}

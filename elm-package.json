@@ -37,7 +37,6 @@
         "SlippyMap.Config",
         "SlippyMap.Events",
         "SlippyMap.Map",
-        "SlippyMap.Msg",
         "SlippyMap.State",
         "SlippyMap.Subscriptions",
         "SlippyMap.Transform",
