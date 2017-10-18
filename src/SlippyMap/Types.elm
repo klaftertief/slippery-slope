@@ -27,7 +27,7 @@ type alias Size =
     }
 
 
-{-| TODO: Rename to Detail, Sector, View, Clipping or something similar
+{-| TODO: Rename to Camera, Detail, Sector, View, Clipping or something similar
 -}
 type alias Scene =
     { center : Location
