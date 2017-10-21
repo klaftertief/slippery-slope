@@ -37,6 +37,11 @@ documentation.json: elm-stuff $(ELM_FILES) ## Generate Elm documentation file
 	@$(NODE_MODULES_BIN)/elm-make --yes --warn --docs=$@
 
 
+example: ## Generate examples
+	@echo "> Generating examples..."
+	@cd examples && $(NODE_MODULES_BIN)/elm-github-install && $(NODE_MODULES_BIN)/elm-reactor
+
+
 analyse: ## Analyse source files
 	@echo "> Analysing .elm files..."
 	@mkdir -p $(REPORTS_DIR)/

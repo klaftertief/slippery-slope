@@ -29,4 +29,11 @@ The base map sets up a view with events to support intertactions via mouse, keyb
 
 ## Examples
 
+To view the examples, execute the following commands, which will install the build dependencies and start `elm-reactor` at `localhost:8000`.
+
+```bash
+$ make install
+$ make example
+```
+
 ## Development
