@@ -13,9 +13,10 @@ import SlippyMap.Geo.CRS.Stereographic as CRS_Stereographic
 import SlippyMap.Geo.Location as Location exposing (Location)
 import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Graticule as Graticule
-import SlippyMap.Map.Config as Map
-import SlippyMap.Map.State as Map
-import SlippyMap.Map.View as Map
+import SlippyMap.Config as Map
+import SlippyMap.State as Map
+import SlippyMap.View as Map
+import SlippyMap.Map as Map exposing (Map)
 import Time exposing (Time)
 
 
@@ -107,7 +108,7 @@ view model =
         [ Html.h1 []
             [ Html.text "Static map with different CRSs" ]
         , crsView model
-        , mapView model
+        , mapView model |> Tuple.first
         ]
 
 
@@ -122,8 +123,7 @@ crsView model =
     Html.p []
         (List.map button crsList)
 
-
-mapView : Model -> Html Msg
+mapView : Model -> ( Html Msg, Map Msg )
 mapView model =
     let
         config =

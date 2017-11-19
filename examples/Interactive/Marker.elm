@@ -5,11 +5,11 @@ import Html.Attributes
 import Html.Events
 import Json.Decode
 import Set exposing (Set)
+import SlippyMap.Bundle.Interactive as Map
+import SlippyMap.Config as MapConfig
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Interactive as Map
 import SlippyMap.Layer.Marker.Circle as Marker
-import SlippyMap.Map.Config as MapConfig
-import SlippyMap.Map.State as MapState
+import SlippyMap.State as MapState
 
 
 type alias Model =

@@ -5,8 +5,8 @@ import GeoJson exposing (GeoJson)
 import Html exposing (Html)
 import Html.Attributes
 import Json.Encode as Json
+import SlippyMap.Bundle.Interactive as Map
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Interactive as Map
 import SlippyMap.Layer.GeoJson as GeoJsonLayer
 
 

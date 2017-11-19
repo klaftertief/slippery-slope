@@ -4,10 +4,10 @@ import Html exposing (Html)
 import Html.Attributes
 import Json.Decode
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Interactive as Map
+import SlippyMap.Bundle.Interactive as Map
 import SlippyMap.Layer.Marker.Circle as Marker
-import SlippyMap.Map.Config as MapConfig
-import SlippyMap.Map.Events as Events
+import SlippyMap.Config as MapConfig
+import SlippyMap.Events as Events
 
 
 type alias Model =

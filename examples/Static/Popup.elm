@@ -2,8 +2,8 @@ module Static.Popup exposing (main)
 
 import Html exposing (Html)
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Map.Types exposing (Size)
-import SlippyMap.Static as Map
+import SlippyMap.Types exposing (Size)
+import SlippyMap.Bundle.Static as Map
 
 
 main : Html msg

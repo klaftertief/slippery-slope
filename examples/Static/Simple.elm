@@ -1,8 +1,8 @@
 module Static.Simple exposing (viewAround, viewAt)
 
 import Html exposing (Html)
+import SlippyMap.Bundle.Static as Map
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Static as Map
 
 
 main : Html msg

@@ -2,8 +2,8 @@ module Interactive.Simple exposing (..)
 
 import Html exposing (Html)
 import Html.Attributes
+import SlippyMap.Bundle.Interactive as Map
 import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Interactive as Map
 
 
 type alias Model =
