@@ -1,4 +1,4 @@
-module NewInteractive exposing (..)
+module NewInteractive exposing (main)
 
 -- import Layer.Debug
 
@@ -8,29 +8,27 @@ import Html exposing (Html)
 import Html.Attributes
 import Html.Events
 import Json.Decode
-import SlippyMap.Geo.Location as Location exposing (Location)
-import SlippyMap.Interactive as Map
+import SlippyMap.Bundle.Interactive as SlippyMap
+import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Layer as Layer
 import SlippyMap.Layer.Circle as Circle
 import SlippyMap.Layer.GeoJson as GeoJson
 import SlippyMap.Layer.Graticule as Graticule
 import SlippyMap.Layer.Marker.Circle as CircleMarker
-import SlippyMap.Layer.Marker.Pin as PinMarker
-import SlippyMap.Layer.Popup as Popup
 import SlippyMap.Layer.StaticImage as StaticImage
-import Svg.Attributes
+import Task
 import Window
 
 
 type alias Model =
-    { mapState : Map.State
+    { mapState : SlippyMap.State
     , size : Window.Size
     , info : Maybe String
     }
 
 
 type Msg
-    = MapMsg Map.Msg
+    = MapMsg SlippyMap.Msg
     | Resize Window.Size
     | SetInfo String
     | ResetInfo
@@ -43,14 +41,14 @@ init size =
         --     { center = { lon = 0, lat = 0 }
         --     , zoom = 3
         --     }
-        Map.around (mapConfig size)
+        SlippyMap.around (mapConfig size)
             { southWest = Location -20 -30
             , northEast = Location 20 20
             }
     , size = size
     , info = Nothing
     }
-        ! []
+        ! [ Task.perform Resize Window.size ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -59,7 +57,7 @@ update msg model =
         MapMsg mapMsg ->
             { model
                 | mapState =
-                    Map.update (mapConfig model.size)
+                    SlippyMap.update (mapConfig model.size)
                         mapMsg
                         model.mapState
             }
@@ -75,44 +73,41 @@ update msg model =
             { model | info = Nothing } ! []
 
 
-mapConfig : Window.Size -> Map.Config Msg
+mapConfig : Window.Size -> SlippyMap.Config Msg
 mapConfig size =
-    Map.config size MapMsg
+    SlippyMap.config size MapMsg
 
 
 view : Model -> Html Msg
 view model =
     Html.div []
-        [ Map.view (mapConfig model.size)
+        [ SlippyMap.view (mapConfig model.size)
             model.mapState
-            [ {- StaticImage.layer
-                     (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ]
-                         |> StaticImage.withAttribution "© OpenStreetMap contributors"
-                     )
-                 ,
-              -}
-              --   Layer.Debug.layer
-              Graticule.layer
+            [ StaticImage.layer
+                (StaticImage.config "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" [ "a", "b", "c" ])
+                |> Layer.withAttribution "© OpenStreetMap contributors"
+              -- , Layer.Debug.layer
+            , Graticule.layer
+            , GeoJson.layer
+                (GeoJson.defaultConfig
+                    (\featureObject ->
+                        let
+                            propertiesName =
+                                Json.Decode.decodeValue
+                                    (Json.Decode.field "name" Json.Decode.string)
+                                    featureObject.properties
+                        in
+                            case propertiesName of
+                                Ok name ->
+                                    [ Html.Events.onClick (SetInfo name)
+                                      -- , Svg.Attributes.pointerEvents "visible"
+                                    ]
 
-            -- , GeoJson.layer
-            --     (GeoJson.defaultConfig
-            --         (\featureObject ->
-            --             let
-            --                 propertiesName =
-            --                     Json.Decode.decodeValue
-            --                         (Json.Decode.field "name" Json.Decode.string)
-            --                         featureObject.properties
-            --             in
-            --             case propertiesName of
-            --                 Ok name ->
-            --                     [ Html.Events.onClick (SetInfo name)
-            --                     -- , Svg.Attributes.pointerEvents "visible"
-            --                     ]
-            --                 Err _ ->
-            --                     []
-            --         )
-            --     )
-            --     (Maybe.withDefault myGeoJson Data.World.geoJson)
+                                Err _ ->
+                                    []
+                    )
+                )
+                (Maybe.withDefault myGeoJson Data.World.geoJson)
             , Layer.group
                 [ Circle.layer (Circle.config 500)
                     (Location 0 60)
@@ -122,10 +117,9 @@ view model =
                     (Location 0 0)
                 ]
             , CircleMarker.marker [ Location 0 0 ]
-
-            -- , PinMarker.layer [ Location -10 0 ]
-            -- , Popup.layer Popup.config
-            --     [ ( Location -10 0, "I'm a popup" ) ]
+              -- , PinMarker.layer [ Location -10 0 ]
+              -- , Popup.layer Popup.config
+              --     [ ( Location -10 0, "I'm a popup" ) ]
             ]
         , Html.p
             [ Html.Attributes.style
@@ -143,15 +137,15 @@ view model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Map.subscriptions (mapConfig model.size) model.mapState
+        [ SlippyMap.subscriptions (mapConfig model.size) model.mapState
         , Window.resizes Resize
         ]
 
 
-main : Program Window.Size Model Msg
+main : Program Never Model Msg
 main =
-    Html.programWithFlags
-        { init = init
+    Html.program
+        { init = init { width = 100, height = 100 }
         , view = view
         , update = update
         , subscriptions = subscriptions
