@@ -15,13 +15,12 @@ module SlippyMap.Bundle.Interactive
         , tileLayer
         , update
         , view
-        , viewWithEvents
         , withAttribution
         )
 
 {-| A convenience module wrapping or re-exposing various specialised functions and types to quickly create a basic interactive map with a default configuration.
 
-@docs Config, config, State, at, around, Msg, update, view, viewWithEvents, subscriptions, Layer, tileLayer, markerLayer, geoJsonLayer, popupLayer, withAttribution, on
+@docs Config, config, State, at, around, Msg, update, view, subscriptions, Layer, tileLayer, markerLayer, geoJsonLayer, popupLayer, withAttribution, on
 
 -}
 
@@ -114,13 +113,6 @@ subscriptions =
 view : Config msg -> State -> List (Layer msg) -> Html msg
 view config state layers =
     View.view config state layers
-        |> Tuple.first
-
-
-{-| -}
-viewWithEvents : Config msg -> State -> List (MapEvent msg) -> List (Layer msg) -> Html msg
-viewWithEvents config state events layers =
-    View.viewWithEvents config state events layers
         |> Tuple.first
 
 

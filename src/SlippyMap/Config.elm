@@ -4,6 +4,7 @@ module SlippyMap.Config
         , Interactions
         , attributionPrefix
         , crs
+        , events
         , interactions
         , interactive
         , maxZoom
@@ -14,6 +15,7 @@ module SlippyMap.Config
         , tagger
         , withAttributionPrefix
         , withCRS
+        , withEvents
         , withMaxZoom
         , withMinZoom
         , withZoomDelta
@@ -27,12 +29,13 @@ module SlippyMap.Config
 
 {-|
 
-@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, withMaxZoom, withMinZoom, withoutZoomControl, zoomControl, Interactions, crs, minZoom, maxZoom, zoomDelta, zoomSnap, tagger, interactions, attributionPrefix, withoutAttributionControl, withAttributionPrefix, pointerPositionDecoder
+@docs Config, static, interactive, size, withCRS, withZoomSnap, withZoomDelta, withMaxZoom, withMinZoom, withoutZoomControl, zoomControl, Interactions, crs, minZoom, maxZoom, zoomDelta, zoomSnap, tagger, interactions, attributionPrefix, withoutAttributionControl, withAttributionPrefix, pointerPositionDecoder, events, withEvents
 
 -}
 
 import DOM
 import Json.Decode as Decode exposing (Decoder)
+import SlippyMap.Events exposing (MapEvent)
 import SlippyMap.Geo.CRS exposing (CRS)
 import SlippyMap.Geo.CRS.EPSG3857 as EPSG3857
 import SlippyMap.Geo.Point exposing (Point)
@@ -57,6 +60,7 @@ type alias ConfigInternal msg =
     , zoomControl : Bool
     , attributionControl : Bool
     , interactions : Interactions
+    , events : List (MapEvent msg)
     , pointerPositionDecoder : Decoder Point
     }
 
@@ -74,6 +78,7 @@ defaultConfigInternal =
     , zoomControl = False
     , attributionControl = True
     , interactions = interactiveInteractions
+    , events = []
     , pointerPositionDecoder = domPointerPositionDecoder
     }
 
@@ -199,6 +204,13 @@ withZoomDelta zoomDelta (Config configInternal) =
 
 
 {-| -}
+withEvents : List (MapEvent msg) -> Config msg -> Config msg
+withEvents events (Config configInternal) =
+    Config
+        { configInternal | events = events }
+
+
+{-| -}
 size : Config msg -> Point
 size (Config { size }) =
     size
@@ -250,6 +262,12 @@ tagger (Config { toMsg }) =
 interactions : Config msg -> Interactions
 interactions (Config { interactions }) =
     interactions
+
+
+{-| -}
+events : Config msg -> List (MapEvent msg)
+events (Config { events }) =
+    events
 
 
 {-| -}

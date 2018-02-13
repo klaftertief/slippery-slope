@@ -1,8 +1,8 @@
-module SlippyMap.View exposing (view, viewWithEvents)
+module SlippyMap.View exposing (view)
 
 {-|
 
-@docs view, viewWithEvents
+@docs view
 
 -}
 
@@ -14,8 +14,6 @@ import Mouse exposing (Position)
 import SlippyMap.Config as Config exposing (Config(..))
 import SlippyMap.Control.Attribution as Attribution
 import SlippyMap.Control.Zoom as Zoom
-import SlippyMap.Events exposing (Event)
-import SlippyMap.Geo.Location exposing (Location)
 import SlippyMap.Geo.Point exposing (Point)
 import SlippyMap.Layer as Layer exposing (Layer)
 import SlippyMap.Map as Map exposing (Map)
@@ -27,17 +25,6 @@ import SlippyMap.Types as Types exposing (Focus(..))
 {-| -}
 view : Config msg -> State -> List (Layer msg) -> ( Html msg, Map msg )
 view config state nestedLayers =
-    viewWithEvents config state [] nestedLayers
-
-
-{-| -}
-viewWithEvents :
-    Config msg
-    -> State
-    -> List (Event ( Point, Location ) msg)
-    -> List (Layer msg)
-    -> ( Html msg, Map msg )
-viewWithEvents config state events nestedLayers =
     let
         ( _, interaction ) =
             ( State.getScene state
@@ -105,7 +92,7 @@ viewWithEvents config state events nestedLayers =
                             |> Decode.andThen toDecoder
                         )
                 )
-                events
+                (Config.events config)
     in
     ( Html.div
         ([ Html.Attributes.style

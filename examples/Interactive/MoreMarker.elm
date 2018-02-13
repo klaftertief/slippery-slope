@@ -66,6 +66,14 @@ update msg model =
 config : Map.Config Msg
 config =
     Map.config { width = 840, height = 560 } MapMsg
+        |> MapConfig.withEvents
+            [ Events.on "click"
+                (\( _, location ) ->
+                    Poi "Custom" location
+                        |> AddPoi
+                        |> Json.Decode.succeed
+                )
+            ]
 
 
 subscriptions : Model -> Sub Msg
@@ -89,16 +97,9 @@ view model =
                 ]
             ]
             []
-        , Map.viewWithEvents
+        , Map.view
             config
             model.map
-            [ Events.on "click"
-                (\( _, location ) ->
-                    Poi "Custom" location
-                        |> AddPoi
-                        |> Json.Decode.succeed
-                )
-            ]
             [ Map.tileLayer "http://localhost:9000/styles/positron/{z}/{x}/{y}.png"
             , Marker.marker (List.map .location model.pois)
             , Map.popupLayer (List.map (\p -> ( p.location, p.name )) model.pois)
