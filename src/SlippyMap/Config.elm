@@ -81,9 +81,9 @@ defaultConfigInternal =
 domPointerPositionDecoder : Decoder Point
 domPointerPositionDecoder =
     Decode.map5
-        (\x y r l t ->
-            { x = x - r.left - l
-            , y = y - r.top - t
+        (\clientX clientY rect clientLeft clientTop ->
+            { x = clientX - rect.left - clientLeft
+            , y = clientY - rect.top - clientTop
             }
         )
         (Decode.field "clientX" Decode.float)
